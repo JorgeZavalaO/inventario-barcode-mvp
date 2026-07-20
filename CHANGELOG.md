@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.12.0 (2026-07-20)
+
+### Fixed
+- Cámara no detectaba códigos de barras: contenedor del video ahora tiene `min-h-[40vh]` y `min-h-0` en el flex container para garantizar dimensiones no-cero antes de inicializar ZXing.
+- Se eliminó `disabled={!!pending}` que causaba re-renderizados innecesarios en el scanner durante la confirmación.
+- Cámara arranca automáticamente al entrar al fullscreen (eliminado el paso extra de "Activar cámara" dentro del overlay).
+- Estado de inicialización: spinner "Iniciando cámara..." mientras se negocian permisos.
+- Manejo de errores de cámara con mensaje visible y botón "Reintentar".
+
+### Changed
+- `BarcodeScanner` ahora acepta prop `autoStart` para iniciar automáticamente al montarse.
+- Vista idle rediseñada con botón "Abrir cámara" con ícono grande y texto descriptivo.
+
 ## 0.11.0 (2026-07-20)
 
 ### Added

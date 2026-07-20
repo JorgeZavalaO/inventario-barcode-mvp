@@ -1,6 +1,6 @@
 "use client";
 
-import { Barcode, Send, LoaderCircle, CheckCircle2, PackageSearch, X, Camera, Keyboard } from "lucide-react";
+import { Barcode, Send, LoaderCircle, CheckCircle2, PackageSearch, X, Keyboard, Camera } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,7 +77,6 @@ export function ScanView({
     await onSubmitCode(pending.code, pending.method);
     setScanFeedback("Producto registrado ✓");
     setPending(null);
-    setManualCode("");
     setScanQty("");
     setTimeout(() => confirmInputRef.current?.focus(), 50);
   }
@@ -109,16 +108,17 @@ export function ScanView({
               onClick={() => { setCameraActive(false); setPending(null); }}
               className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm text-white backdrop-blur-sm hover:bg-white/20"
             >
-              <X size={18} /> Detener
+              <X size={18} /> Cerrar
             </button>
-            <span className="text-xs text-white/60">Cámara activa</span>
+            <span className="text-xs text-white/60">Cámara escaneando</span>
           </div>
 
           {/* Camera feed */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-h-0">
             <BarcodeScanner
               onDetected={(code) => handleDetected(code)}
-              disabled={sending || !!pending}
+              disabled={sending}
+              autoStart
             />
           </div>
 
@@ -176,11 +176,11 @@ export function ScanView({
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value)}
                     placeholder="Código o barcode"
-                    disabled={sending || !!pending}
+                    disabled={sending}
                     autoComplete="off"
                   />
                 </div>
-                <Button type="submit" size="sm" variant="ghost" className="text-white hover:bg-white/10" disabled={sending || !!pending || !manualCode.trim()} aria-label="Registrar">
+                <Button type="submit" size="sm" variant="ghost" className="text-white hover:bg-white/10" disabled={sending || !manualCode.trim()} aria-label="Registrar">
                   <Send size={18} />
                 </Button>
                 <button
@@ -226,8 +226,11 @@ export function ScanView({
                 onClick={() => setCameraActive(true)}
                 className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 py-12 text-slate-500 hover:border-teal-400 hover:bg-teal-50/50 hover:text-teal-700 transition-all"
               >
-                <Camera size={32} />
-                <span className="text-base font-semibold">Activar cámara</span>
+                <div className="text-center">
+                  <div className="mb-2 flex justify-center"><span className="grid size-14 place-items-center rounded-full bg-teal-100 text-teal-600"><Camera size={28} /></span></div>
+                  <span className="text-base font-semibold">Abrir cámara</span>
+                  <p className="mt-1 text-xs text-slate-400">Escaneá códigos de barras al instante</p>
+                </div>
               </button>
             </CardContent>
           </Card>
