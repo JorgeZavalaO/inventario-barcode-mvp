@@ -21,7 +21,7 @@ export function EmptyState({
           Esta sesión ya fue cerrada. No se pueden registrar más conteos.
         </p>
         <div className="mt-6 flex justify-center gap-3">
-          <Button variant="outline" render={<Link href="/sessions" />}>
+          <Button variant="outline" nativeButton={false} render={<Link href="/sessions" />}>
             Volver a sesiones
           </Button>
         </div>
@@ -48,7 +48,7 @@ export function EmptyState({
         Necesitas una sesión activa para escanear productos.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <Button render={<Link href={sessionId ? `/sessions/${sessionId}` : "/sessions"} />}>
+        <Button nativeButton={false} render={<Link href={sessionId ? `/sessions/${sessionId}` : "/sessions"} />}>
           Ir a la sesión <ArrowRight size={16} />
         </Button>
       </div>

@@ -31,7 +31,14 @@ const navItems = [
   { title: "Sesiones", url: "/sessions", icon: ClipboardList },
 ];
 
-export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sidebar> & { user?: { name?: string | null; email?: string | null; image?: string | null } | undefined }) {
+export function AppSidebar({
+  user,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & {
+  user?:
+    | { name?: string | null; email?: string | null; image?: string | null }
+    | undefined;
+}) {
   const pathname = usePathname();
   const { openSessions, target, hasMultiple } = useScanTarget();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -66,7 +73,9 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Módulos</SidebarGroupLabel>
+          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+            Módulos
+          </SidebarGroupLabel>
           <SidebarMenu>
             {allItems.map((item) => {
               if (item.title === "Escanear") {
@@ -75,7 +84,9 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
                     <SidebarMenuButton
                       isActive={isActive(item)}
                       tooltip="Escanear"
-                      onClick={hasMultiple ? () => setSheetOpen(true) : undefined}
+                      onClick={
+                        hasMultiple ? () => setSheetOpen(true) : undefined
+                      }
                       render={!hasMultiple ? <Link href={target} /> : undefined}
                     >
                       <ScanBarcode />
@@ -87,7 +98,11 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
 
               return (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton isActive={isActive(item)} tooltip={item.title} render={<Link href={item.url!} />}>
+                  <SidebarMenuButton
+                    isActive={isActive(item)}
+                    tooltip={item.title}
+                    render={<Link href={item.url!} />}
+                  >
                     <item.icon />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -98,10 +113,22 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        {user && <NavUser user={{ name: user.name ?? "Usuario", email: user.email ?? "", avatar: user.image ?? "" }} />}
+        {user && (
+          <NavUser
+            user={{
+              name: user.name ?? "Usuario",
+              email: user.email ?? "",
+              avatar: user.image ?? "",
+            }}
+          />
+        )}
       </SidebarFooter>
       <SidebarRail />
-      <SessionPickerSheet sessions={openSessions} open={sheetOpen} onOpenChange={setSheetOpen} />
+      <SessionPickerSheet
+        sessions={openSessions}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </Sidebar>
   );
 }

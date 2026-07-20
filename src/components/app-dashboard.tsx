@@ -61,13 +61,13 @@ export function AppDashboard() {
               Administra productos, crea sesiones de inventario y coordina el conteo con tu equipo en tiempo real.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" render={<Link href="/products" />}>
+              <Button variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20" nativeButton={false} render={<Link href="/products" />}>
                 <Package size={17} /> Ir a productos
               </Button>
-              <Button className="bg-teal-600 text-white hover:bg-teal-500" render={<Link href="/sessions" />}>
+              <Button className="bg-teal-600 text-white hover:bg-teal-500" nativeButton={false} render={<Link href="/sessions" />}>
                 <ClipboardList size={17} /> Ir a sesiones
               </Button>
-              <Button variant="outline" className="border-teal-400/30 bg-teal-400/10 text-teal-200 hover:bg-teal-400/20" render={
+              <Button variant="outline" className="border-teal-400/30 bg-teal-400/10 text-teal-200 hover:bg-teal-400/20" nativeButton={false} render={
                 hasMultiple ? <button type="button" onClick={() => setSheetOpen(true)} /> : <Link href={target} />
               }>
                 <ScanBarcode size={17} /> Escanear ahora
@@ -98,7 +98,7 @@ export function AppDashboard() {
               <CardTitle className="text-base">Sesiones recientes</CardTitle>
               <CardDescription>Últimas sesiones del sistema.</CardDescription>
             </div>
-            <Button variant="outline" size="sm" render={<Link href="/sessions" />}>
+            <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/sessions" />}>
               Ver todo <ArrowRight size={15} />
             </Button>
           </CardHeader>

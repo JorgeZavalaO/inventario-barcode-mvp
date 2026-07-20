@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useCallback, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { apiFetch } from "@/lib/client";
 import type { SessionDetail } from "@/lib/types";
 
@@ -16,7 +23,10 @@ type SessionContextType = {
   quantity: string;
   setQuantity: (q: string) => void;
   setToast: (msg: string) => void;
-  submitCount: (code: string, method: "CAMERA" | "MANUAL" | "USB") => Promise<void>;
+  submitCount: (
+    code: string,
+    method: "CAMERA" | "MANUAL" | "USB",
+  ) => Promise<void>;
   reverse: (eventId: string) => Promise<void>;
   closeSession: () => Promise<void>;
   join: (name: string) => Promise<Operator>;
@@ -27,7 +37,8 @@ const SessionContext = createContext<SessionContextType | null>(null);
 
 export function useSessionData() {
   const ctx = useContext(SessionContext);
-  if (!ctx) throw new Error("useSessionData must be used within SessionDataProvider");
+  if (!ctx)
+    throw new Error("useSessionData must be used within SessionDataProvider");
   return ctx;
 }
 
@@ -50,11 +61,17 @@ export function SessionDataProvider({
     async (silent = false) => {
       if (!silent) setLoading(true);
       try {
-        const data = await apiFetch<SessionDetail>(`/api/sessions/${sessionId}`);
+        const data = await apiFetch<SessionDetail>(
+          `/api/sessions/${sessionId}`,
+        );
         setDetail(data);
         setError("");
       } catch (cause) {
-        setError(cause instanceof Error ? cause.message : "No se pudo cargar la sesión");
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "No se pudo cargar la sesión",
+        );
       } finally {
         if (!silent) setLoading(false);
       }
@@ -64,10 +81,13 @@ export function SessionDataProvider({
 
   const join = useCallback(
     async (name: string) => {
-      const data = await apiFetch<{ operator: Operator }>(`/api/sessions/${sessionId}/join`, {
-        method: "POST",
-        body: JSON.stringify({ name }),
-      });
+      const data = await apiFetch<{ operator: Operator }>(
+        `/api/sessions/${sessionId}/join`,
+        {
+          method: "POST",
+          body: JSON.stringify({ name }),
+        },
+      );
       setOperator(data.operator);
       localStorage.setItem("stockscan_operator", JSON.stringify(data.operator));
       return data.operator;
@@ -83,7 +103,9 @@ export function SessionDataProvider({
         try {
           const parsed = JSON.parse(saved) as Operator;
           setOperator(parsed);
-          void join(parsed.name).catch(() => localStorage.removeItem("stockscan_operator"));
+          void join(parsed.name).catch(() =>
+            localStorage.removeItem("stockscan_operator"),
+          );
         } catch {
           localStorage.removeItem("stockscan_operator");
         }
@@ -107,7 +129,8 @@ export function SessionDataProvider({
 
   const submitCount = useCallback(
     async (code: string, inputMethod: "CAMERA" | "MANUAL" | "USB") => {
-      if (!operator || !detail || detail.session.status !== "OPEN" || sending) return;
+      if (!operator || !detail || detail.session.status !== "OPEN" || sending)
+        return;
       setSending(true);
       setError("");
       try {
@@ -126,11 +149,16 @@ export function SessionDataProvider({
           }),
         });
         if (!result.duplicate && result.product) {
-          setToast(`${result.product.description}: total ${Number(result.total ?? 0).toLocaleString("es-PE", { maximumFractionDigits: 3 })} ${result.product.unit}`);
+          setToast(
+            `${result.product.description}: total ${Number(result.total ?? 0).toLocaleString("es-PE", { maximumFractionDigits: 3 })} ${result.product.unit}`,
+          );
         }
         await load(true);
       } catch (cause) {
-        const message = cause instanceof Error ? cause.message : "No se pudo registrar el conteo";
+        const message =
+          cause instanceof Error
+            ? cause.message
+            : "No se pudo registrar el conteo";
         setError(message);
         navigator.vibrate?.(250);
       } finally {
@@ -145,7 +173,10 @@ export function SessionDataProvider({
       setSending(true);
       setError("");
       try {
-        await apiFetch(`/api/counts/${eventId}/reverse`, { method: "POST", body: "{}" });
+        await apiFetch(`/api/counts/${eventId}/reverse`, {
+          method: "POST",
+          body: "{}",
+        });
         setToast("Conteo anulado");
         await load(true);
       } catch (cause) {
@@ -158,14 +189,22 @@ export function SessionDataProvider({
   );
 
   const closeSession = useCallback(async () => {
-    if (!confirm("¿Cerrar la sesión? Después no se podrán registrar más conteos.")) return;
+    if (
+      !confirm("¿Cerrar la sesión? Después no se podrán registrar más conteos.")
+    )
+      return;
     setSending(true);
     try {
-      await apiFetch(`/api/sessions/${sessionId}/close`, { method: "POST", body: "{}" });
+      await apiFetch(`/api/sessions/${sessionId}/close`, {
+        method: "POST",
+        body: "{}",
+      });
       setToast("Sesión cerrada");
       await load(true);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "No se pudo cerrar la sesión");
+      setError(
+        cause instanceof Error ? cause.message : "No se pudo cerrar la sesión",
+      );
     } finally {
       setSending(false);
     }

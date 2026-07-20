@@ -1,6 +1,9 @@
 "use client";
 
-import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser";
+import {
+  BrowserMultiFormatReader,
+  type IScannerControls,
+} from "@zxing/browser";
 import { Camera, CameraOff, ScanLine } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +18,10 @@ export function BarcodeScanner({
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
   const onDetectedRef = useRef(onDetected);
-  const lastScanRef = useRef<{ value: string; at: number }>({ value: "", at: 0 });
+  const lastScanRef = useRef<{ value: string; at: number }>({
+    value: "",
+    at: 0,
+  });
   const [active, setActive] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,7 +33,10 @@ export function BarcodeScanner({
     controlsRef.current?.stop();
     controlsRef.current = null;
     if (videoRef.current?.srcObject) {
-      for (const track of (videoRef.current.srcObject as MediaStream).getTracks()) track.stop();
+      for (const track of (
+        videoRef.current.srcObject as MediaStream
+      ).getTracks())
+        track.stop();
       videoRef.current.srcObject = null;
     }
     setActive(false);
@@ -45,7 +54,11 @@ export function BarcodeScanner({
           if (!result) return;
           const value = result.getText().trim();
           const now = Date.now();
-          if (lastScanRef.current.value === value && now - lastScanRef.current.at < 1800) return;
+          if (
+            lastScanRef.current.value === value &&
+            now - lastScanRef.current.at < 1800
+          )
+            return;
           lastScanRef.current = { value, at: now };
           navigator.vibrate?.(80);
           onDetectedRef.current(value);
@@ -67,13 +80,20 @@ export function BarcodeScanner({
   return (
     <div>
       <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[#101828]">
-        <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
+        <video
+          ref={videoRef}
+          className="h-full w-full object-cover"
+          muted
+          playsInline
+        />
         {!active && (
           <div className="absolute inset-0 grid place-items-center p-6 text-center text-slate-300">
             <div>
               <ScanLine className="mx-auto mb-3 text-teal-300" size={42} />
               <p className="font-semibold text-white">Escáner por cámara</p>
-              <p className="mt-1 text-sm text-slate-400">Apunta al código de barras y evita reflejos.</p>
+              <p className="mt-1 text-sm text-slate-400">
+                Apunta al código de barras y evita reflejos.
+              </p>
             </div>
           </div>
         )}
@@ -90,7 +110,9 @@ export function BarcodeScanner({
         {active ? <CameraOff size={18} /> : <Camera size={18} />}
         {active ? "Detener cámara" : "Activar cámara"}
       </Button>
-      <p className="mt-2 text-center text-xs text-slate-500">La cámara requiere HTTPS o localhost.</p>
+      <p className="mt-2 text-center text-xs text-slate-500">
+        La cámara requiere HTTPS o localhost.
+      </p>
     </div>
   );
 }
