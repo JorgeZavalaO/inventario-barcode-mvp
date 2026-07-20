@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0 (2026-07-20)
+
+### Added
+- Nuevo flujo "Scan & Enter Quantity": al escanear un código se muestra un prompt para ingresar la cantidad real contada antes de registrar.
+- Soporte para barcode opcional (`NULL` en base de datos) cuando el producto no tiene código de barras numérico.
+
+### Changed
+- El campo `barcode` en productos ya no es obligatorio. Si no se provee, se guarda como `NULL`.
+- El escáner ya no registra automáticamente al detectar un código; primero pide confirmación con cantidad.
+- Productos sin barcode muestran "—" en las tablas de catálogo y resultados.
+- Etiqueta de código de barras: cuando no hay barcode, usa el código interno del producto como valor CODE128.
+
+### Fixed
+- Filtro de búsqueda en catálogo y resultados ahora maneja correctamente valores `null`.
+
 ## 0.4.0 (2026-07-20)
 
 ### Added

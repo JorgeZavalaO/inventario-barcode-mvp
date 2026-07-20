@@ -12,7 +12,7 @@ export default function ScanPage() {
     <div>
       <h2 className="text-lg font-bold">Escanear productos</h2>
       <p className="mb-6 text-sm text-slate-500">
-        Escanea códigos de barras usando la cámara o ingresa el código manualmente.
+        Escaneá el código de barras y luego ingresá la cantidad contada.
       </p>
 
       <ScanView
@@ -22,6 +22,7 @@ export default function ScanPage() {
         quantity={quantity}
         onQuantityChange={setQuantity}
         onSubmitCode={submitCount}
+        products={detail.products}
       />
     </div>
   );

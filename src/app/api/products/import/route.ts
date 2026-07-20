@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
           INSERT INTO products (
             id, code, barcode, description, unit, category, theoretical_stock
           ) VALUES (
-            ${randomUUID()}, ${product.code}, ${product.barcode || product.code},
+            ${randomUUID()}, ${product.code}, ${product.barcode || null},
             ${product.description}, ${product.unit || "UND"}, ${product.category || null},
             ${product.theoreticalStock ?? 0}
           )

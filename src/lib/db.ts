@@ -35,7 +35,7 @@ export async function ensureDatabase() {
         CREATE TABLE IF NOT EXISTS products (
           id TEXT PRIMARY KEY,
           code TEXT NOT NULL UNIQUE,
-          barcode TEXT NOT NULL UNIQUE,
+          barcode TEXT UNIQUE,
           description TEXT NOT NULL,
           unit TEXT NOT NULL DEFAULT 'UND',
           category TEXT,

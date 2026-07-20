@@ -32,7 +32,7 @@ export function CountsView({
     const term = search.trim().toLowerCase();
     if (!term) return products;
     return products.filter((product) =>
-      [product.code, product.barcode, product.description, product.category ?? ""]
+      [product.code, product.barcode ?? "", product.description, product.category ?? ""]
         .join(" ")
         .toLowerCase()
         .includes(term),
@@ -74,7 +74,7 @@ export function CountsView({
                 <TableCell>
                   <p className="font-semibold text-slate-900">{product.description}</p>
                   <p className="mt-1 font-mono text-xs text-slate-500">
-                    {product.code} · {product.barcode}
+                    {product.code} · {product.barcode || "—"}
                   </p>
                 </TableCell>
                 <TableCell className="tabular-nums">

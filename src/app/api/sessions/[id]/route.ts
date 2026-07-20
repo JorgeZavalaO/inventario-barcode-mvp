@@ -26,7 +26,7 @@ export async function GET(
     type ProductRow = {
       id: string;
       code: string;
-      barcode: string;
+      barcode: string | null;
       description: string;
       unit: string;
       category: string | null;

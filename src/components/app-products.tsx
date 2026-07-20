@@ -89,7 +89,7 @@ export function AppProducts() {
     return products.filter((product) =>
       [
         product.code,
-        product.barcode,
+        product.barcode ?? "",
         product.description,
         product.category ?? "",
       ]
@@ -459,7 +459,7 @@ export function AppProducts() {
                       </TableCell>
                       <TableCell className="font-mono text-xs text-slate-600">
                         <span className="inline-flex items-center gap-1">
-                          <Barcode size={14} /> {product.barcode}
+                          <Barcode size={14} /> {product.barcode || "—"}
                         </span>
                       </TableCell>
                       <TableCell className="tabular-nums font-semibold">

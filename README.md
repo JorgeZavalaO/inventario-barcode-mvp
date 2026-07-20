@@ -14,7 +14,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 - Generación e impresión de etiquetas Code 128.
 - Creación de sesiones de inventario con una fotografía del stock teórico.
 - Enlace compartible para que varias personas ingresen a la misma sesión.
-- Escaneo con la cámara del celular usando ZXing.
+- Escaneo con la cámara del celular usando ZXing, con confirmación de cantidad post-lectura.
 - Compatibilidad con lectores USB que funcionan como teclado.
 - Conteos por unidad o por cantidad.
 - Sincronización multiusuario mediante PostgreSQL y actualización automática cada 2 segundos.
@@ -106,7 +106,8 @@ Abre `http://localhost:3000` e inicia sesión con las credenciales de prueba:
 4. Ingresa el nombre del participante.
 5. Comparte el enlace de la sesión con otros celulares.
 6. Activa la cámara o escribe uno de los códigos del CSV.
-7. Verifica que los resultados se actualicen en todos los dispositivos.
+7. Ajustá la cantidad en el prompt de confirmación y presioná **Registrar**.
+8. Verifica que los resultados se actualicen en todos los dispositivos.
 
 ## Scripts disponibles
 
@@ -147,6 +148,8 @@ No uses SQLite en Vercel para este caso: la concurrencia y la persistencia multi
 codigo,codigo_barra,descripcion,unidad,categoria,stock_teorico
 PROD-001,7751234567890,Producto de prueba,UND,Categoría,25
 ```
+
+La columna `codigo_barra` (barcode) es **opcional**. Si se deja vacía, el código de barras se generará a partir del código interno del producto usando CODE128 (soporta alfanumérico).
 
 También se reconocen encabezados equivalentes como `code`, `barcode`, `description`, `unit`, `category` y `stock`.
 

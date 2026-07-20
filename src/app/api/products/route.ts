@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const body = productSchema.parse(await request.json());
     const sql = getDb();
     const id = randomUUID();
-    const barcode = body.barcode || body.code;
+    const barcode = body.barcode || null;
 
     const [product] = await sql`
       INSERT INTO products (

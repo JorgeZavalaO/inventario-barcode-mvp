@@ -1,7 +1,7 @@
 export type Product = {
   id: string;
   code: string;
-  barcode: string;
+  barcode: string | null;
   description: string;
   unit: string;
   category: string | null;
@@ -35,7 +35,7 @@ export type CountEvent = {
   created_at: string;
   reversed_at: string | null;
   product_code: string;
-  barcode: string;
+  barcode: string | null;
   product_description: string;
   operator_name: string;
   operator_id: string;
