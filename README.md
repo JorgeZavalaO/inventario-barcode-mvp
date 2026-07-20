@@ -11,7 +11,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 - Importación masiva desde CSV o Excel (.xlsx, .xls) — hasta 6500 filas por lote, con barra de progreso y reporte de errores por fila.
 - Descarga de plantilla Excel con el formato requerido.
 - Módulo de configuración con opciones de administración del sistema.
-- Generación e impresión de etiquetas Code 128.
+- Generación e impresión de etiquetas Code 128, con opción de impresión masiva por selección, página o catálogo completo.
 - Creación de sesiones de inventario con una fotografía del stock teórico.
 - Enlace compartible para que varias personas ingresen a la misma sesión.
 - Escaneo con la cámara del celular usando ZXing, con confirmación de cantidad post-lectura.

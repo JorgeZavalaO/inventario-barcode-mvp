@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   PackagePlus,
   Plus,
+  Printer,
   Search,
   Sparkles,
   Upload,
@@ -99,6 +100,23 @@ export function AppProducts() {
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelectedIds((prev) =>
+      prev.size === paginated.length
+        ? new Set()
+        : new Set(paginated.map((p) => p.id))
+    );
+  }
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -312,28 +330,36 @@ export function AppProducts() {
             Catálogo de productos y stock teórico.
           </p>
         </div>
-          <div className="flex gap-2">
+            <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={downloadTemplate}>
               <FileSpreadsheet size={16} /> Plantilla
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
               <Upload size={16} /> Importar CSV / Excel
+            </Button>
             <input
               ref={fileInputRef}
               type="file"
               accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
               className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) importFile(f);
-                e.target.value = "";
-              }}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) importFile(f); e.target.value = ""; }}
             />
-          </Button>
+            {selectedIds.size > 0 && (
+              <Button variant="outline" size="sm" render={<Link href={`/products/labels?ids=${Array.from(selectedIds).join(",")}`} />}>
+                <Printer size={16} /> Imprimir ({selectedIds.size})
+              </Button>
+            )}
+            {selectedIds.size === 0 && filteredProducts.length > 0 && totalPages > 1 && (
+              <Button variant="outline" size="sm" render={<Link href={`/products/labels?ids=${paginated.map((p) => p.id).join(",")}`} />}>
+                <Printer size={16} /> Imprimir página
+              </Button>
+            )}
+            {selectedIds.size === 0 && products.length > 0 && (
+              <Button variant="outline" size="sm" render={<Link href="/products/labels" />}>
+                <Printer size={16} /> Imprimir todo
+              </Button>
+            )}
+          </div>
           {products.length === 0 && (
             <Button
               variant="outline"
@@ -345,7 +371,6 @@ export function AppProducts() {
             </Button>
           )}
         </div>
-      </div>
 
       {(error || message) && (
         <div
@@ -493,6 +518,14 @@ export function AppProducts() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <input
+                      type="checkbox"
+                      className="size-4 accent-teal-600"
+                      checked={paginated.length > 0 && selectedIds.size === paginated.length}
+                      onChange={toggleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead>Producto</TableHead>
                   <TableHead>Barcode</TableHead>
                   <TableHead>Stock</TableHead>
@@ -502,20 +535,22 @@ export function AppProducts() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="py-12 text-center text-sm text-slate-500"
-                    >
-                      <LoaderCircle
-                        className="mx-auto mb-2 animate-spin"
-                        size={24}
-                      />
+                    <TableCell colSpan={5} className="py-12 text-center text-sm text-slate-500">
+                      <LoaderCircle className="mx-auto mb-2 animate-spin" size={24} />
                       Cargando...
                     </TableCell>
                   </TableRow>
                 ) : paginated.length > 0 ? (
                   paginated.map((product) => (
-                    <TableRow key={product.id}>
+                    <TableRow key={product.id} className={selectedIds.has(product.id) ? "bg-teal-50/40" : ""}>
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          className="size-4 accent-teal-600"
+                          checked={selectedIds.has(product.id)}
+                          onChange={() => toggleSelect(product.id)}
+                        />
+                      </TableCell>
                       <TableCell>
                         <p className="font-semibold text-slate-900">
                           {product.description}
@@ -551,7 +586,7 @@ export function AppProducts() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={4}
+                      colSpan={5}
                       className="py-14 text-center text-sm text-slate-500"
                     >
                       <Boxes

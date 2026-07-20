@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0 (2026-07-20)
+
+### Added
+- Impresión masiva de etiquetas: checkboxes en tabla de productos + botón "Imprimir (N)".
+- Página `/products/labels` que renderiza etiquetas en grilla responsive (2–4 columnas).
+- Botones "Imprimir página" (lista paginada actual) e "Imprimir todo" (catálogo completo).
+- Selector de productos por IDs en `GET /api/products?ids=...` para carga eficiente en la página de etiquetas.
+- Estilos `@media print` para impresión de etiquetas adhesivas.
+
 ## 0.8.0 (2026-07-20)
 
 ### Fixed

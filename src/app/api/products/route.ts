@@ -18,21 +18,36 @@ export async function GET(request: NextRequest) {
     await ensureDatabase();
     const sql = getDb();
     const search = request.nextUrl.searchParams.get("search")?.trim() ?? "";
+    const idsParam = request.nextUrl.searchParams.get("ids")?.trim() ?? "";
     const pattern = `%${search}%`;
 
-    const products = await sql`
-      SELECT
-        id, code, barcode, description, unit, category,
-        theoretical_stock::float8 AS theoretical_stock,
-        active
-      FROM products
-      WHERE active = TRUE
-        AND (
-          ${search} = '' OR code ILIKE ${pattern} OR barcode ILIKE ${pattern}
-          OR description ILIKE ${pattern} OR COALESCE(category, '') ILIKE ${pattern}
-        )
-      ORDER BY description ASC
-    `;
+    const ids = idsParam
+      ? idsParam.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    const products = ids.length > 0
+      ? await sql`
+          SELECT
+            id, code, barcode, description, unit, category,
+            theoretical_stock::float8 AS theoretical_stock,
+            active
+          FROM products
+          WHERE id = ANY(${ids}::text[])
+          ORDER BY description ASC
+        `
+      : await sql`
+          SELECT
+            id, code, barcode, description, unit, category,
+            theoretical_stock::float8 AS theoretical_stock,
+            active
+          FROM products
+          WHERE active = TRUE
+            AND (
+              ${search} = '' OR code ILIKE ${pattern} OR barcode ILIKE ${pattern}
+              OR description ILIKE ${pattern} OR COALESCE(category, '') ILIKE ${pattern}
+            )
+          ORDER BY description ASC
+        `;
 
     return NextResponse.json({ products });
   } catch (error) {
