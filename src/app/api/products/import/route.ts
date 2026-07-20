@@ -14,7 +14,7 @@ const importSchema = z.object({
       category: z.string().trim().optional(),
       theoreticalStock: z.coerce.number().min(0).optional(),
     }),
-  ).min(1).max(5000),
+  ).min(1).max(6500),
 });
 
 export async function POST(request: NextRequest) {
