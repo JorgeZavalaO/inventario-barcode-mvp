@@ -5,6 +5,8 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 ## Funcionalidades incluidas
 
 - Autenticación con Auth.js (credenciales, JWT).
+- Panel de control con métricas globales y acceso rápido.
+- Sidebar colapsable con navegación por módulos.
 - Catálogo de productos con código interno, barcode, descripción, unidad, categoría y stock teórico.
 - Importación masiva desde CSV.
 - Generación e impresión de etiquetas Code 128.
@@ -19,12 +21,15 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 - Deshacer el último conteo y bitácora de movimientos anulados.
 - Comparación entre stock teórico, conteo físico y diferencia.
 - Cierre definitivo de la sesión.
+- Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
+- Escáner inteligente: acceso directo con selector de sesión activa.
+- Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
 
 ## Stack
 
 - Next.js 16 App Router
 - React 19 y TypeScript
-- Tailwind CSS 4
+- Tailwind CSS 4 + shadcn/ui + @base-ui/react
 - Prisma ORM 7 + Neon PostgreSQL
 - Auth.js (NextAuth v5) con Credentials provider
 - ZXing Browser para lectura de códigos

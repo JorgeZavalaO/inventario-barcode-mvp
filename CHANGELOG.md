@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.3.0 (2026-07-20)
+
+### Added
+- Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
+- Ruta dedicada para escáner (`/sessions/[id]/scan`) con cámara y entrada manual.
+- Ruta dedicada para resultados (`/sessions/[id]/counts`) con tabla de conteos y búsqueda.
+- Ruta dedicada para actividad (`/sessions/[id]/activity`) con timeline de eventos.
+- Escáner inteligente con selector de sesión: si hay 1 sesión activa va directo; si hay varias, muestra un Sheet para elegir.
+- Acceso directo "Escanear" en el sidebar (sección Módulos) y en el dashboard (hero + acceso rápido).
+- `SessionDataProvider` (Context) para estado compartido entre páginas y polling automático cada 2s.
+- Componentes UI extraídos: `SessionHero`, `SessionMetrics`, `SessionParticipants`, `ScanView`, `CountsView`, `ActivityView`, `SessionJoinForm`, `EmptyState`, `SessionPickerSheet`.
+- Estados de UI completos: skeletons durante carga, empty states, sesión cerrada, error banner, toast de éxito.
+- Soporte PWA: `manifest.webmanifest`, iconos SVG 192×192 y 512×512, meta tags `apple-mobile-web-app` y `viewport-fit: cover`.
+
+### Changed
+- Vista de sesión migrada de un componente monolítico (`session-client.tsx`, 463 líneas) a 4 rutas independientes con componentes reutilizables.
+- Sidebar: "Escanear" usa hook `useScanTarget` que detecta sesiones activas y redirige o muestra selector según corresponda.
+- Dashboard: botón "Escanear ahora" en hero y card "Escanear" en acceso rápido con el mismo comportamiento inteligente.
+- Layout `(app)/sessions/[id]/` unificado con `SessionDataProvider`, navegación por tabs, modal de identificación y toast global.
+- Componentes UI instalados: Badge, Label, Table (shadcn/ui).
+
+### Fixed
+- Variables CSS de shadcn restauradas en `:root` (`--background`, `--foreground`, `--card`, `--primary`, etc.) que causaban hover y active states invisibles en el sidebar.
+- Estilos globales del body (`font-family: Arial`, `background: radial-gradient`) eliminados para evitar sobrescribir componentes shadcn.
+- Clases CSS custom (`.btn`, `.input`, `.label`, `.badge`, `.surface`, `.table-wrap`) migradas a componentes shadcn en 7 archivos.
+- `asChild` reemplazado por `render` prop en componentes `@base-ui/react`.
+
+### Infrastructure
+- `public/manifest.webmanifest` con configuración PWA completa.
+- Iconos en `public/icons/icon-192.svg` y `public/icons/icon-512.svg`.
+- Hook `src/hooks/use-scan-target.ts` para detección de sesiones activas.
+- Componentes organizados en `src/components/session/` con barrel export.
+
 ## 0.2.0 (2026-07-20)
 
 ### Added

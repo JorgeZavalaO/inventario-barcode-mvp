@@ -14,6 +14,8 @@ import type { InventorySession, Product } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useScanTarget } from "@/hooks/use-scan-target";
+import { SessionPickerSheet } from "@/components/session/session-picker-sheet";
 
 export function AppDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -39,8 +41,10 @@ export function AppDashboard() {
     window.setTimeout(() => void load(), 0);
   }, [load]);
 
-  const openSessions = sessions.filter((s) => s.status === "OPEN").length;
+  const openSessionsCount = sessions.filter((s) => s.status === "OPEN").length;
   const totalUnits = sessions.reduce((t, s) => t + Number(s.total_units ?? 0), 0);
+  const { openSessions, target, hasMultiple } = useScanTarget();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   return (
     <div className="space-y-8">
@@ -63,6 +67,11 @@ export function AppDashboard() {
               <Button className="bg-teal-600 text-white hover:bg-teal-500" render={<Link href="/sessions" />}>
                 <ClipboardList size={17} /> Ir a sesiones
               </Button>
+              <Button variant="outline" className="border-teal-400/30 bg-teal-400/10 text-teal-200 hover:bg-teal-400/20" render={
+                hasMultiple ? <button type="button" onClick={() => setSheetOpen(true)} /> : <Link href={target} />
+              }>
+                <ScanBarcode size={17} /> Escanear ahora
+              </Button>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -71,7 +80,7 @@ export function AppDashboard() {
               <p className="mt-1 text-xs text-slate-400">Productos activos</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-3xl font-bold tabular-nums">{loading ? "..." : openSessions}</p>
+              <p className="text-3xl font-bold tabular-nums">{loading ? "..." : openSessionsCount}</p>
               <p className="mt-1 text-xs text-slate-400">Sesiones abiertas</p>
             </div>
             <div className="col-span-2 rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -131,12 +140,25 @@ export function AppDashboard() {
               <CardDescription>Funciones principales del sistema.</CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4 p-5">
+          <CardContent className="grid grid-cols-3 gap-4 p-5">
             <Link href="/products" className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 p-5 text-center transition hover:border-teal-200 hover:bg-teal-50/30">
               <span className="grid size-12 place-items-center rounded-2xl bg-indigo-50 text-indigo-700"><Package size={24} /></span>
               <span className="font-semibold text-slate-900">Productos</span>
               <span className="text-xs text-slate-500">Catálogo y registro</span>
             </Link>
+            {hasMultiple ? (
+              <button type="button" onClick={() => setSheetOpen(true)} className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 p-5 text-center transition hover:border-teal-200 hover:bg-teal-50/30 cursor-pointer">
+                <span className="grid size-12 place-items-center rounded-2xl bg-teal-50 text-teal-700"><ScanBarcode size={24} /></span>
+                <span className="font-semibold text-slate-900">Escanear</span>
+                <span className="text-xs text-slate-500">Códigos de barras</span>
+              </button>
+            ) : (
+              <Link href={target} className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 p-5 text-center transition hover:border-teal-200 hover:bg-teal-50/30">
+                <span className="grid size-12 place-items-center rounded-2xl bg-teal-50 text-teal-700"><ScanBarcode size={24} /></span>
+                <span className="font-semibold text-slate-900">Escanear</span>
+                <span className="text-xs text-slate-500">Códigos de barras</span>
+              </Link>
+            )}
             <Link href="/sessions" className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 p-5 text-center transition hover:border-teal-200 hover:bg-teal-50/30">
               <span className="grid size-12 place-items-center rounded-2xl bg-teal-50 text-teal-700"><ClipboardList size={24} /></span>
               <span className="font-semibold text-slate-900">Sesiones</span>
@@ -145,6 +167,7 @@ export function AppDashboard() {
           </CardContent>
         </Card>
       </section>
+      <SessionPickerSheet sessions={openSessions} open={sheetOpen} onOpenChange={setSheetOpen} />
     </div>
   );
 }

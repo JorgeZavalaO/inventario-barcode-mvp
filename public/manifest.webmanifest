@@ -1,0 +1,25 @@
+{
+  "name": "StockScan – Inventario colaborativo",
+  "short_name": "StockScan",
+  "description": "Conteo de inventario multiusuario mediante códigos de barras. Escanea, cuenta y coordina con tu equipo en tiempo real.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0b1324",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

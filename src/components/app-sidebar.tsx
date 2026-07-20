@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -21,27 +22,34 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/nav-user";
+import { useScanTarget } from "@/hooks/use-scan-target";
+import { SessionPickerSheet } from "@/components/session/session-picker-sheet";
 
 const navItems = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Productos",
-    url: "/products",
-    icon: Package,
-  },
-  {
-    title: "Sesiones",
-    url: "/sessions",
-    icon: ClipboardList,
-  },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Productos", url: "/products", icon: Package },
+  { title: "Sesiones", url: "/sessions", icon: ClipboardList },
 ];
 
 export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sidebar> & { user?: { name?: string | null; email?: string | null; image?: string | null } | undefined }) {
   const pathname = usePathname();
+  const { openSessions, target, hasMultiple } = useScanTarget();
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const allItems = [
+    { title: "Dashboard", url: "/", icon: LayoutDashboard },
+    { title: "Escanear", icon: ScanBarcode },
+    { title: "Productos", url: "/products", icon: Package },
+    { title: "Sesiones", url: "/sessions", icon: ClipboardList },
+  ];
+
+  function isActive(item: { title: string; url?: string }) {
+    if (item.title === "Dashboard") return pathname === "/";
+    if (item.title === "Sesiones") return pathname.startsWith("/sessions");
+    if (item.title === "Escanear") return pathname.includes("/scan");
+    if (item.url) return pathname.startsWith(item.url);
+    return false;
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -60,11 +68,26 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
         <SidebarGroup>
           <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Módulos</SidebarGroupLabel>
           <SidebarMenu>
-            {navItems.map((item) => {
-              const active = pathname === item.url || (item.url !== "/" && pathname.startsWith(item.url));
+            {allItems.map((item) => {
+              if (item.title === "Escanear") {
+                return (
+                  <SidebarMenuItem key="Escanear">
+                    <SidebarMenuButton
+                      isActive={isActive(item)}
+                      tooltip="Escanear"
+                      onClick={hasMultiple ? () => setSheetOpen(true) : undefined}
+                      render={!hasMultiple ? <Link href={target} /> : undefined}
+                    >
+                      <ScanBarcode />
+                      <span>Escanear</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              }
+
               return (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton isActive={active} tooltip={item.title} render={<Link href={item.url} />}>
+                  <SidebarMenuButton isActive={isActive(item)} tooltip={item.title} render={<Link href={item.url!} />}>
                     <item.icon />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -78,6 +101,7 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
         {user && <NavUser user={{ name: user.name ?? "Usuario", email: user.email ?? "", avatar: user.image ?? "" }} />}
       </SidebarFooter>
       <SidebarRail />
+      <SessionPickerSheet sessions={openSessions} open={sheetOpen} onOpenChange={setSheetOpen} />
     </Sidebar>
   );
 }
