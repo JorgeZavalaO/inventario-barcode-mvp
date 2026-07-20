@@ -51,10 +51,12 @@ export async function POST(request: NextRequest) {
 
     const [product] = await sql`
       INSERT INTO products (
-        id, code, barcode, description, unit, category, theoretical_stock
+        id, code, barcode, description, unit, category, theoretical_stock,
+        created_at, updated_at
       ) VALUES (
         ${id}, ${body.code}, ${barcode}, ${body.description}, ${body.unit},
-        ${body.category || null}, ${body.theoreticalStock}
+        ${body.category || null}, ${body.theoreticalStock},
+        NOW(), NOW()
       )
       RETURNING
         id, code, barcode, description, unit, category,

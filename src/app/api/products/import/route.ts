@@ -29,11 +29,13 @@ export async function POST(request: NextRequest) {
       try {
         await sql`
           INSERT INTO products (
-            id, code, barcode, description, unit, category, theoretical_stock
+            id, code, barcode, description, unit, category, theoretical_stock,
+            created_at, updated_at
           ) VALUES (
             ${randomUUID()}, ${product.code}, ${product.barcode || null},
             ${product.description}, ${product.unit || "UND"}, ${product.category || null},
-            ${product.theoreticalStock ?? 0}
+            ${product.theoreticalStock ?? 0},
+            NOW(), NOW()
           )
           ON CONFLICT (code) DO UPDATE SET
             barcode = EXCLUDED.barcode,
