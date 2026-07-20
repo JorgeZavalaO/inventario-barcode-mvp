@@ -7,7 +7,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 - Autenticación con Auth.js (credenciales, JWT).
 - Panel de control con métricas globales y acceso rápido.
 - Sidebar colapsable con navegación por módulos.
-- Catálogo de productos con código interno, barcode, descripción, unidad, categoría y stock teórico, con paginación y búsqueda por código o descripción.
+- Catálogo de productos con código interno, barcode, descripción, unidad, categoría y stock teórico, con paginación (20–500 items por página) y búsqueda por código o descripción.
 - Importación masiva desde CSV o Excel (.xlsx, .xls) — hasta 6500 filas por lote, con barra de progreso y reporte de errores por fila.
 - Descarga de plantilla Excel con el formato requerido.
 - Módulo de configuración con opciones de administración del sistema.

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.0 (2026-07-20)
+
+### Fixed
+- API de productos ya no tiene límite de 500 registros; ahora devuelve todos los productos.
+- Importación por lote ya no causa bucle infinito al usar `useCallback`/`onComplete`.
+- Barra de progreso de importación ahora muestra el porcentaje numérico visible dentro de la barra.
+
+### Added
+- Selector de items por página en la lista de productos (20, 50, 100, 250, 500).
+- Contador de resultados visibles vs totales en el pie de la tabla de productos.
+
 ## 0.7.0 (2026-07-20)
 
 ### Added

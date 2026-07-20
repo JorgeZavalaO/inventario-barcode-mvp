@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
           OR description ILIKE ${pattern} OR COALESCE(category, '') ILIKE ${pattern}
         )
       ORDER BY description ASC
-      LIMIT 500
     `;
 
     return NextResponse.json({ products });

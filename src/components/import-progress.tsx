@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, XCircle, AlertTriangle, LoaderCircle, X, FileSpreadsheet } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/client";
 
@@ -25,42 +25,46 @@ export function ImportProgress({
   const [progress, setProgress] = useState(0);
   const [imported, setImported] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
-  const [abort, setAbort] = useState(false);
+  const abortRef = useRef(false);
+  const doneRef = useRef(false);
 
   const total = products.length;
   const totalBatches = Math.ceil(total / BATCH_SIZE);
-
-  const run = useCallback(async () => {
-    for (let i = 0; i < total; i += BATCH_SIZE) {
-      if (abort) return;
-      const batch = products.slice(i, i + BATCH_SIZE);
-      try {
-        const result = await apiFetch<ImportResult>("/api/products/import", {
-          method: "POST",
-          body: JSON.stringify({ products: batch }),
-        });
-        setImported((prev) => prev + result.imported);
-        if (result.errors.length) {
-          setErrors((prev) => [...prev, ...result.errors]);
-        }
-      } catch (cause) {
-        setErrors((prev) => [
-          ...prev,
-          `Lote ${Math.floor(i / BATCH_SIZE) + 1}: ${cause instanceof Error ? cause.message : "Error"}`,
-        ]);
-      }
-      setProgress(Math.min(i + BATCH_SIZE, total));
-    }
-    setStatus("done");
-    onComplete();
-  }, [products, abort, onComplete]);
+  const percent = total > 0 ? Math.round((progress / total) * 100) : 0;
 
   useEffect(() => {
-    run();
-  }, [run]);
+    if (doneRef.current) return;
+
+    (async () => {
+      for (let i = 0; i < total; i += BATCH_SIZE) {
+        if (abortRef.current) break;
+        const batch = products.slice(i, i + BATCH_SIZE);
+        try {
+          const result = await apiFetch<ImportResult>("/api/products/import", {
+            method: "POST",
+            body: JSON.stringify({ products: batch }),
+          });
+          setImported((prev) => prev + result.imported);
+          if (result.errors.length) {
+            setErrors((prev) => [...prev, ...result.errors]);
+          }
+        } catch (cause) {
+          setErrors((prev) => [
+            ...prev,
+            `Lote ${Math.floor(i / BATCH_SIZE) + 1}: ${cause instanceof Error ? cause.message : "Error"}`,
+          ]);
+        }
+        setProgress(Math.min(i + BATCH_SIZE, total));
+      }
+      doneRef.current = true;
+      setStatus("done");
+      onComplete();
+    })();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleCancel() {
-    setAbort(true);
+    abortRef.current = true;
+    doneRef.current = true;
     setStatus("done");
   }
 
@@ -88,19 +92,23 @@ export function ImportProgress({
                 <LoaderCircle className="animate-spin text-teal-600 shrink-0" size={22} />
                 <div className="text-sm text-slate-600">
                   Procesando <strong>{Math.min(progress, total)}</strong> de <strong>{total}</strong> productos
+                  <span className="text-slate-400"> · <strong>{percent}%</strong></span>
                   {totalBatches > 1 && (
                     <span className="text-slate-400">
-                      {" "}· Lote {Math.ceil(progress / BATCH_SIZE)} de {totalBatches}
+                      {" "}· Lote {Math.ceil(Math.max(progress, 1) / BATCH_SIZE)} de {totalBatches}
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+              <div className="relative h-3 overflow-hidden rounded-full bg-slate-100">
                 <div
                   className="h-full rounded-full bg-teal-500 transition-all duration-300"
-                  style={{ width: `${Math.min((progress / total) * 100, 100)}%` }}
+                  style={{ width: `${percent}%` }}
                 />
+                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white mix-blend-difference">
+                  {percent}%
+                </span>
               </div>
 
               {imported > 0 && (
@@ -137,13 +145,13 @@ export function ImportProgress({
                 </div>
               </div>
 
-              {!abort && errors.length === 0 && (
+              {!abortRef.current && errors.length === 0 && (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2">
                   <CheckCircle2 size={16} /> Todos los productos se importaron correctamente.
                 </div>
               )}
 
-              {abort && (
+              {abortRef.current && (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 flex items-center gap-2">
                   <AlertTriangle size={16} /> Importación cancelada. Algunos productos no se procesaron.
                 </div>

@@ -98,7 +98,7 @@ export function AppProducts() {
   }, [load]);
 
   const [page, setPage] = useState(1);
-  const perPage = 15;
+  const [perPage, setPerPage] = useState(20);
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -459,17 +459,34 @@ export function AppProducts() {
 
         <Card className="overflow-hidden p-0">
           <div className="border-b border-slate-200 p-5">
-            <div className="relative max-w-sm">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={17}
-              />
-              <Input
-                className="pl-10"
-                placeholder="Buscar código, descripción o categoría"
-                value={search}
-                onChange={(e) => handleSearch(e.target.value)}
-              />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative max-w-sm flex-1">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={17}
+                />
+                <Input
+                  className="pl-10"
+                  placeholder="Buscar código, descripción o categoría"
+                  value={search}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <span className="hidden sm:inline">Ver</span>
+                <select
+                  className="h-8 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-700 focus:border-teal-500 focus:outline-none"
+                  value={perPage}
+                  onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+                >
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={250}>250</option>
+                  <option value={500}>500</option>
+                </select>
+                <span className="hidden sm:inline">por página</span>
+              </div>
             </div>
           </div>
           <div>
@@ -548,29 +565,36 @@ export function AppProducts() {
               </TableBody>
             </Table>
           </div>
-          {!loading && totalPages > 1 && (
-            <div className="border-t border-slate-200 px-4 py-3">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => goToPage(page - 1)}
-                      href="#"
-                      text="Anterior"
-                      className={page <= 1 ? "pointer-events-none opacity-40" : ""}
-                    />
-                  </PaginationItem>
-                  {renderPageNumbers()}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => goToPage(page + 1)}
-                      href="#"
-                      text="Siguiente"
-                      className={page >= totalPages ? "pointer-events-none opacity-40" : ""}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+          {!loading && (
+            <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-xs text-slate-500">
+              <p>
+                {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""}
+                {search && ` coinciden con la búsqueda`}
+                {filteredProducts.length !== products.length && ` (${products.length} en total)`}
+              </p>
+              {totalPages > 1 && (
+                <Pagination className="mx-0 w-auto">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => goToPage(page - 1)}
+                        href="#"
+                        text="Anterior"
+                        className={page <= 1 ? "pointer-events-none opacity-40" : ""}
+                      />
+                    </PaginationItem>
+                    {renderPageNumbers()}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => goToPage(page + 1)}
+                        href="#"
+                        text="Siguiente"
+                        className={page >= totalPages ? "pointer-events-none opacity-40" : ""}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
             </div>
           )}
           <div className="flex items-start gap-2 border-t border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
