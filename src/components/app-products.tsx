@@ -1,0 +1,285 @@
+"use client";
+
+import Link from "next/link";
+import Papa from "papaparse";
+import {
+  Barcode,
+  Boxes,
+  FileSpreadsheet,
+  LoaderCircle,
+  PackagePlus,
+  Plus,
+  Search,
+  Sparkles,
+  Upload,
+} from "lucide-react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { apiFetch } from "@/lib/client";
+import type { Product } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+const initialProduct = {
+  code: "",
+  barcode: "",
+  description: "",
+  unit: "UND",
+  category: "",
+  theoreticalStock: "0",
+};
+
+export function AppProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [productForm, setProductForm] = useState(initialProduct);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await apiFetch<{ products: Product[] }>("/api/products");
+      setProducts(data.products);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudieron cargar los productos");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.setTimeout(() => void load(), 0);
+  }, [load]);
+
+  const filteredProducts = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return products;
+    return products.filter((product) =>
+      [product.code, product.barcode, product.description, product.category ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(term),
+    );
+  }, [products, search]);
+
+  async function createProduct(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      await apiFetch("/api/products", {
+        method: "POST",
+        body: JSON.stringify({ ...productForm, theoreticalStock: Number(productForm.theoreticalStock || 0) }),
+      });
+      setProductForm(initialProduct);
+      setMessage("Producto registrado correctamente");
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudo registrar el producto");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function importCsv(file: File) {
+    Papa.parse<Record<string, string>>(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async ({ data, errors }) => {
+        if (errors.length) {
+          setError(`El CSV tiene errores: ${errors[0]?.message}`);
+          return;
+        }
+        const normalized = data
+          .map((row) => {
+            const lower = Object.fromEntries(
+              Object.entries(row).map(([key, value]) => [key.trim().toLowerCase(), value?.trim()]),
+            );
+            return {
+              code: lower.codigo || lower.code || lower.sku || "",
+              barcode: lower.codigo_barra || lower["codigo de barras"] || lower.barcode || lower.ean || "",
+              description: lower.descripcion || lower.description || lower.producto || "",
+              unit: lower.unidad || lower.unit || "UND",
+              category: lower.categoria || lower.category || "",
+              theoreticalStock: Number(lower.stock_teorico || lower.stock || lower.theoreticalstock || lower.existencia || 0),
+            };
+          })
+          .filter((row) => row.code && row.description);
+
+        if (!normalized.length) {
+          setError("No se encontraron filas válidas.");
+          return;
+        }
+
+        setBusy(true);
+        setError("");
+        try {
+          const result = await apiFetch<{ imported: number; errors: string[] }>("/api/products/import", {
+            method: "POST",
+            body: JSON.stringify({ products: normalized }),
+          });
+          setMessage(`${result.imported} productos importados`);
+          if (result.errors.length) setError(result.errors.slice(0, 3).join(" | "));
+          await load();
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : "No se pudo importar");
+        } finally {
+          setBusy(false);
+        }
+      },
+    });
+  }
+
+  async function seedDemo() {
+    setBusy(true);
+    setError("");
+    try {
+      await apiFetch("/api/setup", { method: "POST", body: JSON.stringify({ seedDemo: true }) });
+      setMessage("Productos demo cargados");
+      await load();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudo cargar demo");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Productos</h1>
+          <p className="text-sm text-slate-500">Catálogo de productos y stock teórico.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+            <Upload size={16} /> Importar CSV
+            <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importCsv(f); e.target.value = ""; }} />
+          </Button>
+          {products.length === 0 && (
+            <Button variant="outline" size="sm" onClick={() => void seedDemo()} disabled={busy}>
+              <Sparkles size={16} /> Demo
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {(error || message) && (
+        <div className={`rounded-xl border px-4 py-3 text-sm ${error ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+          {error || message}
+        </div>
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-[.7fr_1.3fr]">
+        <Card>
+          <CardHeader>
+            <div className="flex items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-700"><PackagePlus size={19} /></span>
+              <div>
+                <CardTitle className="text-base">Registrar producto</CardTitle>
+                <CardDescription>Si dejas vacío el barcode, se usará el código interno.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={createProduct} className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="p-code">Código</Label>
+                <Input id="p-code" value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-barcode">Código de barras</Label>
+                <Input id="p-barcode" value={productForm.barcode} onChange={(e) => setProductForm({ ...productForm, barcode: e.target.value })} placeholder="Opcional" />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="p-desc">Descripción</Label>
+                <Input id="p-desc" value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-unit">Unidad</Label>
+                <Input id="p-unit" value={productForm.unit} onChange={(e) => setProductForm({ ...productForm, unit: e.target.value })} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-cat">Categoría</Label>
+                <Input id="p-cat" value={productForm.category} onChange={(e) => setProductForm({ ...productForm, category: e.target.value })} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="p-stock">Stock teórico</Label>
+                <Input id="p-stock" type="number" min="0" step="0.001" value={productForm.theoreticalStock} onChange={(e) => setProductForm({ ...productForm, theoreticalStock: e.target.value })} />
+              </div>
+              <div className="sm:col-span-2">
+                <Button type="submit" className="w-full" disabled={busy}><Plus size={18} /> Guardar</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        <Card className="overflow-hidden p-0">
+          <div className="border-b border-slate-200 p-5">
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
+              <Input className="pl-10" placeholder="Buscar código, descripción o categoría" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+          </div>
+          <div className="max-h-[34rem] overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Producto</TableHead>
+                  <TableHead>Barcode</TableHead>
+                  <TableHead>Stock</TableHead>
+                  <TableHead className="text-right"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="py-12 text-center text-sm text-slate-500">
+                      <LoaderCircle className="mx-auto mb-2 animate-spin" size={24} />Cargando...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredProducts.map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <p className="font-semibold text-slate-900">{product.description}</p>
+                      <p className="mt-1 font-mono text-xs text-slate-500">{product.code} · {product.category || "Sin categoría"}</p>
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-slate-600">
+                      <span className="inline-flex items-center gap-1"><Barcode size={14} /> {product.barcode}</span>
+                    </TableCell>
+                    <TableCell className="tabular-nums font-semibold">
+                      {product.theoretical_stock.toLocaleString("es-PE")} <span className="text-xs font-normal text-slate-500">{product.unit}</span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" render={<Link href={`/products/${product.id}/label`} />}>
+                        Etiqueta
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {!loading && !filteredProducts.length && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="py-14 text-center text-sm text-slate-500">
+                      <Boxes className="mx-auto mb-2 text-slate-300" size={30} />No hay productos.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex items-start gap-2 border-t border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
+            <FileSpreadsheet className="mt-0.5 shrink-0" size={16} />
+            CSV: <span className="font-mono">codigo,codigo_barra,descripcion,unidad,categoria,stock_teorico</span>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}

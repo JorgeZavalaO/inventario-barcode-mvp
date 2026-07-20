@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: stockscan-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: stockscan
+      POSTGRES_PASSWORD: stockscan
+      POSTGRES_DB: stockscan
+    ports:
+      - "5432:5432"
+    volumes:
+      - stockscan_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockscan -d stockscan"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  stockscan_data:
