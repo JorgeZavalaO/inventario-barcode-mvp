@@ -6,14 +6,15 @@ import {
 } from "@zxing/browser";
 import { Camera, CameraOff, ScanLine } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 
 export function BarcodeScanner({
   onDetected,
   disabled,
+  onActiveChange,
 }: {
   onDetected: (code: string) => void;
   disabled?: boolean;
+  onActiveChange?: (active: boolean) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
@@ -28,6 +29,10 @@ export function BarcodeScanner({
   useEffect(() => {
     onDetectedRef.current = onDetected;
   }, [onDetected]);
+
+  useEffect(() => {
+    onActiveChange?.(active);
+  }, [active, onActiveChange]);
 
   const stop = () => {
     controlsRef.current?.stop();
@@ -78,41 +83,37 @@ export function BarcodeScanner({
   useEffect(() => () => stop(), []);
 
   return (
-    <div>
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[#101828]">
-        <video
-          ref={videoRef}
-          className="h-full w-full object-cover"
-          muted
-          playsInline
-        />
-        {!active && (
-          <div className="absolute inset-0 grid place-items-center p-6 text-center text-slate-300">
-            <div>
-              <ScanLine className="mx-auto mb-3 text-teal-300" size={42} />
-              <p className="font-semibold text-white">Escáner por cámara</p>
-              <p className="mt-1 text-sm text-slate-400">
-                Apunta al código de barras y evita reflejos.
-              </p>
-            </div>
+    <div className="relative size-full">
+      <video
+        ref={videoRef}
+        className="size-full object-cover"
+        muted
+        playsInline
+      />
+      {!active && (
+        <div className="absolute inset-0 grid place-items-center p-6 text-center text-slate-300 bg-[#101828]">
+          <div>
+            <ScanLine className="mx-auto mb-3 text-teal-300" size={42} />
+            <p className="font-semibold text-white">Escáner por cámara</p>
+            <p className="mt-1 text-sm text-slate-400">
+              Apunta al código de barras y evita reflejos.
+            </p>
           </div>
-        )}
-        {active && <div className="scan-line" />}
-        <div className="pointer-events-none absolute inset-5 rounded-xl border border-white/35" />
-      </div>
+        </div>
+      )}
+      {active && <div className="scan-line" />}
+      <div className="pointer-events-none absolute inset-4 rounded-2xl border border-white/30" />
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      <Button
-        variant={active ? "outline" : "default"}
-        className="mt-3 w-full"
-        onClick={active ? stop : start}
-        disabled={disabled}
-      >
-        {active ? <CameraOff size={18} /> : <Camera size={18} />}
-        {active ? "Detener cámara" : "Activar cámara"}
-      </Button>
-      <p className="mt-2 text-center text-xs text-slate-500">
-        La cámara requiere HTTPS o localhost.
-      </p>
+      {!active && (
+        <button
+          type="button"
+          onClick={start}
+          disabled={disabled}
+          className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-center gap-2 rounded-xl bg-teal-600 py-3 text-sm font-semibold text-white shadow-lg hover:bg-teal-500 disabled:opacity-50"
+        >
+          <Camera size={18} /> Activar cámara
+        </button>
+      )}
     </div>
   );
 }

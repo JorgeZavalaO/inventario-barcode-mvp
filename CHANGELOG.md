@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.10.0 (2026-07-20)
+
+### Added
+- Cámara en pantalla completa al escanear: overlay fijo `z-50` con video ocupando todo el viewport.
+- Barra superior flotante con botón "Detener" y estado de cámara activa.
+- Prompt de confirmación de cantidad sobre el feed de cámara (fondo semi-transparente).
+- Botón toggle para ingreso manual directamente desde la vista de cámara completa.
+- Vista idle (cámara apagada) con card de activación tipo "dashed border" y formulario manual.
+
+### Changed
+- `BarcodeScanner` ahora expone `onActiveChange` para que el padre controle el layout fullscreen.
+- Botón "Activar cámara" movido dentro del componente como overlay sobre el placeholder.
+
 ## 0.9.0 (2026-07-20)
 
 ### Added
