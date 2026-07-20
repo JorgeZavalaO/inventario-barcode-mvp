@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 (2026-07-20)
+
+### Added
+- Paginación completa en la lista de productos (15 por página) con componente shadcn/ui Pagination.
+- Navegación por números de página, « Anterior / Siguiente » y elipsis para rangos grandes.
+- Al buscar, el paginado se resetea automáticamente a la página 1.
+- Reemplazado el scroll infinito por paginación con controles visuales.
+
 ## 0.6.0 (2026-07-20)
 
 ### Added

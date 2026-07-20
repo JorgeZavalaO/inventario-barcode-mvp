@@ -26,6 +26,15 @@ import { apiFetch } from "@/lib/client";
 import type { Product } from "@/lib/types";
 import { ImportProgress } from "@/components/import-progress";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
+import {
   Card,
   CardContent,
   CardHeader,
@@ -88,6 +97,9 @@ export function AppProducts() {
     window.setTimeout(() => void load(), 0);
   }, [load]);
 
+  const [page, setPage] = useState(1);
+  const perPage = 15;
+
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return products;
@@ -103,6 +115,56 @@ export function AppProducts() {
         .includes(term),
     );
   }, [products, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / perPage));
+  const paginated = filteredProducts.slice(
+    (page - 1) * perPage,
+    page * perPage,
+  );
+
+  function goToPage(p: number) {
+    setPage(Math.max(1, Math.min(p, totalPages)));
+  }
+
+  function handleSearch(value: string) {
+    setSearch(value);
+    setPage(1);
+  }
+
+  function renderPageNumbers() {
+    const pages: React.ReactNode[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    if (start > 1) {
+      pages.push(
+        <PaginationItem key="1">
+          <PaginationLink onClick={() => goToPage(1)} href="#">1</PaginationLink>
+        </PaginationItem>,
+      );
+      if (start > 2) pages.push(<PaginationItem key="e1"><PaginationEllipsis /></PaginationItem>);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink isActive={i === page} onClick={() => goToPage(i)} href="#">{i}</PaginationLink>
+        </PaginationItem>,
+      );
+    }
+    if (end < totalPages) {
+      if (end < totalPages - 1) pages.push(<PaginationItem key="e2"><PaginationEllipsis /></PaginationItem>);
+      pages.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink onClick={() => goToPage(totalPages)} href="#">{totalPages}</PaginationLink>
+        </PaginationItem>,
+      );
+    }
+    return pages;
+  }
 
   async function createProduct(event: FormEvent) {
     event.preventDefault();
@@ -406,11 +468,11 @@ export function AppProducts() {
                 className="pl-10"
                 placeholder="Buscar código, descripción o categoría"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
           </div>
-          <div className="max-h-136 overflow-auto">
+          <div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -434,8 +496,8 @@ export function AppProducts() {
                       Cargando...
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredProducts.map((product) => (
+                ) : paginated.length > 0 ? (
+                  paginated.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>
                         <p className="font-semibold text-slate-900">
@@ -469,8 +531,7 @@ export function AppProducts() {
                       </TableCell>
                     </TableRow>
                   ))
-                )}
-                {!loading && !filteredProducts.length && (
+                ) : (
                   <TableRow>
                     <TableCell
                       colSpan={4}
@@ -480,13 +541,38 @@ export function AppProducts() {
                         className="mx-auto mb-2 text-slate-300"
                         size={30}
                       />
-                      No hay productos.
+                      {search ? "No se encontraron productos." : "No hay productos."}
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
           </div>
+          {!loading && totalPages > 1 && (
+            <div className="border-t border-slate-200 px-4 py-3">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => goToPage(page - 1)}
+                      href="#"
+                      text="Anterior"
+                      className={page <= 1 ? "pointer-events-none opacity-40" : ""}
+                    />
+                  </PaginationItem>
+                  {renderPageNumbers()}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => goToPage(page + 1)}
+                      href="#"
+                      text="Siguiente"
+                      className={page >= totalPages ? "pointer-events-none opacity-40" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
           <div className="flex items-start gap-2 border-t border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
             <FileSpreadsheet className="mt-0.5 shrink-0" size={16} />
             CSV o Excel: columnas <span className="font-mono">
