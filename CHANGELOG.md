@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (2026-07-20)
+
+### Added
+- Modal de progreso de importación con barra de progreso, contadores en tiempo real y cancelación.
+- Importación por lotes: los productos se envían al API en batches de 200 para mostrar progreso en archivos grandes.
+- Vista de errores detallada al finalizar la importación con lista scrollable de errores por fila.
+
+### Fixed
+- El mensaje de error ya no se limita a 3 errores; ahora se muestran todos en la lista de resultados.
+
 ## 0.5.0 (2026-07-20)
 
 ### Added

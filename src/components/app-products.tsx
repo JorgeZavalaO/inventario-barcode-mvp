@@ -24,6 +24,7 @@ import {
 } from "react";
 import { apiFetch } from "@/lib/client";
 import type { Product } from "@/lib/types";
+import { ImportProgress } from "@/components/import-progress";
 import {
   Card,
   CardContent,
@@ -61,6 +62,10 @@ export function AppProducts() {
   const [error, setError] = useState("");
   const [productForm, setProductForm] = useState(initialProduct);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importProducts, setImportProducts] = useState<
+    | { code: string; barcode?: string; description: string; unit?: string; category?: string; theoreticalStock?: number }[]
+    | null
+  >(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -198,24 +203,7 @@ export function AppProducts() {
       return;
     }
 
-    setBusy(true);
-    setError("");
-    try {
-      const result = await apiFetch<{ imported: number; errors: string[] }>(
-        "/api/products/import",
-        {
-          method: "POST",
-          body: JSON.stringify({ products: normalized }),
-        },
-      );
-      setMessage(`${result.imported} productos importados`);
-      if (result.errors.length) setError(result.errors.slice(0, 3).join(" | "));
-      await load();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "No se pudo importar");
-    } finally {
-      setBusy(false);
-    }
+    setImportProducts(normalized);
   }
   async function seedDemo() {
     setBusy(true);
@@ -512,6 +500,13 @@ export function AppProducts() {
           </div>
         </Card>
       </div>
+      {importProducts && (
+        <ImportProgress
+          products={importProducts}
+          onClose={() => setImportProducts(null)}
+          onComplete={() => { void load(); }}
+        />
+      )}
     </div>
   );
 }
