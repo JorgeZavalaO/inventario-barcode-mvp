@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0 (2026-07-20)
+
+### Added
+- Selector de tamaño de etiqueta en la página de impresión masiva (100×75, 100×50, 75×50, 75×25, 50×25 mm y personalizado).
+- CSS `@page` dinámico según el tamaño seleccionado para impresión térmica one-label-per-page.
+- Panel de ayuda desplegable con instrucciones paso a paso para configurar la TSC TE200.
+
+### Changed
+- En impresión, cada etiqueta se renderiza con `page-break-after: always` para que el alimentador de la térmica avance correctamente.
+
 ## 0.10.0 (2026-07-20)
 
 ### Added
