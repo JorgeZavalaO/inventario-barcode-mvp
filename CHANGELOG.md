@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.0 (2026-07-20)
+
+### Added
+- Importación de productos desde Excel (.xlsx / .xls) además de CSV.
+- Botón "Plantilla" en Productos que descarga un archivo Excel de ejemplo con las columnas requeridas.
+- Módulo de Configuración (`/settings`) con acceso desde el sidebar.
+- Botón "Borrar todos los datos" en Configuración con confirmación de dos pasos.
+- Botón "Cargar demo" en Configuración cuando el catálogo está vacío.
+- Endpoint `DELETE /api/setup` para limpiar todas las tablas del sistema.
+
+### Changed
+- Límite de importación aumentado de 5000 a 6500 productos por lote.
+- Footer de importación actualizado con formato y límite visibles.
+
+### Fixed
+- Warning de consola "Base UI: expected a native `<button>`" silenciado agregando `nativeButton={false}` en todos los `Button` que usan `render` con `<Link>`.
+
 ## 0.3.0 (2026-07-20)
 
 ### Added

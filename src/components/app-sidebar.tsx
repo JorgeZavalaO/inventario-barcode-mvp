@@ -8,6 +8,7 @@ import {
   Package,
   ClipboardList,
   ScanBarcode,
+  Settings,
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,9 +46,10 @@ export function AppSidebar({
 
   const allItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
-    { title: "Escanear", icon: ScanBarcode },
+    { title: "Escanear", url: target, icon: ScanBarcode },
     { title: "Productos", url: "/products", icon: Package },
     { title: "Sesiones", url: "/sessions", icon: ClipboardList },
+    { title: "Configuración", url: "/settings", icon: Settings },
   ];
 
   function isActive(item: { title: string; url?: string }) {

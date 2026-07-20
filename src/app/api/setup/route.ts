@@ -38,3 +38,21 @@ export async function POST() {
     return apiError(error);
   }
 }
+
+export async function DELETE() {
+  try {
+    await ensureDatabase();
+    const sql = getDb();
+
+    await sql`DELETE FROM count_events`;
+    await sql`DELETE FROM session_participants`;
+    await sql`DELETE FROM session_products`;
+    await sql`DELETE FROM inventory_sessions`;
+    await sql`DELETE FROM operators`;
+    await sql`DELETE FROM products`;
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return apiError(error);
+  }
+}

@@ -236,6 +236,23 @@ export function AppProducts() {
     }
   }
 
+  function downloadTemplate() {
+    const wb = XLSX.utils.book_new();
+    const data = [
+      {
+        codigo: "PROD-001",
+        codigo_barra: "7751234567890",
+        descripcion: "Producto de ejemplo",
+        unidad: "UND",
+        categoria: "Categoría",
+        stock_teorico: 25,
+      },
+    ];
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Productos");
+    XLSX.writeFile(wb, "plantilla_productos.xlsx");
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -245,13 +262,16 @@ export function AppProducts() {
             Catálogo de productos y stock teórico.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload size={16} /> Importar CSV / Excel
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={downloadTemplate}>
+              <FileSpreadsheet size={16} /> Plantilla
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload size={16} /> Importar CSV / Excel
             <input
               ref={fileInputRef}
               type="file"

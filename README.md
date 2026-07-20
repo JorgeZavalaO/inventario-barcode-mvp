@@ -9,6 +9,8 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 - Sidebar colapsable con navegación por módulos.
 - Catálogo de productos con código interno, barcode, descripción, unidad, categoría y stock teórico.
 - Importación masiva desde CSV o Excel (.xlsx, .xls) — hasta 6500 filas por lote.
+- Descarga de plantilla Excel con el formato requerido.
+- Módulo de configuración con opciones de administración del sistema.
 - Generación e impresión de etiquetas Code 128.
 - Creación de sesiones de inventario con una fotografía del stock teórico.
 - Enlace compartible para que varias personas ingresen a la misma sesión.
@@ -149,6 +151,8 @@ PROD-001,7751234567890,Producto de prueba,UND,Categoría,25
 También se reconocen encabezados equivalentes como `code`, `barcode`, `description`, `unit`, `category` y `stock`.
 
 Para Excel (.xlsx / .xls), la primera hoja se lee automáticamente. Las columnas deben tener los mismos nombres en la primera fila. Máximo **6500 filas** por lote.
+
+Desde el módulo Productos podés descargar una **plantilla Excel** con el formato listo para completar.
 
 ## Modelo de concurrencia
 
