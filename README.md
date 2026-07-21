@@ -1,6 +1,6 @@
 # StockScan — MVP de inventario colaborativo
 
-Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y realizar conteos físicos mediante cámara, lector USB o ingreso manual. Varias personas pueden participar en la misma sesión y los resultados se sincronizan cada dos segundos.
+Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o QR) y realizar conteos físicos mediante cámara, lector USB o ingreso manual. Varias personas pueden participar en la misma sesión y los resultados se sincronizan cada dos segundos.
 
 ## Funcionalidades incluidas
 
@@ -11,7 +11,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 - Importación masiva desde CSV o Excel (.xlsx, .xls) — hasta 6500 filas por lote, con barra de progreso y reporte de errores por fila.
 - Descarga de plantilla Excel con el formato requerido.
 - Módulo de configuración con opciones de administración del sistema.
-- Generación e impresión de etiquetas Code 128, con opción de impresión masiva por selección, página o catálogo completo.
+- Generación e impresión de etiquetas Code 128 o QR, con opción de impresión masiva por selección, página o catálogo completo. Selector de formato con guardado de preferencia.
 - Creación de sesiones de inventario con una fotografía del stock teórico.
 - Enlace compartible para que varias personas ingresen a la misma sesión.
 - Escaneo con la cámara del celular usando ZXing, con confirmación de cantidad post-lectura.
@@ -36,6 +36,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas Code 128 y r
 - Auth.js (NextAuth v5) con Credentials provider
 - ZXing Browser para lectura de códigos
 - JsBarcode para etiquetas Code 128
+- qrcode para generación de códigos QR
 - PapaParse para archivos CSV
 - Zod para validación de APIs
 

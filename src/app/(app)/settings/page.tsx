@@ -1,19 +1,22 @@
 "use client";
 
-import { Trash2, LoaderCircle, AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
+import { Trash2, LoaderCircle, AlertTriangle, CheckCircle2, Sparkles, QrCode, Barcode } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import type { LabelFormat } from "@/components/barcode-label";
 
 export default function SettingsPage() {
-  const router = useRouter();
   const [productCount, setProductCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [toast, setToast] = useState("");
+  const [defaultFormat, setDefaultFormat] = useState<LabelFormat>(() => {
+    if (typeof window === "undefined") return "CODE128";
+    return (localStorage.getItem("defaultLabelFormat") as LabelFormat) || "CODE128";
+  });
 
   const load = useCallback(async () => {
     try {
@@ -61,6 +64,12 @@ export default function SettingsPage() {
     }
   }
 
+  function handleFormatChange(format: LabelFormat) {
+    setDefaultFormat(format);
+    localStorage.setItem("defaultLabelFormat", format);
+    setToast(`Formato predeterminado: ${format === "QR" ? "Código QR" : "Código de barras"}`);
+  }
+
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div>
@@ -73,6 +82,49 @@ export default function SettingsPage() {
           <CheckCircle2 size={16} /> {toast}
         </div>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Formato de etiquetas</CardTitle>
+          <CardDescription>
+            Elegí el formato predeterminado para las etiquetas imprimibles. Esta preferencia se guarda en tu navegador y se aplica al generar etiquetas nuevas.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => handleFormatChange("CODE128")}
+              className={`flex flex-1 items-center gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
+                defaultFormat === "CODE128"
+                  ? "border-teal-500 bg-teal-50"
+                  : "border-slate-200 bg-white hover:border-slate-300"
+              }`}
+            >
+              <Barcode size={24} className={defaultFormat === "CODE128" ? "text-teal-600" : "text-slate-400"} />
+              <div>
+                <p className="font-semibold text-sm text-slate-900">Código de barras (Code 128)</p>
+                <p className="text-xs text-slate-500">Formato lineal clásico. Recomendado para etiquetas de 75×50 mm o más grandes.</p>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFormatChange("QR")}
+              className={`flex flex-1 items-center gap-3 rounded-xl border-2 p-4 text-left transition-colors ${
+                defaultFormat === "QR"
+                  ? "border-teal-500 bg-teal-50"
+                  : "border-slate-200 bg-white hover:border-slate-300"
+              }`}
+            >
+              <QrCode size={24} className={defaultFormat === "QR" ? "text-teal-600" : "text-slate-400"} />
+              <div>
+                <p className="font-semibold text-sm text-slate-900">Código QR</p>
+                <p className="text-xs text-slate-500">Formato matricial con corrección de error. Ideal para etiquetas chicas como 50×25 mm o 75×25 mm.</p>
+              </div>
+            </button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

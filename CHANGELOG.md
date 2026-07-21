@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.13.0 (2026-07-21)
+
+### Added
+- Generación de códigos QR como alternativa a Code 128 para etiquetas pequeñas.
+- Selector de formato (Código de barras / Código QR) en la página de impresión masiva y en la vista de etiqueta individual.
+- Configuración de formato predeterminado en la página de Configuración (`/settings`), con persistencia en localStorage.
+- Advertencia visual cuando se selecciona Code 128 con un tamaño de etiqueta menor a 40 mm de alto, sugiriendo usar QR.
+
+### Changed
+- `BarcodeLabel` ahora acepta prop `format` (`"CODE128"` | `"QR"`) para elegir el tipo de código.
+- En modo compact de Code 128 se aumentó el ancho de línea (`width: 1.6`) para mejorar legibilidad en etiquetas chicas.
+- Dependencia agregada: `qrcode` para generación de QR en cliente.
+
+### Fixed
+- Varios warnings de lint en componentes existentes (`app-products.tsx`, `use-mobile.ts`).
+
 ## 0.12.0 (2026-07-20)
 
 ### Fixed

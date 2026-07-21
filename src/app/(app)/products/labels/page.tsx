@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, LoaderCircle, Printer, Info } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BarcodeLabel } from "@/components/barcode-label";
+import { BarcodeLabel, type LabelFormat } from "@/components/barcode-label";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/client";
 import type { Product } from "@/lib/types";
@@ -17,6 +17,11 @@ const LABEL_SIZES = [
   { id: "50x25", label: "50 × 25 mm", width: 50, height: 25 },
 ];
 
+const FORMAT_OPTIONS: { id: LabelFormat; label: string }[] = [
+  { id: "CODE128", label: "Código de barras" },
+  { id: "QR", label: "Código QR" },
+];
+
 export default function LabelsPage() {
   const searchParams = useSearchParams();
   const ids = searchParams.get("ids");
@@ -25,7 +30,19 @@ export default function LabelsPage() {
   const [labelSize, setLabelSize] = useState("100x50");
   const [customW, setCustomW] = useState("100");
   const [customH, setCustomH] = useState("50");
+  const [format, setFormat] = useState<LabelFormat>(() => {
+    if (typeof window === "undefined") return "CODE128";
+    return (
+      (localStorage.getItem("labelFormat") as LabelFormat) ||
+      (localStorage.getItem("defaultLabelFormat") as LabelFormat) ||
+      "CODE128"
+    );
+  });
   const [showHelp, setShowHelp] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("labelFormat", format);
+  }, [format]);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -47,6 +64,8 @@ export default function LabelsPage() {
     }
     return LABEL_SIZES.find((s) => s.id === labelSize) ?? LABEL_SIZES[1];
   }, [labelSize, customW, customH]);
+
+  const showQrWarning = format === "CODE128" && size.height < 40;
 
   return (
     <div>
@@ -97,6 +116,28 @@ export default function LabelsPage() {
               <span className="text-slate-400">mm</span>
             </div>
           )}
+
+          <div className="flex items-center gap-2 text-sm text-slate-600 ml-4">
+            <span>Formato:</span>
+          </div>
+          <div className="flex rounded-md border border-slate-200 bg-white text-sm" role="radiogroup">
+            {FORMAT_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                role="radio"
+                aria-checked={format === opt.id}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors first:rounded-l-md last:rounded-r-md ${
+                  format === opt.id
+                    ? "bg-teal-600 text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+                onClick={() => setFormat(opt.id)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
           <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowHelp(!showHelp)}>
               <Info size={16} /> Ayuda
@@ -106,6 +147,15 @@ export default function LabelsPage() {
             </Button>
           </div>
         </div>
+
+        {showQrWarning && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 flex items-start gap-2">
+            <Info size={16} className="mt-0.5 shrink-0" />
+            <span>
+              El tamaño de etiqueta es muy pequeño para código de barras. Se recomienda usar <strong>Código QR</strong> para mejor lectura con cámara.
+            </span>
+          </div>
+        )}
 
         {showHelp && (
           <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-800 space-y-2">
@@ -146,6 +196,7 @@ export default function LabelsPage() {
                 description={product.description}
                 code={product.code}
                 compact={size.height < 40}
+                format={format}
               />
             </div>
           ))}
