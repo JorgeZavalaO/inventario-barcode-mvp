@@ -43,6 +43,21 @@ export type VerificationToken = Prisma.VerificationTokenModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model ProductBarcode
+ * 
+ */
+export type ProductBarcode = Prisma.ProductBarcodeModel
+/**
+ * Model ProductPackage
+ * 
+ */
+export type ProductPackage = Prisma.ProductPackageModel
+/**
+ * Model ProductLocationStock
+ * 
+ */
+export type ProductLocationStock = Prisma.ProductLocationStockModel
+/**
  * Model Operator
  * 
  */

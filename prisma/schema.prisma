@@ -86,7 +86,7 @@ model VerificationToken {
 model Product {
   id               String          @id @default(uuid())
   code             String          @unique
-  barcode          String          @unique
+  barcode          String?         @unique
   description      String
   unit             String          @default("UND")
   category         String?
@@ -97,8 +97,63 @@ model Product {
 
   sessionProducts  SessionProduct[]
   countEvents      CountEvent[]
+  barcodes         ProductBarcode[]
+  packages         ProductPackage[]
+  locationStocks   ProductLocationStock[]
 
   @@map("products")
+}
+
+model ProductBarcode {
+  id        String  @id @default(uuid())
+  productId String  @map("product_id")
+  value     String  @unique
+  type      String  @default("EAN13")
+  active    Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  product  Product          @relation(fields: [productId], references: [id])
+  packages ProductPackage[]
+
+  @@index([productId])
+  @@map("product_barcodes")
+}
+
+model ProductPackage {
+  id           String   @id @default(uuid())
+  productId    String   @map("product_id")
+  code         String
+  name         String
+  baseQuantity Decimal  @map("base_quantity") @db.Decimal(14, 3)
+  barcodeId    String?  @map("barcode_id")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  product Product       @relation(fields: [productId], references: [id])
+  barcode ProductBarcode? @relation(fields: [barcodeId], references: [id])
+
+  @@unique([productId, code])
+  @@map("product_packages")
+}
+
+model ProductLocationStock {
+  id               String   @id @default(uuid())
+  productId        String   @map("product_id")
+  positionId       String   @map("position_id")
+  theoreticalStock Decimal  @map("theoretical_stock") @db.Decimal(14, 3)
+  minimumStock     Decimal? @map("minimum_stock") @db.Decimal(14, 3)
+  isPrimary        Boolean  @default(false) @map("is_primary")
+  source           String?
+  sourceUpdatedAt  DateTime? @map("source_updated_at")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  product  Product          @relation(fields: [productId], references: [id])
+  position StoragePosition  @relation(fields: [positionId], references: [id])
+
+  @@unique([productId, positionId])
+  @@index([positionId])
+  @@map("product_location_stocks")
 }
 
 model Operator {
@@ -311,9 +366,10 @@ model StoragePosition {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  rack       Rack           @relation(fields: [rackId], references: [id])
-  compartment RackCompartment @relation(fields: [compartmentId], references: [id])
-  depthSlot  RackDepthSlot  @relation(fields: [depthSlotId], references: [id])
+  rack          Rack                  @relation(fields: [rackId], references: [id])
+  compartment   RackCompartment       @relation(fields: [compartmentId], references: [id])
+  depthSlot     RackDepthSlot         @relation(fields: [depthSlotId], references: [id])
+  locationStocks ProductLocationStock[]
 
   @@index([rackId])
   @@index([compartmentId])

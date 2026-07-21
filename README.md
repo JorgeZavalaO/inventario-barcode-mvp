@@ -30,6 +30,9 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Diseñador de rack con creación de compartimentos y generación automática de posiciones.
 - Códigos de posición únicos con formato `{ALMACEN}-{PISO}-{RACK}-{COMPARTIMIENTO}-{PROFUNDIDAD}`.
 - QR de ubicación con prefijo `LOC:v1:` para diferenciación de productos.
+- Etiquetas de ubicación imprimibles con QR y código legible (individuales o masivas).
+- Stock teórico por ubicación física (producto → múltiples posiciones).
+- Productos con múltiples códigos de barras y presentaciones (cajas, paquetes).
 - Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
 - Escáner inteligente: acceso directo con selector de sesión activa.
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.

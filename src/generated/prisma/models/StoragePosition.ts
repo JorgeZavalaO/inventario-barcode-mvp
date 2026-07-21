@@ -283,6 +283,7 @@ export type StoragePositionWhereInput = {
   rack?: Prisma.XOR<Prisma.RackScalarRelationFilter, Prisma.RackWhereInput>
   compartment?: Prisma.XOR<Prisma.RackCompartmentScalarRelationFilter, Prisma.RackCompartmentWhereInput>
   depthSlot?: Prisma.XOR<Prisma.RackDepthSlotScalarRelationFilter, Prisma.RackDepthSlotWhereInput>
+  locationStocks?: Prisma.ProductLocationStockListRelationFilter
 }
 
 export type StoragePositionOrderByWithRelationInput = {
@@ -302,6 +303,7 @@ export type StoragePositionOrderByWithRelationInput = {
   rack?: Prisma.RackOrderByWithRelationInput
   compartment?: Prisma.RackCompartmentOrderByWithRelationInput
   depthSlot?: Prisma.RackDepthSlotOrderByWithRelationInput
+  locationStocks?: Prisma.ProductLocationStockOrderByRelationAggregateInput
 }
 
 export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
@@ -324,6 +326,7 @@ export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
   rack?: Prisma.XOR<Prisma.RackScalarRelationFilter, Prisma.RackWhereInput>
   compartment?: Prisma.XOR<Prisma.RackCompartmentScalarRelationFilter, Prisma.RackCompartmentWhereInput>
   depthSlot?: Prisma.XOR<Prisma.RackDepthSlotScalarRelationFilter, Prisma.RackDepthSlotWhereInput>
+  locationStocks?: Prisma.ProductLocationStockListRelationFilter
 }, "id" | "code" | "qrValue">
 
 export type StoragePositionOrderByWithAggregationInput = {
@@ -380,6 +383,7 @@ export type StoragePositionCreateInput = {
   rack: Prisma.RackCreateNestedOneWithoutPositionsInput
   compartment: Prisma.RackCompartmentCreateNestedOneWithoutPositionsInput
   depthSlot: Prisma.RackDepthSlotCreateNestedOneWithoutPositionsInput
+  locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateInput = {
@@ -396,6 +400,7 @@ export type StoragePositionUncheckedCreateInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUpdateInput = {
@@ -412,6 +417,7 @@ export type StoragePositionUpdateInput = {
   rack?: Prisma.RackUpdateOneRequiredWithoutPositionsNestedInput
   compartment?: Prisma.RackCompartmentUpdateOneRequiredWithoutPositionsNestedInput
   depthSlot?: Prisma.RackDepthSlotUpdateOneRequiredWithoutPositionsNestedInput
+  locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateInput = {
@@ -428,6 +434,7 @@ export type StoragePositionUncheckedUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionCreateManyInput = {
@@ -473,6 +480,11 @@ export type StoragePositionUncheckedUpdateManyInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StoragePositionScalarRelationFilter = {
+  is?: Prisma.StoragePositionWhereInput
+  isNot?: Prisma.StoragePositionWhereInput
 }
 
 export type StoragePositionListRelationFilter = {
@@ -539,6 +551,20 @@ export type StoragePositionMinOrderByAggregateInput = {
 
 export type StoragePositionSumOrderByAggregateInput = {
   capacityQty?: Prisma.SortOrder
+}
+
+export type StoragePositionCreateNestedOneWithoutLocationStocksInput = {
+  create?: Prisma.XOR<Prisma.StoragePositionCreateWithoutLocationStocksInput, Prisma.StoragePositionUncheckedCreateWithoutLocationStocksInput>
+  connectOrCreate?: Prisma.StoragePositionCreateOrConnectWithoutLocationStocksInput
+  connect?: Prisma.StoragePositionWhereUniqueInput
+}
+
+export type StoragePositionUpdateOneRequiredWithoutLocationStocksNestedInput = {
+  create?: Prisma.XOR<Prisma.StoragePositionCreateWithoutLocationStocksInput, Prisma.StoragePositionUncheckedCreateWithoutLocationStocksInput>
+  connectOrCreate?: Prisma.StoragePositionCreateOrConnectWithoutLocationStocksInput
+  upsert?: Prisma.StoragePositionUpsertWithoutLocationStocksInput
+  connect?: Prisma.StoragePositionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StoragePositionUpdateToOneWithWhereWithoutLocationStocksInput, Prisma.StoragePositionUpdateWithoutLocationStocksInput>, Prisma.StoragePositionUncheckedUpdateWithoutLocationStocksInput>
 }
 
 export type StoragePositionCreateNestedManyWithoutRackInput = {
@@ -667,12 +693,84 @@ export type StoragePositionUncheckedUpdateManyWithoutDepthSlotNestedInput = {
   deleteMany?: Prisma.StoragePositionScalarWhereInput | Prisma.StoragePositionScalarWhereInput[]
 }
 
-export type NullableDecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+export type StoragePositionCreateWithoutLocationStocksInput = {
+  id?: string
+  code: string
+  qrValue: string
+  capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: string | null
+  active?: boolean
+  countable?: boolean
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rack: Prisma.RackCreateNestedOneWithoutPositionsInput
+  compartment: Prisma.RackCompartmentCreateNestedOneWithoutPositionsInput
+  depthSlot: Prisma.RackDepthSlotCreateNestedOneWithoutPositionsInput
+}
+
+export type StoragePositionUncheckedCreateWithoutLocationStocksInput = {
+  id?: string
+  rackId: string
+  compartmentId: string
+  depthSlotId: string
+  code: string
+  qrValue: string
+  capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: string | null
+  active?: boolean
+  countable?: boolean
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type StoragePositionCreateOrConnectWithoutLocationStocksInput = {
+  where: Prisma.StoragePositionWhereUniqueInput
+  create: Prisma.XOR<Prisma.StoragePositionCreateWithoutLocationStocksInput, Prisma.StoragePositionUncheckedCreateWithoutLocationStocksInput>
+}
+
+export type StoragePositionUpsertWithoutLocationStocksInput = {
+  update: Prisma.XOR<Prisma.StoragePositionUpdateWithoutLocationStocksInput, Prisma.StoragePositionUncheckedUpdateWithoutLocationStocksInput>
+  create: Prisma.XOR<Prisma.StoragePositionCreateWithoutLocationStocksInput, Prisma.StoragePositionUncheckedCreateWithoutLocationStocksInput>
+  where?: Prisma.StoragePositionWhereInput
+}
+
+export type StoragePositionUpdateToOneWithWhereWithoutLocationStocksInput = {
+  where?: Prisma.StoragePositionWhereInput
+  data: Prisma.XOR<Prisma.StoragePositionUpdateWithoutLocationStocksInput, Prisma.StoragePositionUncheckedUpdateWithoutLocationStocksInput>
+}
+
+export type StoragePositionUpdateWithoutLocationStocksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  qrValue?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  countable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rack?: Prisma.RackUpdateOneRequiredWithoutPositionsNestedInput
+  compartment?: Prisma.RackCompartmentUpdateOneRequiredWithoutPositionsNestedInput
+  depthSlot?: Prisma.RackDepthSlotUpdateOneRequiredWithoutPositionsNestedInput
+}
+
+export type StoragePositionUncheckedUpdateWithoutLocationStocksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rackId?: Prisma.StringFieldUpdateOperationsInput | string
+  compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  qrValue?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  countable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type StoragePositionCreateWithoutRackInput = {
@@ -688,6 +786,7 @@ export type StoragePositionCreateWithoutRackInput = {
   updatedAt?: Date | string
   compartment: Prisma.RackCompartmentCreateNestedOneWithoutPositionsInput
   depthSlot: Prisma.RackDepthSlotCreateNestedOneWithoutPositionsInput
+  locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutRackInput = {
@@ -703,6 +802,7 @@ export type StoragePositionUncheckedCreateWithoutRackInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutRackInput = {
@@ -763,6 +863,7 @@ export type StoragePositionCreateWithoutCompartmentInput = {
   updatedAt?: Date | string
   rack: Prisma.RackCreateNestedOneWithoutPositionsInput
   depthSlot: Prisma.RackDepthSlotCreateNestedOneWithoutPositionsInput
+  locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutCompartmentInput = {
@@ -778,6 +879,7 @@ export type StoragePositionUncheckedCreateWithoutCompartmentInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutCompartmentInput = {
@@ -819,6 +921,7 @@ export type StoragePositionCreateWithoutDepthSlotInput = {
   updatedAt?: Date | string
   rack: Prisma.RackCreateNestedOneWithoutPositionsInput
   compartment: Prisma.RackCompartmentCreateNestedOneWithoutPositionsInput
+  locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutDepthSlotInput = {
@@ -834,6 +937,7 @@ export type StoragePositionUncheckedCreateWithoutDepthSlotInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutDepthSlotInput = {
@@ -890,6 +994,7 @@ export type StoragePositionUpdateWithoutRackInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compartment?: Prisma.RackCompartmentUpdateOneRequiredWithoutPositionsNestedInput
   depthSlot?: Prisma.RackDepthSlotUpdateOneRequiredWithoutPositionsNestedInput
+  locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutRackInput = {
@@ -905,6 +1010,7 @@ export type StoragePositionUncheckedUpdateWithoutRackInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateManyWithoutRackInput = {
@@ -950,6 +1056,7 @@ export type StoragePositionUpdateWithoutCompartmentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rack?: Prisma.RackUpdateOneRequiredWithoutPositionsNestedInput
   depthSlot?: Prisma.RackDepthSlotUpdateOneRequiredWithoutPositionsNestedInput
+  locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutCompartmentInput = {
@@ -965,6 +1072,7 @@ export type StoragePositionUncheckedUpdateWithoutCompartmentInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateManyWithoutCompartmentInput = {
@@ -1010,6 +1118,7 @@ export type StoragePositionUpdateWithoutDepthSlotInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rack?: Prisma.RackUpdateOneRequiredWithoutPositionsNestedInput
   compartment?: Prisma.RackCompartmentUpdateOneRequiredWithoutPositionsNestedInput
+  locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutDepthSlotInput = {
@@ -1025,6 +1134,7 @@ export type StoragePositionUncheckedUpdateWithoutDepthSlotInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateManyWithoutDepthSlotInput = {
@@ -1042,6 +1152,35 @@ export type StoragePositionUncheckedUpdateManyWithoutDepthSlotInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type StoragePositionCountOutputType
+ */
+
+export type StoragePositionCountOutputType = {
+  locationStocks: number
+}
+
+export type StoragePositionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  locationStocks?: boolean | StoragePositionCountOutputTypeCountLocationStocksArgs
+}
+
+/**
+ * StoragePositionCountOutputType without action
+ */
+export type StoragePositionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StoragePositionCountOutputType
+   */
+  select?: Prisma.StoragePositionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * StoragePositionCountOutputType without action
+ */
+export type StoragePositionCountOutputTypeCountLocationStocksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductLocationStockWhereInput
+}
 
 
 export type StoragePositionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1061,6 +1200,8 @@ export type StoragePositionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   rack?: boolean | Prisma.RackDefaultArgs<ExtArgs>
   compartment?: boolean | Prisma.RackCompartmentDefaultArgs<ExtArgs>
   depthSlot?: boolean | Prisma.RackDepthSlotDefaultArgs<ExtArgs>
+  locationStocks?: boolean | Prisma.StoragePosition$locationStocksArgs<ExtArgs>
+  _count?: boolean | Prisma.StoragePositionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["storagePosition"]>
 
 export type StoragePositionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1122,6 +1263,8 @@ export type StoragePositionInclude<ExtArgs extends runtime.Types.Extensions.Inte
   rack?: boolean | Prisma.RackDefaultArgs<ExtArgs>
   compartment?: boolean | Prisma.RackCompartmentDefaultArgs<ExtArgs>
   depthSlot?: boolean | Prisma.RackDepthSlotDefaultArgs<ExtArgs>
+  locationStocks?: boolean | Prisma.StoragePosition$locationStocksArgs<ExtArgs>
+  _count?: boolean | Prisma.StoragePositionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StoragePositionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rack?: boolean | Prisma.RackDefaultArgs<ExtArgs>
@@ -1140,6 +1283,7 @@ export type $StoragePositionPayload<ExtArgs extends runtime.Types.Extensions.Int
     rack: Prisma.$RackPayload<ExtArgs>
     compartment: Prisma.$RackCompartmentPayload<ExtArgs>
     depthSlot: Prisma.$RackDepthSlotPayload<ExtArgs>
+    locationStocks: Prisma.$ProductLocationStockPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1552,6 +1696,7 @@ export interface Prisma__StoragePositionClient<T, Null = never, ExtArgs extends 
   rack<T extends Prisma.RackDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RackDefaultArgs<ExtArgs>>): Prisma.Prisma__RackClient<runtime.Types.Result.GetResult<Prisma.$RackPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   compartment<T extends Prisma.RackCompartmentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RackCompartmentDefaultArgs<ExtArgs>>): Prisma.Prisma__RackCompartmentClient<runtime.Types.Result.GetResult<Prisma.$RackCompartmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   depthSlot<T extends Prisma.RackDepthSlotDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RackDepthSlotDefaultArgs<ExtArgs>>): Prisma.Prisma__RackDepthSlotClient<runtime.Types.Result.GetResult<Prisma.$RackDepthSlotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  locationStocks<T extends Prisma.StoragePosition$locationStocksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StoragePosition$locationStocksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductLocationStockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1992,6 +2137,30 @@ export type StoragePositionDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many StoragePositions to delete.
    */
   limit?: number
+}
+
+/**
+ * StoragePosition.locationStocks
+ */
+export type StoragePosition$locationStocksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProductLocationStock
+   */
+  select?: Prisma.ProductLocationStockSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProductLocationStock
+   */
+  omit?: Prisma.ProductLocationStockOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductLocationStockInclude<ExtArgs> | null
+  where?: Prisma.ProductLocationStockWhereInput
+  orderBy?: Prisma.ProductLocationStockOrderByWithRelationInput | Prisma.ProductLocationStockOrderByWithRelationInput[]
+  cursor?: Prisma.ProductLocationStockWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductLocationStockScalarFieldEnum | Prisma.ProductLocationStockScalarFieldEnum[]
 }
 
 /**

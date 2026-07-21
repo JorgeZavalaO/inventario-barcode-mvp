@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { Building2, Layers, MapPin, Plus, LoaderCircle, Warehouse, ChevronRight } from "lucide-react";
+import { Building2, Layers, MapPin, Plus, LoaderCircle, Printer, Warehouse } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,9 +64,14 @@ export default function LocationsPage() {
           <h1 className="text-2xl font-bold tracking-tight">Ubicaciones</h1>
           <p className="mt-1 text-sm text-slate-500">Almacenes, pisos, zonas y racks.</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Plus size={16} /> {showForm ? "Cancelar" : "Nuevo almacén"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link href="/locations/labels">
+            <Button variant="outline" size="sm"><Printer size={14} /> Etiquetas</Button>
+          </Link>
+          <Button onClick={() => setShowForm(!showForm)}>
+            <Plus size={16} /> {showForm ? "Cancelar" : "Nuevo almacén"}
+          </Button>
+        </div>
       </div>
 
       {showForm && (

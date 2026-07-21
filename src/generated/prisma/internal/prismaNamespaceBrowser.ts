@@ -56,6 +56,9 @@ export const ModelName = {
   Session: 'Session',
   VerificationToken: 'VerificationToken',
   Product: 'Product',
+  ProductBarcode: 'ProductBarcode',
+  ProductPackage: 'ProductPackage',
+  ProductLocationStock: 'ProductLocationStock',
   Operator: 'Operator',
   InventorySession: 'InventorySession',
   SessionProduct: 'SessionProduct',
@@ -151,6 +154,48 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ProductBarcodeScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  value: 'value',
+  type: 'type',
+  active: 'active',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductBarcodeScalarFieldEnum = (typeof ProductBarcodeScalarFieldEnum)[keyof typeof ProductBarcodeScalarFieldEnum]
+
+
+export const ProductPackageScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  code: 'code',
+  name: 'name',
+  baseQuantity: 'baseQuantity',
+  barcodeId: 'barcodeId',
+  active: 'active',
+  createdAt: 'createdAt'
+} as const
+
+export type ProductPackageScalarFieldEnum = (typeof ProductPackageScalarFieldEnum)[keyof typeof ProductPackageScalarFieldEnum]
+
+
+export const ProductLocationStockScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  positionId: 'positionId',
+  theoreticalStock: 'theoreticalStock',
+  minimumStock: 'minimumStock',
+  isPrimary: 'isPrimary',
+  source: 'source',
+  sourceUpdatedAt: 'sourceUpdatedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductLocationStockScalarFieldEnum = (typeof ProductLocationStockScalarFieldEnum)[keyof typeof ProductLocationStockScalarFieldEnum]
 
 
 export const OperatorScalarFieldEnum = {

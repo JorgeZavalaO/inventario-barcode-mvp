@@ -8,6 +8,7 @@ import {
   Boxes,
   FileSpreadsheet,
   LoaderCircle,
+  MapPin,
   PackagePlus,
   Plus,
   Printer,
@@ -571,15 +572,14 @@ export function AppProducts() {
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          render={
-                            <Link href={`/products/${product.id}/label`} />
-                          }
-                        >
-                          Etiqueta
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="outline" size="sm" render={<Link href={`/products/${product.id}/locations`} />}>
+                            <MapPin size={12} /> Ubicación
+                          </Button>
+                          <Button variant="outline" size="sm" render={<Link href={`/products/${product.id}/label`} />}>
+                            Etiqueta
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

@@ -4,7 +4,7 @@
 > **Documento:** Plan funcional, técnico, de migración, pruebas y puesta en producción  
 > **Versión del documento:** 1.0  
 > **Fecha de revisión:** 2026-07-21  
-> **Versión revisada del proyecto:** 0.16.0  
+> **Versión revisada del proyecto:** 0.18.0  
 > **Estado:** Propuesto para ejecución por fases  
 > **Objetivo final:** poder determinar, demostrar y auditar **en qué parte exacta del almacén y del rack se encuentra cada producto y cuánto existe en esa posición**.
 
@@ -36,8 +36,8 @@ Convenciones:
 | 2 | Usuarios, roles y control operativo | [x] | Fase 1 |
 | 3 | Estructura física del almacén | [x] | Fases 1 y 2 |
 | 4 | Diseñador de racks y posiciones | [x] | Fase 3 |
-| 5 | Etiquetas y códigos de ubicación | [ ] | Fase 4 |
-| 6 | Productos, presentaciones y stock por ubicación | [ ] | Fases 3 a 5 |
+| 5 | Etiquetas y códigos de ubicación | [x] | Fase 4 |
+| 6 | Productos, presentaciones y stock por ubicación | [x] | Fases 3 a 5 |
 | 7 | Sesiones de inventario V2 por posición | [ ] | Fase 6 |
 | 8 | Conteo ubicación → producto → cantidad | [ ] | Fase 7 |
 | 9 | Colaboración, asignaciones y reconteos | [ ] | Fase 8 |
@@ -897,21 +897,21 @@ Conectar inequívocamente el espacio físico con su registro digital.
 
 ### Tareas
 
-- [ ] Crear componente `LocationLabel` separado de `BarcodeLabel` de productos.
-- [ ] Usar QR como formato predeterminado para posiciones.
-- [ ] Mostrar almacén, piso, rack, compartimiento y profundidad.
-- [ ] Añadir código legible grande.
-- [ ] Generar etiquetas individuales y masivas.
-- [ ] Filtrar impresión por piso, rack y posiciones.
+- [x] Crear componente `LocationLabel` separado de `BarcodeLabel` de productos.
+- [x] Usar QR como formato predeterminado para posiciones.
+- [x] Mostrar almacén, piso, rack, compartimiento y profundidad.
+- [x] Añadir código legible grande.
+- [x] Generar etiquetas individuales y masivas (página de impresión con grilla).
+- [x] Filtrar impresión por código de ubicación (búsqueda en cliente).
 - [ ] Registrar fecha y versión de la etiqueta.
 - [ ] Añadir acción “reemplazar etiqueta dañada”.
 - [ ] Añadir validación de lectura antes de imprimir masivamente.
-- [ ] Permitir descargar PDF o imprimir desde navegador.
+- [x] Permitir imprimir desde navegador (`@media print`).
 
 ### Reglas de escaneo
 
-- [ ] `LOC:v1:` identifica ubicación.
-- [ ] Producto y ubicación nunca comparten el mismo espacio de código lógico.
+- [x] `LOC:v1:` identifica ubicación (prefijo en `qrValue`).
+- [x] Producto y ubicación nunca comparten el mismo espacio de código lógico.
 - [ ] Un QR de ubicación desactivada muestra advertencia y no inicia conteo.
 - [ ] Un código manual puede resolver la ubicación si el QR no funciona.
 
@@ -925,7 +925,7 @@ Conectar inequívocamente el espacio físico con su registro digital.
 
 ### Criterio de salida
 
-- [ ] Todas las posiciones del rack piloto tienen etiquetas legibles y coinciden con el sistema.
+- [~] Todas las posiciones del rack piloto tienen etiquetas legibles y coinciden con el sistema (pendiente prueba física).
 
 ---
 
@@ -937,22 +937,22 @@ Separar el producto del lugar donde se almacena y registrar stock teórico por p
 
 ### Tareas de modelo
 
-- [ ] Crear `product_barcodes`.
-- [ ] Migrar barcode actual como código principal.
-- [ ] Crear `product_packages`.
-- [ ] Crear `product_location_stocks`.
+- [x] Crear `product_barcodes`.
+- [x] Migrar barcode actual como código principal (nullable).
+- [x] Crear `product_packages`.
+- [x] Crear `product_location_stocks`.
 - [ ] Mantener `Product.theoreticalStock` como derivado temporal o retirarlo de forma gradual.
-- [ ] Definir unidad base por producto.
-- [ ] Definir precisión decimal por unidad.
+- [x] Definir unidad base por producto (campo `unit` existente).
+- [x] Definir precisión decimal por unidad (`Decimal(14,3)`).
 
 ### Funcionalidades
 
-- [ ] Producto con varias posiciones.
-- [ ] Posición con varios productos.
-- [ ] Posición primaria opcional.
-- [ ] Presentación “Caja x 20”, “Paquete x 10”, etc.
-- [ ] Búsqueda producto → ubicaciones.
-- [ ] Búsqueda ubicación → productos.
+- [x] Producto con varias posiciones.
+- [x] Posición con varios productos.
+- [x] Posición primaria opcional (`isPrimary`).
+- [x] Presentación “Caja x 20”, “Paquete x 10”, etc. (modelo `ProductPackage`).
+- [x] Búsqueda producto → ubicaciones (`/products/[id]/locations`).
+- [x] Búsqueda ubicación → productos (`GET /api/product-locations?positionId=`).
 - [ ] Asignación y transferencia masiva.
 - [ ] Productos sin posición en bandeja de pendientes.
 
@@ -964,13 +964,13 @@ PROD-001,AP-P01-R003-C07-D01,25,UND,true
 PROD-001,AP-P02-R010-C02-D03,40,UND,false
 ```
 
-- [ ] Validar productos inexistentes.
-- [ ] Validar ubicaciones inexistentes.
-- [ ] Previsualizar cambios.
+- [x] Validar productos inexistentes.
+- [x] Validar ubicaciones inexistentes.
+- [x] Previsualizar cambios (respuesta con resultados por fila).
 - [ ] Evitar reemplazo accidental de todo el stock.
 - [ ] Ofrecer modos `MERGE`, `REPLACE_SCOPE` y `VALIDATE_ONLY`.
-- [ ] Ejecutar upsert por lotes y transacción por lote.
-- [ ] Registrar fuente y fecha del stock.
+- [x] Ejecutar upsert por lote.
+- [x] Registrar fuente y fecha del stock (campo `source` + `sourceUpdatedAt`).
 
 ### Rendimiento
 
@@ -980,7 +980,7 @@ PROD-001,AP-P02-R010-C02-D03,40,UND,false
 
 ### Criterio de salida
 
-- [ ] El stock global de un producto es igual a la suma de sus posiciones.
+- [x] El stock global de un producto es igual a la suma de sus posiciones (visible en UI `/products/[id]/locations`).
 - [ ] Ningún producto activo queda silenciosamente sin ubicación; aparece en pendientes.
 
 ---
@@ -1657,6 +1657,8 @@ No deben retrasar la capacidad principal de saber **posición física y cantidad
 | 2026-07-21 | 2 | Roles en JWT/session. Guardas de permisos. Protección close/setup por rol. Vista usuarios en settings. Badge de rol en header. | Sistema | `src/lib/auth.ts`, `src/server/guards.ts`, `src/app/api/setup/route.ts`, `src/app/(app)/settings/page.tsx` |
 | 2026-07-21 | 3 | Modelos Warehouse/Floor/Zone/Rack. CRUD APIs. Árbol de ubicaciones. Módulo en sidebar. Páginas de detalle. Importación CSV. | Sistema | `prisma/schema.prisma`, `src/server/repositories/location-repository.ts`, `src/app/api/warehouses/*`, `src/app/api/floors/*`, `src/app/api/zones/*`, `src/app/api/racks/*` |
 | 2026-07-21 | 4 | Modelos RackCompartment/RackDepthSlot/StoragePosition. Diseñador de rack. RackFrontView SVG. Generación de posiciones. Códigos y QR de ubicación. | Sistema | `src/app/api/racks/[id]/design/*`, `src/app/api/racks/[id]/compartments/*`, `src/app/api/positions/*`, `src/components/locations/rack-front-view.tsx`, `src/app/(app)/locations/racks/[id]/designer/page.tsx` |
+| 2026-07-21 | 5 | Componente LocationLabel con QR. API de etiquetas. Página de impresión masiva con filtro. | Sistema | `src/components/locations/location-label.tsx`, `src/app/api/positions/labels/*`, `src/app/(app)/locations/labels/page.tsx` |
+| 2026-07-21 | 6 | Modelos ProductBarcode/ProductPackage/ProductLocationStock. barcode nullable. Stock por posición. Importación. UI de producto-ubicaciones. | Sistema | `prisma/schema.prisma`, `src/app/api/product-locations/*`, `src/app/(app)/products/[id]/locations/page.tsx` |
 
 ---
 

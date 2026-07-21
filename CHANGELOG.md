@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.18.0 (2026-07-21)
+
+### Added (Fase 5 — Etiquetas y códigos de ubicación)
+
+- **Componente `LocationLabel`:** Etiqueta imprimible con QR + código legible + ruta jerárquica del almacén. QR usa prefijo `LOC:v1:{uuid}`.
+- **API de etiquetas:** `GET /api/positions/labels` devuelve datos formateados para etiquetas, con filtros por rack, piso o posición individual.
+- **Página de impresión masiva:** `/locations/labels` con grilla responsive de etiquetas, búsqueda por código y soporte `@media print`.
+- **Botón "Etiquetas"** en la página principal de Ubicaciones para acceso rápido a la impresión.
+
+### Added (Fase 6 — Productos, presentaciones y stock por ubicación)
+
+- **Modelos de producto extendidos:** `ProductBarcode` (múltiples códigos por producto), `ProductPackage` (presentaciones con cantidad base), `ProductLocationStock` (stock teórico por posición física).
+- **`barcode` opcional en `Product`:** El campo `barcode` ahora es nullable; los códigos adicionales se registran en `product_barcodes`.
+- **Migración expansiva:** `20260721140000_v3_products_barcodes_packages_stock` crea las tres nuevas tablas con índices y claves foráneas.
+- **API de stock por posición:** `GET/POST/DELETE /api/product-locations` para asignar, consultar y eliminar stock teórico por producto+posición.
+- **Importación de stock:** `POST /api/product-locations/import` con validación de productos y posiciones existentes, upsert por lote.
+- **Página de ubicaciones de producto:** `/products/[id]/locations` con tabla de posiciones asignadas, selector para agregar nuevas, indicador de posición primaria y total calculado.
+- **Acceso directo:** Botón "Ubicación" en la tabla de productos que navega a la gestión de stock por posición.
+
+### Infrastructure
+
+- Prisma Client regenerado con 3 nuevos modelos (`ProductBarcode`, `ProductPackage`, `ProductLocationStock`).
+
 ## 0.16.0 (2026-07-21)
 
 ### Added (Fase 3 — Estructura física del almacén)
