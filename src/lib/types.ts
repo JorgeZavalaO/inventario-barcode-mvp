@@ -1,3 +1,5 @@
+export type UserRole = "ADMIN" | "SUPERVISOR" | "COUNTER" | "VIEWER";
+
 export type Product = {
   id: string;
   code: string;
@@ -14,7 +16,8 @@ export type InventorySession = {
   code: string;
   name: string;
   warehouse: string;
-  status: "OPEN" | "PAUSED" | "CLOSED";
+  status: "DRAFT" | "OPEN" | "PAUSED" | "CLOSED" | "CANCELLED";
+  schema_version: number;
   created_at: string;
   closed_at: string | null;
   product_count?: number;

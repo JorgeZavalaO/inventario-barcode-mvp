@@ -60,7 +60,14 @@ export const ModelName = {
   InventorySession: 'InventorySession',
   SessionProduct: 'SessionProduct',
   SessionParticipant: 'SessionParticipant',
-  CountEvent: 'CountEvent'
+  CountEvent: 'CountEvent',
+  Warehouse: 'Warehouse',
+  Floor: 'Floor',
+  WarehouseZone: 'WarehouseZone',
+  Rack: 'Rack',
+  RackCompartment: 'RackCompartment',
+  RackDepthSlot: 'RackDepthSlot',
+  StoragePosition: 'StoragePosition'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -86,6 +93,8 @@ export const UserScalarFieldEnum = {
   emailVerified: 'emailVerified',
   image: 'image',
   passwordHash: 'passwordHash',
+  role: 'role',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -159,6 +168,7 @@ export const InventorySessionScalarFieldEnum = {
   name: 'name',
   warehouse: 'warehouse',
   status: 'status',
+  schemaVersion: 'schemaVersion',
   createdAt: 'createdAt',
   closedAt: 'closedAt'
 } as const
@@ -200,12 +210,136 @@ export const CountEventScalarFieldEnum = {
 export type CountEventScalarFieldEnum = (typeof CountEventScalarFieldEnum)[keyof typeof CountEventScalarFieldEnum]
 
 
+export const WarehouseScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WarehouseScalarFieldEnum = (typeof WarehouseScalarFieldEnum)[keyof typeof WarehouseScalarFieldEnum]
+
+
+export const FloorScalarFieldEnum = {
+  id: 'id',
+  warehouseId: 'warehouseId',
+  code: 'code',
+  name: 'name',
+  orderIndex: 'orderIndex',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FloorScalarFieldEnum = (typeof FloorScalarFieldEnum)[keyof typeof FloorScalarFieldEnum]
+
+
+export const WarehouseZoneScalarFieldEnum = {
+  id: 'id',
+  floorId: 'floorId',
+  code: 'code',
+  name: 'name',
+  type: 'type',
+  orderIndex: 'orderIndex',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WarehouseZoneScalarFieldEnum = (typeof WarehouseZoneScalarFieldEnum)[keyof typeof WarehouseZoneScalarFieldEnum]
+
+
+export const RackScalarFieldEnum = {
+  id: 'id',
+  zoneId: 'zoneId',
+  code: 'code',
+  name: 'name',
+  widthMm: 'widthMm',
+  heightMm: 'heightMm',
+  depthMm: 'depthMm',
+  orderIndex: 'orderIndex',
+  active: 'active',
+  version: 'version',
+  design: 'design',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RackScalarFieldEnum = (typeof RackScalarFieldEnum)[keyof typeof RackScalarFieldEnum]
+
+
+export const RackCompartmentScalarFieldEnum = {
+  id: 'id',
+  rackId: 'rackId',
+  code: 'code',
+  name: 'name',
+  x: 'x',
+  y: 'y',
+  width: 'width',
+  height: 'height',
+  moduleLabel: 'moduleLabel',
+  levelLabel: 'levelLabel',
+  orderIndex: 'orderIndex',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RackCompartmentScalarFieldEnum = (typeof RackCompartmentScalarFieldEnum)[keyof typeof RackCompartmentScalarFieldEnum]
+
+
+export const RackDepthSlotScalarFieldEnum = {
+  id: 'id',
+  compartmentId: 'compartmentId',
+  code: 'code',
+  name: 'name',
+  kind: 'kind',
+  depthIndex: 'depthIndex',
+  startZ: 'startZ',
+  depthSize: 'depthSize',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RackDepthSlotScalarFieldEnum = (typeof RackDepthSlotScalarFieldEnum)[keyof typeof RackDepthSlotScalarFieldEnum]
+
+
+export const StoragePositionScalarFieldEnum = {
+  id: 'id',
+  rackId: 'rackId',
+  compartmentId: 'compartmentId',
+  depthSlotId: 'depthSlotId',
+  code: 'code',
+  qrValue: 'qrValue',
+  capacityQty: 'capacityQty',
+  capacityUnit: 'capacityUnit',
+  active: 'active',
+  countable: 'countable',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StoragePositionScalarFieldEnum = (typeof StoragePositionScalarFieldEnum)[keyof typeof StoragePositionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -222,4 +356,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

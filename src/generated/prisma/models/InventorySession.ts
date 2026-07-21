@@ -20,8 +20,18 @@ export type InventorySessionModel = runtime.Types.Result.DefaultSelection<Prisma
 
 export type AggregateInventorySession = {
   _count: InventorySessionCountAggregateOutputType | null
+  _avg: InventorySessionAvgAggregateOutputType | null
+  _sum: InventorySessionSumAggregateOutputType | null
   _min: InventorySessionMinAggregateOutputType | null
   _max: InventorySessionMaxAggregateOutputType | null
+}
+
+export type InventorySessionAvgAggregateOutputType = {
+  schemaVersion: number | null
+}
+
+export type InventorySessionSumAggregateOutputType = {
+  schemaVersion: number | null
 }
 
 export type InventorySessionMinAggregateOutputType = {
@@ -30,6 +40,7 @@ export type InventorySessionMinAggregateOutputType = {
   name: string | null
   warehouse: string | null
   status: $Enums.SessionStatus | null
+  schemaVersion: number | null
   createdAt: Date | null
   closedAt: Date | null
 }
@@ -40,6 +51,7 @@ export type InventorySessionMaxAggregateOutputType = {
   name: string | null
   warehouse: string | null
   status: $Enums.SessionStatus | null
+  schemaVersion: number | null
   createdAt: Date | null
   closedAt: Date | null
 }
@@ -50,11 +62,20 @@ export type InventorySessionCountAggregateOutputType = {
   name: number
   warehouse: number
   status: number
+  schemaVersion: number
   createdAt: number
   closedAt: number
   _all: number
 }
 
+
+export type InventorySessionAvgAggregateInputType = {
+  schemaVersion?: true
+}
+
+export type InventorySessionSumAggregateInputType = {
+  schemaVersion?: true
+}
 
 export type InventorySessionMinAggregateInputType = {
   id?: true
@@ -62,6 +83,7 @@ export type InventorySessionMinAggregateInputType = {
   name?: true
   warehouse?: true
   status?: true
+  schemaVersion?: true
   createdAt?: true
   closedAt?: true
 }
@@ -72,6 +94,7 @@ export type InventorySessionMaxAggregateInputType = {
   name?: true
   warehouse?: true
   status?: true
+  schemaVersion?: true
   createdAt?: true
   closedAt?: true
 }
@@ -82,6 +105,7 @@ export type InventorySessionCountAggregateInputType = {
   name?: true
   warehouse?: true
   status?: true
+  schemaVersion?: true
   createdAt?: true
   closedAt?: true
   _all?: true
@@ -125,6 +149,18 @@ export type InventorySessionAggregateArgs<ExtArgs extends runtime.Types.Extensio
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: InventorySessionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: InventorySessionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: InventorySessionMinAggregateInputType
@@ -155,6 +191,8 @@ export type InventorySessionGroupByArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   _count?: InventorySessionCountAggregateInputType | true
+  _avg?: InventorySessionAvgAggregateInputType
+  _sum?: InventorySessionSumAggregateInputType
   _min?: InventorySessionMinAggregateInputType
   _max?: InventorySessionMaxAggregateInputType
 }
@@ -165,9 +203,12 @@ export type InventorySessionGroupByOutputType = {
   name: string
   warehouse: string
   status: $Enums.SessionStatus
+  schemaVersion: number
   createdAt: Date
   closedAt: Date | null
   _count: InventorySessionCountAggregateOutputType | null
+  _avg: InventorySessionAvgAggregateOutputType | null
+  _sum: InventorySessionSumAggregateOutputType | null
   _min: InventorySessionMinAggregateOutputType | null
   _max: InventorySessionMaxAggregateOutputType | null
 }
@@ -196,6 +237,7 @@ export type InventorySessionWhereInput = {
   name?: Prisma.StringFilter<"InventorySession"> | string
   warehouse?: Prisma.StringFilter<"InventorySession"> | string
   status?: Prisma.EnumSessionStatusFilter<"InventorySession"> | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFilter<"InventorySession"> | number
   createdAt?: Prisma.DateTimeFilter<"InventorySession"> | Date | string
   closedAt?: Prisma.DateTimeNullableFilter<"InventorySession"> | Date | string | null
   sessionProducts?: Prisma.SessionProductListRelationFilter
@@ -209,6 +251,7 @@ export type InventorySessionOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   warehouse?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  schemaVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   sessionProducts?: Prisma.SessionProductOrderByRelationAggregateInput
@@ -225,6 +268,7 @@ export type InventorySessionWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"InventorySession"> | string
   warehouse?: Prisma.StringFilter<"InventorySession"> | string
   status?: Prisma.EnumSessionStatusFilter<"InventorySession"> | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFilter<"InventorySession"> | number
   createdAt?: Prisma.DateTimeFilter<"InventorySession"> | Date | string
   closedAt?: Prisma.DateTimeNullableFilter<"InventorySession"> | Date | string | null
   sessionProducts?: Prisma.SessionProductListRelationFilter
@@ -238,11 +282,14 @@ export type InventorySessionOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   warehouse?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  schemaVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.InventorySessionCountOrderByAggregateInput
+  _avg?: Prisma.InventorySessionAvgOrderByAggregateInput
   _max?: Prisma.InventorySessionMaxOrderByAggregateInput
   _min?: Prisma.InventorySessionMinOrderByAggregateInput
+  _sum?: Prisma.InventorySessionSumOrderByAggregateInput
 }
 
 export type InventorySessionScalarWhereWithAggregatesInput = {
@@ -254,6 +301,7 @@ export type InventorySessionScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"InventorySession"> | string
   warehouse?: Prisma.StringWithAggregatesFilter<"InventorySession"> | string
   status?: Prisma.EnumSessionStatusWithAggregatesFilter<"InventorySession"> | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntWithAggregatesFilter<"InventorySession"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InventorySession"> | Date | string
   closedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InventorySession"> | Date | string | null
 }
@@ -264,6 +312,7 @@ export type InventorySessionCreateInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
@@ -277,6 +326,7 @@ export type InventorySessionUncheckedCreateInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
@@ -290,6 +340,7 @@ export type InventorySessionUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
@@ -303,6 +354,7 @@ export type InventorySessionUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
@@ -316,6 +368,7 @@ export type InventorySessionCreateManyInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
 }
@@ -326,6 +379,7 @@ export type InventorySessionUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -336,6 +390,7 @@ export type InventorySessionUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -346,8 +401,13 @@ export type InventorySessionCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   warehouse?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  schemaVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
+}
+
+export type InventorySessionAvgOrderByAggregateInput = {
+  schemaVersion?: Prisma.SortOrder
 }
 
 export type InventorySessionMaxOrderByAggregateInput = {
@@ -356,6 +416,7 @@ export type InventorySessionMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   warehouse?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  schemaVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
 }
@@ -366,8 +427,13 @@ export type InventorySessionMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   warehouse?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  schemaVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   closedAt?: Prisma.SortOrder
+}
+
+export type InventorySessionSumOrderByAggregateInput = {
+  schemaVersion?: Prisma.SortOrder
 }
 
 export type InventorySessionScalarRelationFilter = {
@@ -377,6 +443,14 @@ export type InventorySessionScalarRelationFilter = {
 
 export type EnumSessionStatusFieldUpdateOperationsInput = {
   set?: $Enums.SessionStatus
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type InventorySessionCreateNestedOneWithoutSessionProductsInput = {
@@ -427,6 +501,7 @@ export type InventorySessionCreateWithoutSessionProductsInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutSessionInput
@@ -439,6 +514,7 @@ export type InventorySessionUncheckedCreateWithoutSessionProductsInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutSessionInput
@@ -467,6 +543,7 @@ export type InventorySessionUpdateWithoutSessionProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutSessionNestedInput
@@ -479,6 +556,7 @@ export type InventorySessionUncheckedUpdateWithoutSessionProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutSessionNestedInput
@@ -491,6 +569,7 @@ export type InventorySessionCreateWithoutSessionParticipantsInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
@@ -503,6 +582,7 @@ export type InventorySessionUncheckedCreateWithoutSessionParticipantsInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
@@ -531,6 +611,7 @@ export type InventorySessionUpdateWithoutSessionParticipantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
@@ -543,6 +624,7 @@ export type InventorySessionUncheckedUpdateWithoutSessionParticipantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
@@ -555,6 +637,7 @@ export type InventorySessionCreateWithoutCountEventsInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
@@ -567,6 +650,7 @@ export type InventorySessionUncheckedCreateWithoutCountEventsInput = {
   name: string
   warehouse?: string
   status?: $Enums.SessionStatus
+  schemaVersion?: number
   createdAt?: Date | string
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
@@ -595,6 +679,7 @@ export type InventorySessionUpdateWithoutCountEventsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
@@ -607,6 +692,7 @@ export type InventorySessionUncheckedUpdateWithoutCountEventsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   warehouse?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
@@ -668,6 +754,7 @@ export type InventorySessionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   name?: boolean
   warehouse?: boolean
   status?: boolean
+  schemaVersion?: boolean
   createdAt?: boolean
   closedAt?: boolean
   sessionProducts?: boolean | Prisma.InventorySession$sessionProductsArgs<ExtArgs>
@@ -682,6 +769,7 @@ export type InventorySessionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   name?: boolean
   warehouse?: boolean
   status?: boolean
+  schemaVersion?: boolean
   createdAt?: boolean
   closedAt?: boolean
 }, ExtArgs["result"]["inventorySession"]>
@@ -692,6 +780,7 @@ export type InventorySessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   name?: boolean
   warehouse?: boolean
   status?: boolean
+  schemaVersion?: boolean
   createdAt?: boolean
   closedAt?: boolean
 }, ExtArgs["result"]["inventorySession"]>
@@ -702,11 +791,12 @@ export type InventorySessionSelectScalar = {
   name?: boolean
   warehouse?: boolean
   status?: boolean
+  schemaVersion?: boolean
   createdAt?: boolean
   closedAt?: boolean
 }
 
-export type InventorySessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "warehouse" | "status" | "createdAt" | "closedAt", ExtArgs["result"]["inventorySession"]>
+export type InventorySessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "warehouse" | "status" | "schemaVersion" | "createdAt" | "closedAt", ExtArgs["result"]["inventorySession"]>
 export type InventorySessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessionProducts?: boolean | Prisma.InventorySession$sessionProductsArgs<ExtArgs>
   sessionParticipants?: boolean | Prisma.InventorySession$sessionParticipantsArgs<ExtArgs>
@@ -729,6 +819,7 @@ export type $InventorySessionPayload<ExtArgs extends runtime.Types.Extensions.In
     name: string
     warehouse: string
     status: $Enums.SessionStatus
+    schemaVersion: number
     createdAt: Date
     closedAt: Date | null
   }, ExtArgs["result"]["inventorySession"]>
@@ -1162,6 +1253,7 @@ export interface InventorySessionFieldRefs {
   readonly name: Prisma.FieldRef<"InventorySession", 'String'>
   readonly warehouse: Prisma.FieldRef<"InventorySession", 'String'>
   readonly status: Prisma.FieldRef<"InventorySession", 'SessionStatus'>
+  readonly schemaVersion: Prisma.FieldRef<"InventorySession", 'Int'>
   readonly createdAt: Prisma.FieldRef<"InventorySession", 'DateTime'>
   readonly closedAt: Prisma.FieldRef<"InventorySession", 'DateTime'>
 }

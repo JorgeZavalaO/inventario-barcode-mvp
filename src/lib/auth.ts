@@ -4,6 +4,29 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+export type UserRole = "ADMIN" | "SUPERVISOR" | "COUNTER" | "VIEWER";
+
+export type AuthUser = {
+  id: string;
+  email: string | null;
+  name: string | null;
+  role: UserRole;
+};
+
+declare module "next-auth" {
+  interface User {
+    role?: UserRole;
+  }
+  interface Session {
+    user: {
+      id: string;
+      email: string | null;
+      name: string | null;
+      role: UserRole;
+    };
+  }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
@@ -33,7 +56,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!isValid) return null;
 
-        return { id: user.id, email: user.email, name: user.name };
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role as UserRole,
+        };
       },
     }),
   ],
@@ -41,12 +69,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = user.role ?? "COUNTER";
       }
       return token;
     },
     session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.role = (token.role as UserRole) ?? "COUNTER";
       }
       return session;
     },

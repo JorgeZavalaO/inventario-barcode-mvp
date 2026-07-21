@@ -1,7 +1,14 @@
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { auth, signOut } from "@/lib/auth";
-import { LogOut, UserRound } from "lucide-react";
+import { Shield, LogOut, UserRound } from "lucide-react";
+
+const roleLabels: Record<string, string> = {
+  ADMIN: "Admin",
+  SUPERVISOR: "Supervisor",
+  COUNTER: "Contador",
+  VIEWER: "Visor",
+};
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -17,6 +24,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <UserRound size={15} />
               {session?.user?.name ?? session?.user?.email}
             </span>
+            {session?.user?.role ? (
+              <span className="flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                <Shield size={12} />
+                {roleLabels[session.user.role] ?? session.user.role}
+              </span>
+            ) : null}
             <form
               action={async () => {
                 "use server";

@@ -4,7 +4,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 
 ## Funcionalidades incluidas
 
-- Autenticación con Auth.js (credenciales, JWT).
+- Autenticación con Auth.js (credenciales, JWT) con roles: Admin, Supervisor, Contador y Visor.
 - Panel de control con métricas globales y acceso rápido.
 - Sidebar colapsable con navegación por módulos.
 - Catálogo de productos con código interno, barcode, descripción, unidad, categoría y stock teórico, con paginación (20–500 items por página) y búsqueda por código o descripción.
@@ -22,7 +22,14 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Idempotencia por `operation_id` para evitar duplicados por reintentos de red.
 - Deshacer el último conteo y bitácora de movimientos anulados.
 - Comparación entre stock teórico, conteo físico y diferencia.
-- Cierre definitivo de la sesión.
+- Cierre de sesión controlado (solo Supervisor o Admin).
+- Roles y permisos del lado servidor: Admin, Supervisor, Contador y Visor.
+- Vista de usuarios y roles en Configuración.
+- Módulo de Ubicaciones con almacenes, pisos, zonas y racks.
+- Vista frontal de rack con compartimentos renderizados en SVG.
+- Diseñador de rack con creación de compartimentos y generación automática de posiciones.
+- Códigos de posición únicos con formato `{ALMACEN}-{PISO}-{RACK}-{COMPARTIMIENTO}-{PROFUNDIDAD}`.
+- QR de ubicación con prefijo `LOC:v1:` para diferenciación de productos.
 - Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
 - Escáner inteligente: acceso directo con selector de sesión activa.
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
@@ -170,16 +177,16 @@ Esto permite que varias personas registren cantidades al mismo tiempo sin sobres
 
 ## Limitaciones deliberadas del MVP
 
-- La identificación de operadores dentro de una sesión es por nombre (independiente de la autenticación del sistema).
-- Cualquier participante puede cerrar una sesión.
+- La identificación de operadores dentro de una sesión V1 es por nombre (independiente de la autenticación del sistema).
 - La sincronización utiliza polling cada 2 segundos, no WebSockets.
 - Requiere conexión a Internet; todavía no almacena lecturas offline en IndexedDB.
 - No actualiza automáticamente el stock de un ERP después de cerrar el conteo.
 - La impresión está orientada a etiquetas del navegador; no incluye integración directa con Zebra/ZPL.
+- Las sesiones de inventario V2 con conteo por posición aún no están implementadas.
 
 ## Siguiente etapa recomendada
 
-Roles Administrador, Supervisor y Contador; modo offline con IndexedDB; reconteos independientes; WebSockets o Supabase Realtime; zonas/pasillos; exportación a Excel y conexión con el ERP.
+Estructura física del almacén (almacenes, pisos, zonas y racks); modo offline con IndexedDB; reconteos independientes; WebSockets o Supabase Realtime; exportación a Excel y conexión con el ERP.
 
 ## Validación realizada
 

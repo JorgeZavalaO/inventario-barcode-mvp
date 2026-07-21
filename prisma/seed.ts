@@ -17,6 +17,7 @@ async function main() {
       name: "Admin",
       email: "admin@stockscan.app",
       passwordHash,
+      role: "ADMIN",
     },
   });
   console.log(`User created: ${user.email}`);

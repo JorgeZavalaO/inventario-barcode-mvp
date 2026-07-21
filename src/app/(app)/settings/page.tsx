@@ -1,11 +1,27 @@
 "use client";
 
-import { Trash2, LoaderCircle, AlertTriangle, CheckCircle2, Sparkles, QrCode, Barcode } from "lucide-react";
+import { Trash2, LoaderCircle, AlertTriangle, CheckCircle2, Sparkles, QrCode, Barcode, Shield } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/lib/client";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { LabelFormat } from "@/components/barcode-label";
+
+type UserRow = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  role: string;
+  active: boolean;
+  createdAt: string;
+};
+
+const roleLabels: Record<string, string> = {
+  ADMIN: "Administrador",
+  SUPERVISOR: "Supervisor",
+  COUNTER: "Contador",
+  VIEWER: "Visor",
+};
 
 export default function SettingsPage() {
   const [productCount, setProductCount] = useState<number | null>(null);
@@ -13,6 +29,8 @@ export default function SettingsPage() {
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [toast, setToast] = useState("");
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
   const [defaultFormat, setDefaultFormat] = useState<LabelFormat>(() => {
     if (typeof window === "undefined") return "CODE128";
     return (localStorage.getItem("defaultLabelFormat") as LabelFormat) || "CODE128";
@@ -30,6 +48,19 @@ export default function SettingsPage() {
   }, []);
 
   useEffect(() => { window.setTimeout(() => void load(), 0); }, [load]);
+
+  const loadUsers = useCallback(async () => {
+    try {
+      const data = await apiFetch<{ users: UserRow[] }>("/api/users");
+      setUsers(data.users);
+    } catch {
+      // silent
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { window.setTimeout(() => void loadUsers(), 0); }, [loadUsers]);
 
   useEffect(() => {
     if (!toast) return;
@@ -123,6 +154,49 @@ export default function SettingsPage() {
               </div>
             </button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Usuarios y roles</CardTitle>
+          <CardDescription>
+            {usersLoading ? "Cargando..." : `${users.length} usuario${users.length === 1 ? "" : "s"} registrado${users.length === 1 ? "" : "s"}`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {usersLoading ? (
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <LoaderCircle className="animate-spin" size={16} /> Cargando usuarios...
+            </div>
+          ) : users.length === 0 ? (
+            <p className="text-sm text-slate-500">No hay usuarios registrados.</p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {users.map((user) => (
+                <div key={user.id} className="flex items-center gap-3 py-3">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">
+                    {(user.name ?? user.email ?? "?")[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-sm font-medium text-slate-900">
+                      {user.name ?? "—"}
+                    </p>
+                    <p className="truncate text-xs text-slate-500">{user.email ?? "—"}</p>
+                  </div>
+                  <span className="flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                    <Shield size={12} />
+                    {roleLabels[user.role] ?? user.role}
+                  </span>
+                  {!user.active && (
+                    <span className="rounded-md bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">
+                      Inactivo
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

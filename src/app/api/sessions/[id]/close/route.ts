@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ensureDatabase, getDb } from "@/lib/db";
 import { apiError } from "@/lib/http";
+import { requireRole } from "@/server/guards";
 
 export async function POST(
   _request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    const auth = await requireRole("SUPERVISOR", "ADMIN");
+    if (!auth.authorized) return auth.response;
+
     await ensureDatabase();
     const { id } = await context.params;
     const sql = getDb();

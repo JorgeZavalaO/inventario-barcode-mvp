@@ -91,3 +91,38 @@ export type SessionParticipant = Prisma.SessionParticipantModel
  * 
  */
 export type CountEvent = Prisma.CountEventModel
+/**
+ * Model Warehouse
+ * 
+ */
+export type Warehouse = Prisma.WarehouseModel
+/**
+ * Model Floor
+ * 
+ */
+export type Floor = Prisma.FloorModel
+/**
+ * Model WarehouseZone
+ * 
+ */
+export type WarehouseZone = Prisma.WarehouseZoneModel
+/**
+ * Model Rack
+ * 
+ */
+export type Rack = Prisma.RackModel
+/**
+ * Model RackCompartment
+ * 
+ */
+export type RackCompartment = Prisma.RackCompartmentModel
+/**
+ * Model RackDepthSlot
+ * 
+ */
+export type RackDepthSlot = Prisma.RackDepthSlotModel
+/**
+ * Model StoragePosition
+ * 
+ */
+export type StoragePosition = Prisma.StoragePositionModel

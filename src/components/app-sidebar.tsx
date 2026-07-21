@@ -9,6 +9,7 @@ import {
   ClipboardList,
   ScanBarcode,
   Settings,
+  Building2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,7 +38,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user?:
-    | { name?: string | null; email?: string | null; image?: string | null }
+    | { name?: string | null; email?: string | null; image?: string | null; role?: string | null }
     | undefined;
 }) {
   const pathname = usePathname();
@@ -48,6 +49,7 @@ export function AppSidebar({
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
     { title: "Escanear", url: target, icon: ScanBarcode },
     { title: "Productos", url: "/products", icon: Package },
+    { title: "Ubicaciones", url: "/locations", icon: Building2 },
     { title: "Sesiones", url: "/sessions", icon: ClipboardList },
     { title: "Configuración", url: "/settings", icon: Settings },
   ];

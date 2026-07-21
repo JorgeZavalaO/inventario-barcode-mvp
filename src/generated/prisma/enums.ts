@@ -9,10 +9,22 @@
 * 🟢 You can import this file directly.
 */
 
+export const UserRole = {
+  ADMIN: 'ADMIN',
+  SUPERVISOR: 'SUPERVISOR',
+  COUNTER: 'COUNTER',
+  VIEWER: 'VIEWER'
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
 export const SessionStatus = {
+  DRAFT: 'DRAFT',
   OPEN: 'OPEN',
   PAUSED: 'PAUSED',
-  CLOSED: 'CLOSED'
+  CLOSED: 'CLOSED',
+  CANCELLED: 'CANCELLED'
 } as const
 
 export type SessionStatus = (typeof SessionStatus)[keyof typeof SessionStatus]
@@ -25,3 +37,13 @@ export const InputMethod = {
 } as const
 
 export type InputMethod = (typeof InputMethod)[keyof typeof InputMethod]
+
+
+export const DepthKind = {
+  FRONT: 'FRONT',
+  MIDDLE: 'MIDDLE',
+  BACK: 'BACK',
+  CUSTOM: 'CUSTOM'
+} as const
+
+export type DepthKind = (typeof DepthKind)[keyof typeof DepthKind]

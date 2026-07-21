@@ -1,5 +1,70 @@
 # Changelog
 
+## 0.16.0 (2026-07-21)
+
+### Added (Fase 3 — Estructura física del almacén)
+
+- **Modelos de ubicación:** Nuevas tablas `warehouses`, `floors`, `warehouse_zones`, `racks` con relaciones jerárquicas y códigos únicos por padre.
+- **Migración expansiva:** `20260721120000_v2_locations` crea toda la estructura de ubicaciones.
+- **CRUD completo de ubicaciones:** APIs REST para almacenes, pisos, zonas y racks con validación Zod y guards de permisos.
+- **Árbol de ubicaciones:** Endpoint `GET /api/warehouses` que devuelve toda la jerarquía (almacén → pisos → zonas → racks).
+- **Importación CSV/JSON de estructura:** `POST /api/racks/import` con upsert de almacenes, pisos, zonas y racks por lote.
+- **Módulo "Ubicaciones" en sidebar:** Nueva sección en la navegación principal con vista de árbol.
+- **Páginas de detalle:** Vistas para almacén (con pisos), piso (con zonas y racks), rack (con vista frontal y posiciones).
+- **Alta rápida:** Formularios inline para crear almacenes, pisos y zonas desde la UI.
+
+### Added (Fase 4 — Diseñador de racks y posiciones)
+
+- **Modelos de compartimientos:** Tablas `rack_compartments` (coordenadas normalizadas x, y, width, height), `rack_depth_slots` (profundidad Frente/Centro/Fondo/CUSTOM), `storage_positions` (código + QR único).
+- **Componente `RackFrontView`:** SVG responsive que renderiza compartimientos proporcionalmente según coordenadas normalizadas (0–10000).
+- **Página diseñador de rack:** Interfaz para crear compartimentos con posición, tamaño y código. Guarda diseño como JSON en el rack.
+- **Generación automática de posiciones:** Endpoint `POST /api/positions` que crea `StoragePosition` por cada combinación compartimento + slot de profundidad, con código `{WH}-{FL}-{RACK}-{COMP}-{SLOT}` y QR `LOC:v1:{uuid}`.
+- **API de diseño:** `PUT/GET /api/racks/[id]/design` para guardar y recuperar el diseño del rack.
+- **API de posiciones:** `GET /api/positions?rackId=` para listar posiciones activas por rack.
+
+### Infrastructure
+
+- Prisma Client regenerado con 7 nuevos modelos y enum `DepthKind`.
+- Migración de esquema creada en `prisma/migrations/20260721120000_v2_locations/`.
+
+## 0.14.0 (2026-07-21)
+
+### Added (Fase 1 — Arquitectura de datos y migración segura)
+
+- **Roles de usuario:** Nuevo enum `UserRole` (`ADMIN`, `SUPERVISOR`, `COUNTER`, `VIEWER`) añadido al esquema Prisma.
+- **Nuevos campos en `User`:** `role` con valor por defecto `COUNTER` y `active` (`boolean`).
+- **`schema_version` en sesiones:** Nuevo campo `schema_version` (default `1`) en `inventory_sessions` para diferenciar sesiones V1 y V2.
+- **Estados `DRAFT` y `CANCELLED`:** Añadidos al enum `SessionStatus` para el flujo de creación controlada.
+- **Migración expansiva:** Nueva migración `20260721100001_v1_roles_schema_version` que agrega columnas y enums sin romper datos existentes.
+- **Fuente única de esquema:** `ensureDatabase()` eliminó todo DDL — ahora solo verifica conectividad (`SELECT 1`). El esquema es gestionado exclusivamente por Prisma Migrate.
+- **Capa de repositorios:** Nueva carpeta `src/server/repositories/` con repositorios tipados:
+  - `product-repository.ts` — consultas de productos.
+  - `session-repository.ts` — consultas y creación de sesiones.
+  - `count-repository.ts` — eventos de conteo, idempotencia y totales.
+  - `operator-repository.ts` — operadores y participantes.
+- **Feature flag:** Nueva variable `INVENTORY_LOCATION_V2_ENABLED` (default `false`) en `.env.example` y utilidad `src/lib/flags.ts`.
+
+### Added (Fase 2 — Usuarios, roles y control operativo)
+
+- **Roles en autenticación:** Auth.js (NextAuth) ahora incluye `role` en el JWT y en la sesión. El seed crea al usuario `admin@stockscan.app` con rol `ADMIN`.
+- **Guardas de permisos:** Nueva función `requireRole(...roles)` en `src/server/guards.ts` que protege rutas de API del lado servidor.
+- **Protección de acciones destructivas:**
+  - `DELETE /api/setup` restringido a rol `ADMIN`.
+  - `POST /api/setup` (cargar demo) restringido a rol `ADMIN`.
+  - `POST /api/sessions/[id]/close` restringido a `SUPERVISOR` o `ADMIN`.
+- **Vista de usuarios y roles:** Nueva sección "Usuarios y roles" en Configuración (`/settings`) que lista usuarios, su rol y estado.
+- **Indicador visual de rol:** El header de la app muestra el rol del usuario autenticado (Admin, Supervisor, Contador, Visor).
+
+### Changed
+
+- Sesiones nuevas se crean con `schema_version = 1` para compatibilidad V1.
+- El seed asigna `role: "ADMIN"` al usuario de prueba.
+
+### Infrastructure
+
+- Migración de esquema creada manualmente en `prisma/migrations/20260721100001_v1_roles_schema_version/`.
+- Prisma Client regenerado con los nuevos tipos y enums.
+
 ## 0.13.0 (2026-07-21)
 
 ### Added

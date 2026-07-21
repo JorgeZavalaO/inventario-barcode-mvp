@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ensureDatabase, getDb } from "@/lib/db";
 import { apiError } from "@/lib/http";
+import { requireRole } from "@/server/guards";
 
 const DEMO_PRODUCTS = [
   ["MANG-001", "7750000000017", "Manguera hidráulica 1/2 pulgada", "MTR", "Mangueras", 24],
@@ -13,6 +14,9 @@ const DEMO_PRODUCTS = [
 
 export async function POST() {
   try {
+    const auth = await requireRole("ADMIN");
+    if (!auth.authorized) return auth.response;
+
     await ensureDatabase();
     const sql = getDb();
     const [{ count }] = await sql<{ count: number }[]>`
@@ -41,6 +45,9 @@ export async function POST() {
 
 export async function DELETE() {
   try {
+    const auth = await requireRole("ADMIN");
+    if (!auth.authorized) return auth.response;
+
     await ensureDatabase();
     const sql = getDb();
 
