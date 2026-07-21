@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
+  robots: { index: false },
   title: "StockScan | Inventario colaborativo",
   description: "Conteo de inventario multiusuario mediante códigos de barras. Escanea, cuenta y coordina con tu equipo en tiempo real.",
   manifest: "/manifest.webmanifest",
