@@ -6,10 +6,11 @@ import { useState } from "react";
 import {
   LayoutDashboard,
   Package,
-  ClipboardList,
   ScanBarcode,
   Settings,
   Building2,
+  History,
+  Layers,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,12 +27,6 @@ import {
 import { NavUser } from "@/components/nav-user";
 import { useScanTarget } from "@/hooks/use-scan-target";
 import { SessionPickerSheet } from "@/components/session/session-picker-sheet";
-
-const navItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Productos", url: "/products", icon: Package },
-  { title: "Sesiones", url: "/sessions", icon: ClipboardList },
-];
 
 export function AppSidebar({
   user,
@@ -50,13 +45,15 @@ export function AppSidebar({
     { title: "Escanear", url: target, icon: ScanBarcode },
     { title: "Productos", url: "/products", icon: Package },
     { title: "Ubicaciones", url: "/locations", icon: Building2 },
-    { title: "Sesiones", url: "/sessions", icon: ClipboardList },
+    { title: "Sesiones V1", url: "/sessions/v1", icon: History },
+    { title: "Sesiones V2", url: "/sessions/v2", icon: Layers },
     { title: "Configuración", url: "/settings", icon: Settings },
   ];
 
   function isActive(item: { title: string; url?: string }) {
     if (item.title === "Dashboard") return pathname === "/";
-    if (item.title === "Sesiones") return pathname.startsWith("/sessions");
+    if (item.title === "Sesiones V1") return pathname.startsWith("/sessions/v1");
+    if (item.title === "Sesiones V2") return pathname.startsWith("/sessions/v2");
     if (item.title === "Escanear") return pathname.includes("/scan");
     if (item.url) return pathname.startsWith(item.url);
     return false;
