@@ -167,7 +167,7 @@ export async function updateRack(id: string, data: {
   code?: string; name?: string; widthMm?: number | null; heightMm?: number | null;
   depthMm?: number | null; orderIndex?: number; active?: boolean; design?: unknown;
 }) {
-  return prisma.rack.update({ where: { id }, data: data as any });
+  return prisma.rack.update({ where: { id }, data: data as Parameters<typeof prisma.rack.update>[0]["data"] });
 }
 
 // ── Compartments ──
@@ -175,6 +175,7 @@ export async function updateRack(id: string, data: {
 export async function createCompartment(data: {
   rackId: string; code: string; name: string;
   x: number; y: number; width: number; height: number;
+  columnCount?: number; stackLevels?: number;
   moduleLabel?: string | null; levelLabel?: string | null;
   orderIndex?: number;
 }) {
@@ -201,6 +202,7 @@ export async function createDepthSlot(data: {
 
 export async function createStoragePosition(data: {
   rackId: string; compartmentId: string; depthSlotId: string;
+  columnIndex?: number; stackIndex?: number;
   code: string; qrValue: string;
   capacityQty?: number | null; capacityUnit?: string | null;
   notes?: string | null;

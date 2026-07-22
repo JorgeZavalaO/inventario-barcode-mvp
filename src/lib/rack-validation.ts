@@ -10,7 +10,7 @@ export type Compartment = {
 };
 
 export type ValidationIssue = {
-  type: "overlap" | "bounds" | "duplicate_code" | "empty";
+  type: "overlap" | "bounds" | "duplicate_code" | "empty" | "minimum_size";
   message: string;
   compartmentId?: string;
 };
@@ -71,6 +71,103 @@ export function validateCompartment(
   return issues;
 }
 
+export type Rect = { x: number; y: number; width: number; height: number };
+
+export type ResizeHandle =
+  | "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
+
+/** Keep a value inside an inclusive range. */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+/** Snap a logical rack coordinate to a positive grid size. */
+export function snapToGrid(value: number, gridSize: number): number {
+  if (!Number.isFinite(gridSize) || gridSize <= 0) return Math.round(value);
+  return Math.round(value / gridSize) * gridSize;
+}
+
+/** Move a rectangle while preserving its size and rack bounds. */
+export function moveRect(
+  initial: Rect,
+  delta: { x: number; y: number },
+  rackWidth: number,
+  rackHeight: number,
+  gridSize = 1,
+): Rect {
+  const x = clamp(snapToGrid(initial.x + delta.x, gridSize), 0, rackWidth - initial.width);
+  const y = clamp(snapToGrid(initial.y + delta.y, gridSize), 0, rackHeight - initial.height);
+  return { ...initial, x, y };
+}
+
+/** Resize a rectangle from one of its eight handles. */
+export function resizeRect(
+  initial: Rect,
+  handle: ResizeHandle,
+  delta: { x: number; y: number },
+  rackWidth: number,
+  rackHeight: number,
+  minSize = 2,
+  gridSize = 1,
+): Rect {
+  let left = initial.x;
+  let top = initial.y;
+  let right = initial.x + initial.width;
+  let bottom = initial.y + initial.height;
+
+  if (handle.includes("w")) left = snapToGrid(initial.x + delta.x, gridSize);
+  if (handle.includes("e")) right = snapToGrid(initial.x + initial.width + delta.x, gridSize);
+  if (handle.includes("n")) top = snapToGrid(initial.y + delta.y, gridSize);
+  if (handle.includes("s")) bottom = snapToGrid(initial.y + initial.height + delta.y, gridSize);
+
+  if (handle.includes("w")) left = clamp(left, 0, right - minSize);
+  if (handle.includes("e")) right = clamp(right, left + minSize, rackWidth);
+  if (handle.includes("n")) top = clamp(top, 0, bottom - minSize);
+  if (handle.includes("s")) bottom = clamp(bottom, top + minSize, rackHeight);
+
+  return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
+/** Validate all active rectangles together, including duplicate codes. */
+export function validateCompartmentSet(
+  compartments: Array<Compartment & { active?: boolean }>,
+  rackWidth: number,
+  rackHeight: number,
+): ValidationIssue[] {
+  const active = compartments.filter((comp) => comp.active !== false);
+  const issues: ValidationIssue[] = [];
+  const codes = new Map<string, string>();
+
+  for (const comp of active) {
+    if (comp.width < 1 || comp.height < 1) {
+      issues.push({ type: "minimum_size", message: `Tamaño inválido en ${comp.code}`, compartmentId: comp.id });
+    }
+    if (!isWithinBounds(comp, rackWidth, rackHeight)) {
+      issues.push({ type: "bounds", message: `Fuera de límites (${rackWidth}x${rackHeight})`, compartmentId: comp.id });
+    }
+    const previous = codes.get(comp.code);
+    if (previous) {
+      issues.push({ type: "duplicate_code", message: `Código duplicado ${comp.code}`, compartmentId: comp.id });
+    } else {
+      codes.set(comp.code, comp.id);
+    }
+  }
+
+  for (let index = 0; index < active.length; index += 1) {
+    for (let other = index + 1; other < active.length; other += 1) {
+      if (rectsOverlap(active[index], active[other])) {
+        issues.push({
+          type: "overlap",
+          message: `${active[index].code} solapa con ${active[other].code}`,
+          compartmentId: active[other].id,
+        });
+      }
+    }
+  }
+
+  return issues;
+}
+
 /**
  * Horizontal split: divides height in half.
  */
@@ -117,6 +214,19 @@ export function generatePositionCode(
   depthCode: string,
 ): string {
   return `${warehouseCode}-${floorCode}-${rackCode}-${compartmentCode}-${depthCode}`;
+}
+
+/** Generate the stable code for one physical matrix cell. */
+export function generatePhysicalPositionCode(
+  warehouseCode: string,
+  floorCode: string,
+  rackCode: string,
+  compartmentCode: string,
+  depthCode: string,
+  columnIndex: number,
+  stackIndex: number,
+): string {
+  return `${generatePositionCode(warehouseCode, floorCode, rackCode, compartmentCode, depthCode)}-C${String(columnIndex).padStart(2, "0")}-N${String(stackIndex).padStart(2, "0")}`;
 }
 
 /**

@@ -27,10 +27,14 @@ export type AggregateStoragePosition = {
 }
 
 export type StoragePositionAvgAggregateOutputType = {
+  columnIndex: number | null
+  stackIndex: number | null
   capacityQty: runtime.Decimal | null
 }
 
 export type StoragePositionSumAggregateOutputType = {
+  columnIndex: number | null
+  stackIndex: number | null
   capacityQty: runtime.Decimal | null
 }
 
@@ -39,6 +43,8 @@ export type StoragePositionMinAggregateOutputType = {
   rackId: string | null
   compartmentId: string | null
   depthSlotId: string | null
+  columnIndex: number | null
+  stackIndex: number | null
   code: string | null
   qrValue: string | null
   capacityQty: runtime.Decimal | null
@@ -55,6 +61,8 @@ export type StoragePositionMaxAggregateOutputType = {
   rackId: string | null
   compartmentId: string | null
   depthSlotId: string | null
+  columnIndex: number | null
+  stackIndex: number | null
   code: string | null
   qrValue: string | null
   capacityQty: runtime.Decimal | null
@@ -71,6 +79,8 @@ export type StoragePositionCountAggregateOutputType = {
   rackId: number
   compartmentId: number
   depthSlotId: number
+  columnIndex: number
+  stackIndex: number
   code: number
   qrValue: number
   capacityQty: number
@@ -85,10 +95,14 @@ export type StoragePositionCountAggregateOutputType = {
 
 
 export type StoragePositionAvgAggregateInputType = {
+  columnIndex?: true
+  stackIndex?: true
   capacityQty?: true
 }
 
 export type StoragePositionSumAggregateInputType = {
+  columnIndex?: true
+  stackIndex?: true
   capacityQty?: true
 }
 
@@ -97,6 +111,8 @@ export type StoragePositionMinAggregateInputType = {
   rackId?: true
   compartmentId?: true
   depthSlotId?: true
+  columnIndex?: true
+  stackIndex?: true
   code?: true
   qrValue?: true
   capacityQty?: true
@@ -113,6 +129,8 @@ export type StoragePositionMaxAggregateInputType = {
   rackId?: true
   compartmentId?: true
   depthSlotId?: true
+  columnIndex?: true
+  stackIndex?: true
   code?: true
   qrValue?: true
   capacityQty?: true
@@ -129,6 +147,8 @@ export type StoragePositionCountAggregateInputType = {
   rackId?: true
   compartmentId?: true
   depthSlotId?: true
+  columnIndex?: true
+  stackIndex?: true
   code?: true
   qrValue?: true
   capacityQty?: true
@@ -232,6 +252,8 @@ export type StoragePositionGroupByOutputType = {
   rackId: string
   compartmentId: string
   depthSlotId: string
+  columnIndex: number
+  stackIndex: number
   code: string
   qrValue: string
   capacityQty: runtime.Decimal | null
@@ -271,6 +293,8 @@ export type StoragePositionWhereInput = {
   rackId?: Prisma.StringFilter<"StoragePosition"> | string
   compartmentId?: Prisma.StringFilter<"StoragePosition"> | string
   depthSlotId?: Prisma.StringFilter<"StoragePosition"> | string
+  columnIndex?: Prisma.IntFilter<"StoragePosition"> | number
+  stackIndex?: Prisma.IntFilter<"StoragePosition"> | number
   code?: Prisma.StringFilter<"StoragePosition"> | string
   qrValue?: Prisma.StringFilter<"StoragePosition"> | string
   capacityQty?: Prisma.DecimalNullableFilter<"StoragePosition"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -294,6 +318,8 @@ export type StoragePositionOrderByWithRelationInput = {
   rackId?: Prisma.SortOrder
   compartmentId?: Prisma.SortOrder
   depthSlotId?: Prisma.SortOrder
+  columnIndex?: Prisma.SortOrder
+  stackIndex?: Prisma.SortOrder
   code?: Prisma.SortOrder
   qrValue?: Prisma.SortOrder
   capacityQty?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -316,12 +342,15 @@ export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   code?: string
   qrValue?: string
+  depthSlotId_columnIndex_stackIndex?: Prisma.StoragePositionDepthSlotIdColumnIndexStackIndexCompoundUniqueInput
   AND?: Prisma.StoragePositionWhereInput | Prisma.StoragePositionWhereInput[]
   OR?: Prisma.StoragePositionWhereInput[]
   NOT?: Prisma.StoragePositionWhereInput | Prisma.StoragePositionWhereInput[]
   rackId?: Prisma.StringFilter<"StoragePosition"> | string
   compartmentId?: Prisma.StringFilter<"StoragePosition"> | string
   depthSlotId?: Prisma.StringFilter<"StoragePosition"> | string
+  columnIndex?: Prisma.IntFilter<"StoragePosition"> | number
+  stackIndex?: Prisma.IntFilter<"StoragePosition"> | number
   capacityQty?: Prisma.DecimalNullableFilter<"StoragePosition"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   capacityUnit?: Prisma.StringNullableFilter<"StoragePosition"> | string | null
   active?: Prisma.BoolFilter<"StoragePosition"> | boolean
@@ -336,13 +365,15 @@ export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
   sessionPositions?: Prisma.SessionPositionListRelationFilter
   stockSnapshots?: Prisma.SessionStockSnapshotListRelationFilter
   incidents?: Prisma.CountIncidentListRelationFilter
-}, "id" | "code" | "qrValue">
+}, "id" | "code" | "qrValue" | "depthSlotId_columnIndex_stackIndex">
 
 export type StoragePositionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   rackId?: Prisma.SortOrder
   compartmentId?: Prisma.SortOrder
   depthSlotId?: Prisma.SortOrder
+  columnIndex?: Prisma.SortOrder
+  stackIndex?: Prisma.SortOrder
   code?: Prisma.SortOrder
   qrValue?: Prisma.SortOrder
   capacityQty?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -367,6 +398,8 @@ export type StoragePositionScalarWhereWithAggregatesInput = {
   rackId?: Prisma.StringWithAggregatesFilter<"StoragePosition"> | string
   compartmentId?: Prisma.StringWithAggregatesFilter<"StoragePosition"> | string
   depthSlotId?: Prisma.StringWithAggregatesFilter<"StoragePosition"> | string
+  columnIndex?: Prisma.IntWithAggregatesFilter<"StoragePosition"> | number
+  stackIndex?: Prisma.IntWithAggregatesFilter<"StoragePosition"> | number
   code?: Prisma.StringWithAggregatesFilter<"StoragePosition"> | string
   qrValue?: Prisma.StringWithAggregatesFilter<"StoragePosition"> | string
   capacityQty?: Prisma.DecimalNullableWithAggregatesFilter<"StoragePosition"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -380,6 +413,8 @@ export type StoragePositionScalarWhereWithAggregatesInput = {
 
 export type StoragePositionCreateInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -403,6 +438,8 @@ export type StoragePositionUncheckedCreateInput = {
   rackId: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -420,6 +457,8 @@ export type StoragePositionUncheckedCreateInput = {
 
 export type StoragePositionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -443,6 +482,8 @@ export type StoragePositionUncheckedUpdateInput = {
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -463,6 +504,8 @@ export type StoragePositionCreateManyInput = {
   rackId: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -476,6 +519,8 @@ export type StoragePositionCreateManyInput = {
 
 export type StoragePositionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -492,6 +537,8 @@ export type StoragePositionUncheckedUpdateManyInput = {
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -518,11 +565,19 @@ export type StoragePositionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type StoragePositionDepthSlotIdColumnIndexStackIndexCompoundUniqueInput = {
+  depthSlotId: string
+  columnIndex: number
+  stackIndex: number
+}
+
 export type StoragePositionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   rackId?: Prisma.SortOrder
   compartmentId?: Prisma.SortOrder
   depthSlotId?: Prisma.SortOrder
+  columnIndex?: Prisma.SortOrder
+  stackIndex?: Prisma.SortOrder
   code?: Prisma.SortOrder
   qrValue?: Prisma.SortOrder
   capacityQty?: Prisma.SortOrder
@@ -535,6 +590,8 @@ export type StoragePositionCountOrderByAggregateInput = {
 }
 
 export type StoragePositionAvgOrderByAggregateInput = {
+  columnIndex?: Prisma.SortOrder
+  stackIndex?: Prisma.SortOrder
   capacityQty?: Prisma.SortOrder
 }
 
@@ -543,6 +600,8 @@ export type StoragePositionMaxOrderByAggregateInput = {
   rackId?: Prisma.SortOrder
   compartmentId?: Prisma.SortOrder
   depthSlotId?: Prisma.SortOrder
+  columnIndex?: Prisma.SortOrder
+  stackIndex?: Prisma.SortOrder
   code?: Prisma.SortOrder
   qrValue?: Prisma.SortOrder
   capacityQty?: Prisma.SortOrder
@@ -559,6 +618,8 @@ export type StoragePositionMinOrderByAggregateInput = {
   rackId?: Prisma.SortOrder
   compartmentId?: Prisma.SortOrder
   depthSlotId?: Prisma.SortOrder
+  columnIndex?: Prisma.SortOrder
+  stackIndex?: Prisma.SortOrder
   code?: Prisma.SortOrder
   qrValue?: Prisma.SortOrder
   capacityQty?: Prisma.SortOrder
@@ -571,6 +632,8 @@ export type StoragePositionMinOrderByAggregateInput = {
 }
 
 export type StoragePositionSumOrderByAggregateInput = {
+  columnIndex?: Prisma.SortOrder
+  stackIndex?: Prisma.SortOrder
   capacityQty?: Prisma.SortOrder
 }
 
@@ -758,6 +821,8 @@ export type StoragePositionUncheckedUpdateManyWithoutDepthSlotNestedInput = {
 
 export type StoragePositionCreateWithoutLocationStocksInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -780,6 +845,8 @@ export type StoragePositionUncheckedCreateWithoutLocationStocksInput = {
   rackId: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -812,6 +879,8 @@ export type StoragePositionUpdateToOneWithWhereWithoutLocationStocksInput = {
 
 export type StoragePositionUpdateWithoutLocationStocksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -834,6 +903,8 @@ export type StoragePositionUncheckedUpdateWithoutLocationStocksInput = {
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -850,6 +921,8 @@ export type StoragePositionUncheckedUpdateWithoutLocationStocksInput = {
 
 export type StoragePositionCreateWithoutSessionPositionsInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -872,6 +945,8 @@ export type StoragePositionUncheckedCreateWithoutSessionPositionsInput = {
   rackId: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -904,6 +979,8 @@ export type StoragePositionUpdateToOneWithWhereWithoutSessionPositionsInput = {
 
 export type StoragePositionUpdateWithoutSessionPositionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -926,6 +1003,8 @@ export type StoragePositionUncheckedUpdateWithoutSessionPositionsInput = {
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -942,6 +1021,8 @@ export type StoragePositionUncheckedUpdateWithoutSessionPositionsInput = {
 
 export type StoragePositionCreateWithoutStockSnapshotsInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -964,6 +1045,8 @@ export type StoragePositionUncheckedCreateWithoutStockSnapshotsInput = {
   rackId: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -996,6 +1079,8 @@ export type StoragePositionUpdateToOneWithWhereWithoutStockSnapshotsInput = {
 
 export type StoragePositionUpdateWithoutStockSnapshotsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1018,6 +1103,8 @@ export type StoragePositionUncheckedUpdateWithoutStockSnapshotsInput = {
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1034,6 +1121,8 @@ export type StoragePositionUncheckedUpdateWithoutStockSnapshotsInput = {
 
 export type StoragePositionCreateWithoutIncidentsInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1056,6 +1145,8 @@ export type StoragePositionUncheckedCreateWithoutIncidentsInput = {
   rackId: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1088,6 +1179,8 @@ export type StoragePositionUpdateToOneWithWhereWithoutIncidentsInput = {
 
 export type StoragePositionUpdateWithoutIncidentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1110,6 +1203,8 @@ export type StoragePositionUncheckedUpdateWithoutIncidentsInput = {
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1126,6 +1221,8 @@ export type StoragePositionUncheckedUpdateWithoutIncidentsInput = {
 
 export type StoragePositionCreateWithoutRackInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1147,6 +1244,8 @@ export type StoragePositionUncheckedCreateWithoutRackInput = {
   id?: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1196,6 +1295,8 @@ export type StoragePositionScalarWhereInput = {
   rackId?: Prisma.StringFilter<"StoragePosition"> | string
   compartmentId?: Prisma.StringFilter<"StoragePosition"> | string
   depthSlotId?: Prisma.StringFilter<"StoragePosition"> | string
+  columnIndex?: Prisma.IntFilter<"StoragePosition"> | number
+  stackIndex?: Prisma.IntFilter<"StoragePosition"> | number
   code?: Prisma.StringFilter<"StoragePosition"> | string
   qrValue?: Prisma.StringFilter<"StoragePosition"> | string
   capacityQty?: Prisma.DecimalNullableFilter<"StoragePosition"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1209,6 +1310,8 @@ export type StoragePositionScalarWhereInput = {
 
 export type StoragePositionCreateWithoutCompartmentInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1230,6 +1333,8 @@ export type StoragePositionUncheckedCreateWithoutCompartmentInput = {
   id?: string
   rackId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1273,6 +1378,8 @@ export type StoragePositionUpdateManyWithWhereWithoutCompartmentInput = {
 
 export type StoragePositionCreateWithoutDepthSlotInput = {
   id?: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1294,6 +1401,8 @@ export type StoragePositionUncheckedCreateWithoutDepthSlotInput = {
   id?: string
   rackId: string
   compartmentId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1339,6 +1448,8 @@ export type StoragePositionCreateManyRackInput = {
   id?: string
   compartmentId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1352,6 +1463,8 @@ export type StoragePositionCreateManyRackInput = {
 
 export type StoragePositionUpdateWithoutRackInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1373,6 +1486,8 @@ export type StoragePositionUncheckedUpdateWithoutRackInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1392,6 +1507,8 @@ export type StoragePositionUncheckedUpdateManyWithoutRackInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1407,6 +1524,8 @@ export type StoragePositionCreateManyCompartmentInput = {
   id?: string
   rackId: string
   depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1420,6 +1539,8 @@ export type StoragePositionCreateManyCompartmentInput = {
 
 export type StoragePositionUpdateWithoutCompartmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1441,6 +1562,8 @@ export type StoragePositionUncheckedUpdateWithoutCompartmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1460,6 +1583,8 @@ export type StoragePositionUncheckedUpdateManyWithoutCompartmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1475,6 +1600,8 @@ export type StoragePositionCreateManyDepthSlotInput = {
   id?: string
   rackId: string
   compartmentId: string
+  columnIndex?: number
+  stackIndex?: number
   code: string
   qrValue: string
   capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1488,6 +1615,8 @@ export type StoragePositionCreateManyDepthSlotInput = {
 
 export type StoragePositionUpdateWithoutDepthSlotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1509,6 +1638,8 @@ export type StoragePositionUncheckedUpdateWithoutDepthSlotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1528,6 +1659,8 @@ export type StoragePositionUncheckedUpdateManyWithoutDepthSlotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   rackId?: Prisma.StringFieldUpdateOperationsInput | string
   compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
   code?: Prisma.StringFieldUpdateOperationsInput | string
   qrValue?: Prisma.StringFieldUpdateOperationsInput | string
   capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1602,6 +1735,8 @@ export type StoragePositionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   rackId?: boolean
   compartmentId?: boolean
   depthSlotId?: boolean
+  columnIndex?: boolean
+  stackIndex?: boolean
   code?: boolean
   qrValue?: boolean
   capacityQty?: boolean
@@ -1626,6 +1761,8 @@ export type StoragePositionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   rackId?: boolean
   compartmentId?: boolean
   depthSlotId?: boolean
+  columnIndex?: boolean
+  stackIndex?: boolean
   code?: boolean
   qrValue?: boolean
   capacityQty?: boolean
@@ -1645,6 +1782,8 @@ export type StoragePositionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   rackId?: boolean
   compartmentId?: boolean
   depthSlotId?: boolean
+  columnIndex?: boolean
+  stackIndex?: boolean
   code?: boolean
   qrValue?: boolean
   capacityQty?: boolean
@@ -1664,6 +1803,8 @@ export type StoragePositionSelectScalar = {
   rackId?: boolean
   compartmentId?: boolean
   depthSlotId?: boolean
+  columnIndex?: boolean
+  stackIndex?: boolean
   code?: boolean
   qrValue?: boolean
   capacityQty?: boolean
@@ -1675,7 +1816,7 @@ export type StoragePositionSelectScalar = {
   updatedAt?: boolean
 }
 
-export type StoragePositionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rackId" | "compartmentId" | "depthSlotId" | "code" | "qrValue" | "capacityQty" | "capacityUnit" | "active" | "countable" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["storagePosition"]>
+export type StoragePositionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rackId" | "compartmentId" | "depthSlotId" | "columnIndex" | "stackIndex" | "code" | "qrValue" | "capacityQty" | "capacityUnit" | "active" | "countable" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["storagePosition"]>
 export type StoragePositionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rack?: boolean | Prisma.RackDefaultArgs<ExtArgs>
   compartment?: boolean | Prisma.RackCompartmentDefaultArgs<ExtArgs>
@@ -1713,6 +1854,8 @@ export type $StoragePositionPayload<ExtArgs extends runtime.Types.Extensions.Int
     rackId: string
     compartmentId: string
     depthSlotId: string
+    columnIndex: number
+    stackIndex: number
     code: string
     qrValue: string
     capacityQty: runtime.Decimal | null
@@ -2156,6 +2299,8 @@ export interface StoragePositionFieldRefs {
   readonly rackId: Prisma.FieldRef<"StoragePosition", 'String'>
   readonly compartmentId: Prisma.FieldRef<"StoragePosition", 'String'>
   readonly depthSlotId: Prisma.FieldRef<"StoragePosition", 'String'>
+  readonly columnIndex: Prisma.FieldRef<"StoragePosition", 'Int'>
+  readonly stackIndex: Prisma.FieldRef<"StoragePosition", 'Int'>
   readonly code: Prisma.FieldRef<"StoragePosition", 'String'>
   readonly qrValue: Prisma.FieldRef<"StoragePosition", 'String'>
   readonly capacityQty: Prisma.FieldRef<"StoragePosition", 'Decimal'>

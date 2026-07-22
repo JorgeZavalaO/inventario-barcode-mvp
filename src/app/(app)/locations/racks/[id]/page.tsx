@@ -9,22 +9,30 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { RackFrontView } from "@/components/locations/rack-front-view";
 
+type StoragePosition = { id: string; code: string; columnIndex: number; stackIndex: number };
+type DepthSlot = { id: string; code: string; name: string; positions: StoragePosition[] };
+type RackCompartment = { id: string; code: string; name: string; x: number; y: number; width: number; height: number; columnCount?: number; stackLevels?: number; depthSlots?: DepthSlot[] };
+type RackData = { id: string; name: string; code: string; zoneId: string; widthMm: number | null; heightMm: number | null; zone: { floorId: string; name: string; floor: { name: string; warehouse: { name: string } } }; compartments: RackCompartment[] };
+
 export default function RackDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [rack, setRack] = useState<any>(null);
+  const [rack, setRack] = useState<RackData | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     try {
-      const data = await apiFetch<any>(`/api/racks/${id}`);
+      const data = await apiFetch<{ rack: RackData }>(`/api/racks/${id}`);
       setRack(data.rack);
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, [id]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
 
   if (loading) return <div className="flex items-center justify-center py-16 text-slate-500"><LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...</div>;
   if (!rack) return <div className="py-16 text-center text-slate-500">Rack no encontrado.</div>;
@@ -69,17 +77,28 @@ export default function RackDetailPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Posiciones</CardTitle><CardDescription>{rack.compartments?.flatMap((c: any) => c.depthSlots ?? []).length ?? 0} slots de profundidad</CardDescription></CardHeader>
+          <CardHeader><CardTitle className="text-base">Posiciones</CardTitle><CardDescription>{rack.compartments.flatMap((compartment) => compartment.depthSlots ?? []).length} slots de profundidad</CardDescription></CardHeader>
           <CardContent>
-            {rack.compartments?.map((comp: any) => (
+            {rack.compartments.map((comp) => (
               <div key={comp.id} className="mb-3 rounded-lg border border-slate-100 p-3">
                 <p className="text-sm font-medium">{comp.name} <span className="text-xs text-slate-400">({comp.code})</span></p>
-                {comp.depthSlots?.map((slot: any) => (
-                  <div key={slot.id} className="ml-3 mt-1 flex items-center gap-2 text-xs text-slate-500">
-                    <span className="inline-block size-2 rounded-full bg-teal-400" />
-                    {slot.name} ({slot.code})
+                {comp.depthSlots?.map((slot) => (
+                  <div key={slot.id}>
+                    <div className="ml-3 mt-1 flex items-center gap-2 text-xs text-slate-500">
+                      <span className="inline-block size-2 rounded-full bg-teal-400" />
+                      {slot.name} ({slot.code})
+                      {slot.positions?.length > 0 && (
+                        <span className="rounded bg-teal-50 px-1 py-0.5 text-teal-600">{slot.positions.length} pos.</span>
+                      )}
+                    </div>
                     {slot.positions?.length > 0 && (
-                      <span className="rounded bg-teal-50 px-1 py-0.5 text-teal-600">{slot.positions.length} pos.</span>
+                      <div className="ml-8 mt-1 flex flex-wrap gap-1">
+                        {slot.positions.map((position) => (
+                          <span key={position.id} className="rounded bg-slate-50 px-1.5 py-0.5 text-[10px] text-slate-500" title={`Columna ${position.columnIndex}, nivel ${position.stackIndex}`}>
+                            {position.code}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 ))}

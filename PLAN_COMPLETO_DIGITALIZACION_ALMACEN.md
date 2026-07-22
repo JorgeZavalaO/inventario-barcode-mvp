@@ -426,18 +426,26 @@ D03 = Fondo
 
 No todos los compartimientos requieren tres profundidades. Puede existir uno, dos, tres o más segmentos personalizados.
 
+Cada compartimiento también puede tener varias columnas y niveles verticales. La posición física contable se obtiene combinando:
+
+```text
+columna × nivel apilado × profundidad
+```
+
+Por ejemplo, 3 columnas × 4 niveles × 3 profundidades produce 36 posiciones físicas independientes.
+
 ### 6.6 Código de ubicación
 
 Formato recomendado:
 
 ```text
-{ALMACEN}-{PISO}-{RACK}-{COMPARTIMIENTO}-{PROFUNDIDAD}
+{ALMACEN}-{PISO}-{RACK}-{COMPARTIMIENTO}-{PROFUNDIDAD}-{COLUMNA}-{NIVEL}
 ```
 
 Ejemplo:
 
 ```text
-AP-P01-R003-C07-D02
+AP-P01-R003-C07-D02-C03-N04
 ```
 
 Contenido QR recomendado:
@@ -849,12 +857,20 @@ No usar una cuadrícula rígida como fuente de verdad. El diseñador trabajará 
 - [x] Guardar coordenadas normalizadas (x, y, width, height 0–10000).
 - [x] Añadir versión del diseño del rack (campo `version` + `design` JSON).
 - [x] Prohibir solapamientos inválidos al crear compartimentos (validación backend).
-- [x] Permitir borrador antes de publicar (diseño guardado como JSON).
+- [x] Permitir borrador local antes de publicar y guardar snapshot JSON derivado.
 - [x] Mantener posiciones activas; desactivación en lugar de borrado.
+- [x] Guardar el diseño completo en una transacción con control de versión optimista.
+- [x] Modelar columnas y niveles verticales por compartimiento.
+- [x] Generar una posición física por combinación columna × nivel × profundidad.
 
 ### Tareas de UI
 
 - [x] Canvas/SVG responsive para vista frontal.
+- [x] Selección, movimiento y redimensionado directo con mouse/touch mediante Pointer Events.
+- [x] Grid y snap opcionales para edición visual.
+- [x] Creación por dibujo en espacio vacío.
+- [x] Undo/redo por gesto y atajos de teclado.
+- [x] Seleccionar celdas internas y configurar profundidad activa.
 - [x] Herramienta de división horizontal (splitHorizontal en diseñador).
 - [x] Herramienta de división vertical (splitVertical en diseñador).
 - [x] Ajuste de tamaño con validación (coordenadas 0–10000 + rack bounds).
@@ -873,6 +889,9 @@ No usar una cuadrícula rígida como fuente de verdad. El diseñador trabajará 
 - [x] Cada posición tiene código único (unique constraint DB).
 - [x] Una posición con historial no se elimina físicamente (soft delete: active=false).
 - [x] Los cambios estructurales mayores crean una nueva versión (version auto-increment).
+- [x] Guardado con `expectedVersion` y respuesta `409` ante conflicto concurrente.
+- [x] No eliminar, dividir ni cambiar código de compartimientos con posiciones activas.
+- [x] No reducir columnas, niveles o profundidades con posiciones creadas.
 
 ### Pruebas
 
@@ -882,11 +901,15 @@ No usar una cuadrícula rígida como fuente de verdad. El diseñador trabajará 
 - [x] Rack sin división de profundidad.
 - [x] Rack con tres profundidades.
 - [x] Rack con una posición deshabilitada.
+- [x] Snap, movimiento, redimensionado y validación del conjunto de compartimientos.
 
 ### Criterio de salida
 
 - [x] El rack dibujado por el usuario puede reproducirse de forma razonable en la vista frontal (SVG con coordenadas normalizadas).
 - [x] Cada área contable tiene una posición y profundidad identificable (StoragePosition + RackDepthSlot).
+- [x] El usuario puede editar el layout directamente sin introducir coordenadas para mover o redimensionar.
+- [x] El usuario puede identificar cada celda física mediante columna, nivel, profundidad y QR.
+- [x] Los códigos nuevos conservan la coordenada física como `D01-C01-N01` y no renumeran posiciones legacy.
 
 ---
 
@@ -1690,4 +1713,3 @@ El primer bloque de trabajo debe abarcar únicamente:
 5. CRUD de almacén, pisos, zonas y racks de Fase 3.
 
 No se debe construir el diseñador visual antes de estabilizar esquema, seguridad y compatibilidad de datos.
-

@@ -27,8 +27,9 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Vista de usuarios y roles en Configuración.
 - Módulo de Ubicaciones con almacenes, pisos, zonas y racks.
 - Vista frontal de rack con compartimentos renderizados en SVG.
-- Diseñador de rack con creación de compartimentos y generación automática de posiciones.
-- Códigos de posición únicos con formato `{ALMACEN}-{PISO}-{RACK}-{COMPARTIMIENTO}-{PROFUNDIDAD}`.
+- Diseñador visual de rack con canvas SVG: crear por dibujo, mover, redimensionar, duplicar, dividir y deshacer cambios.
+- Matriz física por compartimiento con columnas, niveles apilados y profundidades, generando una posición y QR por cada celda.
+- Códigos de posición únicos con formato `{ALMACEN}-{PISO}-{RACK}-{COMPARTIMIENTO}-{PROFUNDIDAD}-{COLUMNA}-{NIVEL}`.
 - QR de ubicación con prefijo `LOC:v1:` para diferenciación de productos.
 - Etiquetas de ubicación imprimibles con QR y código legible (individuales o masivas).
 - Stock teórico por ubicación física (producto → múltiples posiciones).

@@ -7,7 +7,13 @@ import {
   splitVertical,
   duplicateCompartment,
   generatePositionCode,
+  generatePhysicalPositionCode,
   areCoordsValid,
+  clamp,
+  moveRect,
+  resizeRect,
+  snapToGrid,
+  validateCompartmentSet,
   type Compartment,
 } from "@/lib/rack-validation";
 
@@ -205,6 +211,12 @@ describe("generatePositionCode", () => {
   });
 });
 
+describe("generatePhysicalPositionCode", () => {
+  it("includes column and stack indexes", () => {
+    expect(generatePhysicalPositionCode("AP", "P01", "R001", "C07", "D02", 3, 4)).toBe("AP-P01-R001-C07-D02-C03-N04");
+  });
+});
+
 describe("areCoordsValid", () => {
   it("valid coords pass", () => {
     expect(areCoordsValid({ x: 0, y: 0, width: 10000, height: 10000 })).toBe(true);
@@ -216,6 +228,31 @@ describe("areCoordsValid", () => {
     expect(areCoordsValid({ x: 0, y: 10001, width: 100, height: 100 })).toBe(false);
     expect(areCoordsValid({ x: 0, y: 0, width: 10001, height: 100 })).toBe(false);
     expect(areCoordsValid({ x: 0, y: 0, width: 0, height: 100 })).toBe(false);
+  });
+});
+
+describe("interactive geometry", () => {
+  it("snaps and clamps a moved rectangle", () => {
+    expect(snapToGrid(249, 100)).toBe(200);
+    expect(clamp(12000, 0, 10000)).toBe(10000);
+    expect(moveRect({ x: 9000, y: 9000, width: 1000, height: 1000 }, { x: 500, y: 500 }, 10000, 10000, 100)).toEqual({
+      x: 9000, y: 9000, width: 1000, height: 1000,
+    });
+  });
+
+  it("resizes from the north-west handle without crossing the minimum", () => {
+    expect(resizeRect({ x: 100, y: 100, width: 400, height: 400 }, "nw", { x: 450, y: 450 }, 1000, 1000, 50, 10)).toEqual({
+      x: 450, y: 450, width: 50, height: 50,
+    });
+  });
+
+  it("validates the complete active set", () => {
+    const issues = validateCompartmentSet([
+      comp({ id: "a", code: "A", x: 0, y: 0, width: 600, height: 1000 }),
+      comp({ id: "b", code: "A", x: 500, y: 0, width: 500, height: 1000 }),
+    ], 1000, 1000);
+    expect(issues.some((issue) => issue.type === "duplicate_code")).toBe(true);
+    expect(issues.some((issue) => issue.type === "overlap")).toBe(true);
   });
 });
 

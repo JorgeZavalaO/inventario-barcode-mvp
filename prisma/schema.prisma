@@ -431,6 +431,8 @@ model RackCompartment {
   y           Int
   width       Int
   height      Int
+  columnCount Int      @default(1) @map("column_count")
+  stackLevels Int      @default(1) @map("stack_levels")
   moduleLabel String?  @map("module_label")
   levelLabel  String?  @map("level_label")
   orderIndex  Int      @map("order_index")
@@ -471,6 +473,8 @@ model StoragePosition {
   rackId        String   @map("rack_id")
   compartmentId String   @map("compartment_id")
   depthSlotId   String   @map("depth_slot_id")
+  columnIndex   Int      @default(1) @map("column_index")
+  stackIndex    Int      @default(1) @map("stack_index")
   code          String   @unique
   qrValue       String   @unique @map("qr_value")
   capacityQty   Decimal? @map("capacity_qty") @db.Decimal(14, 3)
@@ -492,5 +496,6 @@ model StoragePosition {
   @@index([rackId])
   @@index([compartmentId])
   @@index([depthSlotId])
+  @@unique([depthSlotId, columnIndex, stackIndex])
   @@map("storage_positions")
 }

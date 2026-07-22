@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.31.0 (2026-07-22)
+
+### Added (Matriz física de posiciones)
+
+- **Columnas y niveles por compartimiento:** Cada separación puede tener múltiples columnas, niveles verticales y profundidades Frente/Centro/Fondo.
+- **Posiciones tridimensionales:** Se genera una ubicación por combinación `columna × nivel × profundidad`.
+- **Códigos físicos:** Nuevas posiciones usan el formato `...-D01-C01-N01` y conservan códigos legacy existentes.
+- **Editor interactivo de celdas:** La vista frontal muestra columnas y niveles, permite seleccionar una celda y configurar la profundidad activa.
+- **Protección de estructura:** No se permite reducir columnas, niveles o profundidades cuando existen posiciones creadas.
+
+### Changed
+
+- `StoragePosition` ahora almacena `columnIndex` y `stackIndex`.
+- `RackCompartment` ahora almacena `columnCount` y `stackLevels`.
+- La generación de posiciones es transaccional e idempotente por celda.
+- La vista de detalle del rack muestra los códigos de las posiciones físicas generadas.
+
+## 0.30.0 (2026-07-22)
+
+### Added (Fase 4 — Diseñador visual)
+
+- **Canvas SVG interactivo:** Selección, movimiento con mouse/touch y redimensionado mediante ocho controles.
+- **Creación visual:** Herramienta para dibujar un rectángulo en el espacio libre y completar código/nombre en el formulario.
+- **Grid y snap opcionales:** Ajuste configurable a una cuadrícula de 100 unidades.
+- **Undo/redo y atajos:** `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z`, `Ctrl/Cmd+D`, `Delete` y `Ctrl/Cmd+S`.
+- **Borrador local:** Los gestos no generan peticiones durante el movimiento; el diseño se guarda como una operación transaccional.
+
+### Changed
+
+- **Guardado atómico del diseño:** `PUT /api/racks/[id]/design` valida todo el conjunto, controla `rack.version` y responde conflicto `409` ante cambios concurrentes.
+- **Validación backend reforzada:** PATCH verifica pertenencia al rack, límites, solapamientos, esquema y códigos históricos.
+- **Protección de posiciones activas:** No se permite eliminar, dividir o cambiar el código de un compartimiento con posiciones activas.
+- **Escala SVG estable:** La vista utiliza las dimensiones reales del rack o el espacio lógico `10000×10000` como fallback.
+- **Pruebas de geometría:** Añadidas pruebas de snap, movimiento, redimensionado y validación del conjunto completo.
+
 ## 0.29.0 (2026-07-22)
 
 ### Added

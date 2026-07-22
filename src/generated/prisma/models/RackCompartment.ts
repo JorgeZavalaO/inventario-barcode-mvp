@@ -31,6 +31,8 @@ export type RackCompartmentAvgAggregateOutputType = {
   y: number | null
   width: number | null
   height: number | null
+  columnCount: number | null
+  stackLevels: number | null
   orderIndex: number | null
 }
 
@@ -39,6 +41,8 @@ export type RackCompartmentSumAggregateOutputType = {
   y: number | null
   width: number | null
   height: number | null
+  columnCount: number | null
+  stackLevels: number | null
   orderIndex: number | null
 }
 
@@ -51,6 +55,8 @@ export type RackCompartmentMinAggregateOutputType = {
   y: number | null
   width: number | null
   height: number | null
+  columnCount: number | null
+  stackLevels: number | null
   moduleLabel: string | null
   levelLabel: string | null
   orderIndex: number | null
@@ -68,6 +74,8 @@ export type RackCompartmentMaxAggregateOutputType = {
   y: number | null
   width: number | null
   height: number | null
+  columnCount: number | null
+  stackLevels: number | null
   moduleLabel: string | null
   levelLabel: string | null
   orderIndex: number | null
@@ -85,6 +93,8 @@ export type RackCompartmentCountAggregateOutputType = {
   y: number
   width: number
   height: number
+  columnCount: number
+  stackLevels: number
   moduleLabel: number
   levelLabel: number
   orderIndex: number
@@ -100,6 +110,8 @@ export type RackCompartmentAvgAggregateInputType = {
   y?: true
   width?: true
   height?: true
+  columnCount?: true
+  stackLevels?: true
   orderIndex?: true
 }
 
@@ -108,6 +120,8 @@ export type RackCompartmentSumAggregateInputType = {
   y?: true
   width?: true
   height?: true
+  columnCount?: true
+  stackLevels?: true
   orderIndex?: true
 }
 
@@ -120,6 +134,8 @@ export type RackCompartmentMinAggregateInputType = {
   y?: true
   width?: true
   height?: true
+  columnCount?: true
+  stackLevels?: true
   moduleLabel?: true
   levelLabel?: true
   orderIndex?: true
@@ -137,6 +153,8 @@ export type RackCompartmentMaxAggregateInputType = {
   y?: true
   width?: true
   height?: true
+  columnCount?: true
+  stackLevels?: true
   moduleLabel?: true
   levelLabel?: true
   orderIndex?: true
@@ -154,6 +172,8 @@ export type RackCompartmentCountAggregateInputType = {
   y?: true
   width?: true
   height?: true
+  columnCount?: true
+  stackLevels?: true
   moduleLabel?: true
   levelLabel?: true
   orderIndex?: true
@@ -258,6 +278,8 @@ export type RackCompartmentGroupByOutputType = {
   y: number
   width: number
   height: number
+  columnCount: number
+  stackLevels: number
   moduleLabel: string | null
   levelLabel: string | null
   orderIndex: number
@@ -298,6 +320,8 @@ export type RackCompartmentWhereInput = {
   y?: Prisma.IntFilter<"RackCompartment"> | number
   width?: Prisma.IntFilter<"RackCompartment"> | number
   height?: Prisma.IntFilter<"RackCompartment"> | number
+  columnCount?: Prisma.IntFilter<"RackCompartment"> | number
+  stackLevels?: Prisma.IntFilter<"RackCompartment"> | number
   moduleLabel?: Prisma.StringNullableFilter<"RackCompartment"> | string | null
   levelLabel?: Prisma.StringNullableFilter<"RackCompartment"> | string | null
   orderIndex?: Prisma.IntFilter<"RackCompartment"> | number
@@ -318,6 +342,8 @@ export type RackCompartmentOrderByWithRelationInput = {
   y?: Prisma.SortOrder
   width?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  columnCount?: Prisma.SortOrder
+  stackLevels?: Prisma.SortOrder
   moduleLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   levelLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
@@ -342,6 +368,8 @@ export type RackCompartmentWhereUniqueInput = Prisma.AtLeast<{
   y?: Prisma.IntFilter<"RackCompartment"> | number
   width?: Prisma.IntFilter<"RackCompartment"> | number
   height?: Prisma.IntFilter<"RackCompartment"> | number
+  columnCount?: Prisma.IntFilter<"RackCompartment"> | number
+  stackLevels?: Prisma.IntFilter<"RackCompartment"> | number
   moduleLabel?: Prisma.StringNullableFilter<"RackCompartment"> | string | null
   levelLabel?: Prisma.StringNullableFilter<"RackCompartment"> | string | null
   orderIndex?: Prisma.IntFilter<"RackCompartment"> | number
@@ -362,6 +390,8 @@ export type RackCompartmentOrderByWithAggregationInput = {
   y?: Prisma.SortOrder
   width?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  columnCount?: Prisma.SortOrder
+  stackLevels?: Prisma.SortOrder
   moduleLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   levelLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
@@ -387,6 +417,8 @@ export type RackCompartmentScalarWhereWithAggregatesInput = {
   y?: Prisma.IntWithAggregatesFilter<"RackCompartment"> | number
   width?: Prisma.IntWithAggregatesFilter<"RackCompartment"> | number
   height?: Prisma.IntWithAggregatesFilter<"RackCompartment"> | number
+  columnCount?: Prisma.IntWithAggregatesFilter<"RackCompartment"> | number
+  stackLevels?: Prisma.IntWithAggregatesFilter<"RackCompartment"> | number
   moduleLabel?: Prisma.StringNullableWithAggregatesFilter<"RackCompartment"> | string | null
   levelLabel?: Prisma.StringNullableWithAggregatesFilter<"RackCompartment"> | string | null
   orderIndex?: Prisma.IntWithAggregatesFilter<"RackCompartment"> | number
@@ -403,6 +435,8 @@ export type RackCompartmentCreateInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -423,6 +457,8 @@ export type RackCompartmentUncheckedCreateInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -441,6 +477,8 @@ export type RackCompartmentUpdateInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -461,6 +499,8 @@ export type RackCompartmentUncheckedUpdateInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -480,6 +520,8 @@ export type RackCompartmentCreateManyInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -496,6 +538,8 @@ export type RackCompartmentUpdateManyMutationInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -513,6 +557,8 @@ export type RackCompartmentUncheckedUpdateManyInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -545,6 +591,8 @@ export type RackCompartmentCountOrderByAggregateInput = {
   y?: Prisma.SortOrder
   width?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  columnCount?: Prisma.SortOrder
+  stackLevels?: Prisma.SortOrder
   moduleLabel?: Prisma.SortOrder
   levelLabel?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
@@ -558,6 +606,8 @@ export type RackCompartmentAvgOrderByAggregateInput = {
   y?: Prisma.SortOrder
   width?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  columnCount?: Prisma.SortOrder
+  stackLevels?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
 }
 
@@ -570,6 +620,8 @@ export type RackCompartmentMaxOrderByAggregateInput = {
   y?: Prisma.SortOrder
   width?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  columnCount?: Prisma.SortOrder
+  stackLevels?: Prisma.SortOrder
   moduleLabel?: Prisma.SortOrder
   levelLabel?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
@@ -587,6 +639,8 @@ export type RackCompartmentMinOrderByAggregateInput = {
   y?: Prisma.SortOrder
   width?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  columnCount?: Prisma.SortOrder
+  stackLevels?: Prisma.SortOrder
   moduleLabel?: Prisma.SortOrder
   levelLabel?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
@@ -600,6 +654,8 @@ export type RackCompartmentSumOrderByAggregateInput = {
   y?: Prisma.SortOrder
   width?: Prisma.SortOrder
   height?: Prisma.SortOrder
+  columnCount?: Prisma.SortOrder
+  stackLevels?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
 }
 
@@ -686,6 +742,8 @@ export type RackCompartmentCreateWithoutRackInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -704,6 +762,8 @@ export type RackCompartmentUncheckedCreateWithoutRackInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -752,6 +812,8 @@ export type RackCompartmentScalarWhereInput = {
   y?: Prisma.IntFilter<"RackCompartment"> | number
   width?: Prisma.IntFilter<"RackCompartment"> | number
   height?: Prisma.IntFilter<"RackCompartment"> | number
+  columnCount?: Prisma.IntFilter<"RackCompartment"> | number
+  stackLevels?: Prisma.IntFilter<"RackCompartment"> | number
   moduleLabel?: Prisma.StringNullableFilter<"RackCompartment"> | string | null
   levelLabel?: Prisma.StringNullableFilter<"RackCompartment"> | string | null
   orderIndex?: Prisma.IntFilter<"RackCompartment"> | number
@@ -768,6 +830,8 @@ export type RackCompartmentCreateWithoutDepthSlotsInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -787,6 +851,8 @@ export type RackCompartmentUncheckedCreateWithoutDepthSlotsInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -820,6 +886,8 @@ export type RackCompartmentUpdateWithoutDepthSlotsInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -839,6 +907,8 @@ export type RackCompartmentUncheckedUpdateWithoutDepthSlotsInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -856,6 +926,8 @@ export type RackCompartmentCreateWithoutPositionsInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -875,6 +947,8 @@ export type RackCompartmentUncheckedCreateWithoutPositionsInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -908,6 +982,8 @@ export type RackCompartmentUpdateWithoutPositionsInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -927,6 +1003,8 @@ export type RackCompartmentUncheckedUpdateWithoutPositionsInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -944,6 +1022,8 @@ export type RackCompartmentCreateManyRackInput = {
   y: number
   width: number
   height: number
+  columnCount?: number
+  stackLevels?: number
   moduleLabel?: string | null
   levelLabel?: string | null
   orderIndex: number
@@ -960,6 +1040,8 @@ export type RackCompartmentUpdateWithoutRackInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -978,6 +1060,8 @@ export type RackCompartmentUncheckedUpdateWithoutRackInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -996,6 +1080,8 @@ export type RackCompartmentUncheckedUpdateManyWithoutRackInput = {
   y?: Prisma.IntFieldUpdateOperationsInput | number
   width?: Prisma.IntFieldUpdateOperationsInput | number
   height?: Prisma.IntFieldUpdateOperationsInput | number
+  columnCount?: Prisma.IntFieldUpdateOperationsInput | number
+  stackLevels?: Prisma.IntFieldUpdateOperationsInput | number
   moduleLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   levelLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1053,6 +1139,8 @@ export type RackCompartmentSelect<ExtArgs extends runtime.Types.Extensions.Inter
   y?: boolean
   width?: boolean
   height?: boolean
+  columnCount?: boolean
+  stackLevels?: boolean
   moduleLabel?: boolean
   levelLabel?: boolean
   orderIndex?: boolean
@@ -1074,6 +1162,8 @@ export type RackCompartmentSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   y?: boolean
   width?: boolean
   height?: boolean
+  columnCount?: boolean
+  stackLevels?: boolean
   moduleLabel?: boolean
   levelLabel?: boolean
   orderIndex?: boolean
@@ -1092,6 +1182,8 @@ export type RackCompartmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   y?: boolean
   width?: boolean
   height?: boolean
+  columnCount?: boolean
+  stackLevels?: boolean
   moduleLabel?: boolean
   levelLabel?: boolean
   orderIndex?: boolean
@@ -1110,6 +1202,8 @@ export type RackCompartmentSelectScalar = {
   y?: boolean
   width?: boolean
   height?: boolean
+  columnCount?: boolean
+  stackLevels?: boolean
   moduleLabel?: boolean
   levelLabel?: boolean
   orderIndex?: boolean
@@ -1118,7 +1212,7 @@ export type RackCompartmentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RackCompartmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rackId" | "code" | "name" | "x" | "y" | "width" | "height" | "moduleLabel" | "levelLabel" | "orderIndex" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["rackCompartment"]>
+export type RackCompartmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "rackId" | "code" | "name" | "x" | "y" | "width" | "height" | "columnCount" | "stackLevels" | "moduleLabel" | "levelLabel" | "orderIndex" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["rackCompartment"]>
 export type RackCompartmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rack?: boolean | Prisma.RackDefaultArgs<ExtArgs>
   depthSlots?: boolean | Prisma.RackCompartment$depthSlotsArgs<ExtArgs>
@@ -1148,6 +1242,8 @@ export type $RackCompartmentPayload<ExtArgs extends runtime.Types.Extensions.Int
     y: number
     width: number
     height: number
+    columnCount: number
+    stackLevels: number
     moduleLabel: string | null
     levelLabel: string | null
     orderIndex: number
@@ -1588,6 +1684,8 @@ export interface RackCompartmentFieldRefs {
   readonly y: Prisma.FieldRef<"RackCompartment", 'Int'>
   readonly width: Prisma.FieldRef<"RackCompartment", 'Int'>
   readonly height: Prisma.FieldRef<"RackCompartment", 'Int'>
+  readonly columnCount: Prisma.FieldRef<"RackCompartment", 'Int'>
+  readonly stackLevels: Prisma.FieldRef<"RackCompartment", 'Int'>
   readonly moduleLabel: Prisma.FieldRef<"RackCompartment", 'String'>
   readonly levelLabel: Prisma.FieldRef<"RackCompartment", 'String'>
   readonly orderIndex: Prisma.FieldRef<"RackCompartment", 'Int'>
