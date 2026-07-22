@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { ArrowLeft, Save, Plus, SplitSquareHorizontal, SplitSquareVertical, LoaderCircle, Trash2, Layers } from "lucide-react";
+import { ArrowLeft, Save, Plus, SplitSquareHorizontal, SplitSquareVertical, LoaderCircle, Copy, Trash2, Layers } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ export default function RackDesignerPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedComp, setSelectedComp] = useState<string | null>(null);
 
   const [newCode, setNewCode] = useState("");
   const [newName, setNewName] = useState("");
@@ -43,23 +44,75 @@ export default function RackDesignerPage() {
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2500); return () => clearTimeout(t); }, [toast]);
 
-  async function addCompartment() {
-    if (!newCode.trim() || !newName.trim()) return;
+  async function addCompartment(data?: {
+    code?: string; name?: string; x?: number; y?: number; width?: number; height?: number;
+  }) {
+    const c = data ?? { code: newCode, name: newName, x: parseInt(newX), y: parseInt(newY), width: parseInt(newW), height: parseInt(newH) };
+    if (!c.code || !c.name) { setToast("Código y nombre requeridos"); return; }
     try {
       await apiFetch(`/api/racks/${id}/compartments`, {
         method: "POST",
-        body: JSON.stringify({
-          code: newCode, name: newName,
-          x: parseInt(newX), y: parseInt(newY),
-          width: parseInt(newW), height: parseInt(newH),
-          orderIndex: compartments.length,
-        }),
+        body: JSON.stringify({ ...c, orderIndex: compartments.length }),
       });
       setNewCode(""); setNewName(""); setNewX("0"); setNewY("0"); setNewW("1000"); setNewH("1000");
       setShowAddForm(false);
       await load();
       setToast("Compartimento agregado");
-    } catch { setToast("Error al crear compartimento"); }
+    } catch { setToast("Error al crear"); }
+  }
+
+  async function deleteCompartment(compId: string) {
+    try {
+      await apiFetch(`/api/racks/${id}/compartments?compartmentId=${compId}`, { method: "DELETE" });
+      setSelectedComp(null);
+      await load();
+      setToast("Compartimento desactivado");
+    } catch { setToast("Error"); }
+  }
+
+  function splitHorizontal(sourceId: string) {
+    const comp = compartments.find((c) => c.id === sourceId);
+    if (!comp) return;
+    const halfH = Math.floor(comp.height / 2);
+    if (halfH < 2) { setToast("Muy pequeño para dividir"); return; }
+
+    const code1 = `${comp.code}A`;
+    const code2 = `${comp.code}B`;
+
+    // Deactivate original
+    void deleteCompartment(sourceId).then(() => {
+      void addCompartment({ code: code1, name: `${comp.name} A`, x: comp.x, y: comp.y, width: comp.width, height: halfH });
+      void addCompartment({ code: code2, name: `${comp.name} B`, x: comp.x, y: comp.y + halfH, width: comp.width, height: comp.height - halfH });
+    });
+  }
+
+  function splitVertical(sourceId: string) {
+    const comp = compartments.find((c) => c.id === sourceId);
+    if (!comp) return;
+    const halfW = Math.floor(comp.width / 2);
+    if (halfW < 2) { setToast("Muy pequeño para dividir"); return; }
+
+    const code1 = `${comp.code}L`;
+    const code2 = `${comp.code}R`;
+
+    void deleteCompartment(sourceId).then(() => {
+      void addCompartment({ code: code1, name: `${comp.name} Izq`, x: comp.x, y: comp.y, width: halfW, height: comp.height });
+      void addCompartment({ code: code2, name: `${comp.name} Der`, x: comp.x + halfW, y: comp.y, width: comp.width - halfW, height: comp.height });
+    });
+  }
+
+  function duplicate(compId: string) {
+    const comp = compartments.find((c) => c.id === compId);
+    if (!comp) return;
+    const offset = 50;
+    void addCompartment({
+      code: `${comp.code}-DUP`,
+      name: `${comp.name} (copia)`,
+      x: Math.min(comp.x + offset, 10000 - comp.width),
+      y: Math.min(comp.y + offset, 10000 - comp.height),
+      width: comp.width,
+      height: comp.height,
+    });
   }
 
   async function generatePositions() {
@@ -68,11 +121,7 @@ export default function RackDesignerPage() {
     try {
       await apiFetch("/api/positions", {
         method: "POST",
-        body: JSON.stringify({
-          rackId: id,
-          compartmentIds: compartments.map((c: any) => c.id),
-          generatePositions: true,
-        }),
+        body: JSON.stringify({ rackId: id, compartmentIds: compartments.map((c: any) => c.id), generatePositions: true }),
       });
       await load();
       setToast("Posiciones generadas");
@@ -101,7 +150,10 @@ export default function RackDesignerPage() {
         <Link href={`/locations/racks/${id}`} className="text-slate-400 hover:text-slate-600"><ArrowLeft size={20} /></Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">Diseñador: {rack.name}</h1>
-          <p className="text-xs text-slate-400">Compartimentos con coordenadas normalizadas (0–10000)</p>
+          <p className="text-xs text-slate-400">
+            Dimensiones: {rack.widthMm ?? "—"}×{rack.heightMm ?? "—"}mm · Versión {rack.version}
+            {rack.widthMm && <span className="ml-2 text-amber-600">Máx X: {rack.widthMm}, Máx Y: {rack.heightMm}</span>}
+          </p>
         </div>
         {toast && <span className="rounded bg-emerald-50 px-3 py-1 text-sm text-emerald-600">{toast}</span>}
       </div>
@@ -129,12 +181,31 @@ export default function RackDesignerPage() {
               <Button className="w-full" size="sm" onClick={() => setShowAddForm(!showAddForm)}>
                 <Plus size={14} /> {showAddForm ? "Cancelar" : "Nuevo compartimento"}
               </Button>
+              {selectedComp && (
+                <>
+                  <Button className="w-full" size="sm" variant="outline" onClick={() => splitHorizontal(selectedComp)}>
+                    <SplitSquareHorizontal size={14} /> Dividir H
+                  </Button>
+                  <Button className="w-full" size="sm" variant="outline" onClick={() => splitVertical(selectedComp)}>
+                    <SplitSquareVertical size={14} /> Dividir V
+                  </Button>
+                  <Button className="w-full" size="sm" variant="outline" onClick={() => duplicate(selectedComp)}>
+                    <Copy size={14} /> Duplicar
+                  </Button>
+                  <Button className="w-full" size="sm" variant="destructive" onClick={() => void deleteCompartment(selectedComp)}>
+                    <Trash2 size={14} /> Eliminar
+                  </Button>
+                </>
+              )}
               <Button className="w-full" size="sm" variant="outline" onClick={() => void generatePositions()} disabled={saving || compartments.length === 0}>
                 {saving ? <LoaderCircle className="animate-spin" size={14} /> : <Layers size={14} />} Generar posiciones
               </Button>
               <Button className="w-full" size="sm" variant="outline" onClick={() => void saveDesign()} disabled={saving}>
                 <Save size={14} /> Guardar diseño
               </Button>
+              {!selectedComp && compartments.length > 0 && (
+                <p className="text-xs text-slate-400">Selecciona un compartimento en la lista para dividir, duplicar o eliminar.</p>
+              )}
             </CardContent>
           </Card>
 
@@ -144,6 +215,7 @@ export default function RackDesignerPage() {
               <CardContent className="space-y-2">
                 <Input placeholder="Código (C01)" value={newCode} onChange={(e) => setNewCode(e.target.value)} />
                 <Input placeholder="Nombre" value={newName} onChange={(e) => setNewName(e.target.value)} />
+                <p className="text-xs text-slate-400">Coordenadas normalizadas 0–{rack.widthMm ?? 10000}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <Input placeholder="X" type="number" value={newX} onChange={(e) => setNewX(e.target.value)} />
                   <Input placeholder="Y" type="number" value={newY} onChange={(e) => setNewY(e.target.value)} />
@@ -158,12 +230,18 @@ export default function RackDesignerPage() {
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Compartimentos ({compartments.length})</CardTitle></CardHeader>
             <CardContent className="max-h-64 space-y-1 overflow-y-auto">
-              {compartments.map((comp: any, i: number) => (
-                <div key={comp.id} className="flex items-center gap-2 rounded bg-slate-50 px-2 py-1 text-xs">
+              {compartments.map((comp: any) => (
+                <button
+                  key={comp.id}
+                  onClick={() => setSelectedComp(selectedComp === comp.id ? null : comp.id)}
+                  className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs text-left ${
+                    selectedComp === comp.id ? "bg-teal-50 ring-1 ring-teal-400" : "bg-slate-50 hover:bg-slate-100"
+                  }`}
+                >
                   <span className="font-medium text-slate-600">{comp.code}</span>
-                  <span className="text-slate-400">{comp.name}</span>
+                  <span className="text-slate-400 truncate">{comp.name}</span>
                   <span className="ml-auto text-slate-400">{comp.x},{comp.y} {comp.width}×{comp.height}</span>
-                </div>
+                </button>
               ))}
               {compartments.length === 0 && <p className="text-xs text-slate-400">Agrega compartimentos para empezar.</p>}
             </CardContent>

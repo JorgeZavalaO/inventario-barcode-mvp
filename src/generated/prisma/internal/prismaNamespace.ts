@@ -397,6 +397,10 @@ export const ModelName = {
   SessionProduct: 'SessionProduct',
   SessionParticipant: 'SessionParticipant',
   CountEvent: 'CountEvent',
+  SessionPosition: 'SessionPosition',
+  SessionStockSnapshot: 'SessionStockSnapshot',
+  CountRound: 'CountRound',
+  CountIncident: 'CountIncident',
   Warehouse: 'Warehouse',
   Floor: 'Floor',
   WarehouseZone: 'WarehouseZone',
@@ -419,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "product" | "productBarcode" | "productPackage" | "productLocationStock" | "operator" | "inventorySession" | "sessionProduct" | "sessionParticipant" | "countEvent" | "warehouse" | "floor" | "warehouseZone" | "rack" | "rackCompartment" | "rackDepthSlot" | "storagePosition"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "product" | "productBarcode" | "productPackage" | "productLocationStock" | "operator" | "inventorySession" | "sessionProduct" | "sessionParticipant" | "countEvent" | "sessionPosition" | "sessionStockSnapshot" | "countRound" | "countIncident" | "warehouse" | "floor" | "warehouseZone" | "rack" | "rackCompartment" | "rackDepthSlot" | "storagePosition"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1385,6 +1389,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SessionPosition: {
+      payload: Prisma.$SessionPositionPayload<ExtArgs>
+      fields: Prisma.SessionPositionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SessionPositionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SessionPositionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>
+        }
+        findFirst: {
+          args: Prisma.SessionPositionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SessionPositionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>
+        }
+        findMany: {
+          args: Prisma.SessionPositionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>[]
+        }
+        create: {
+          args: Prisma.SessionPositionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>
+        }
+        createMany: {
+          args: Prisma.SessionPositionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SessionPositionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>[]
+        }
+        delete: {
+          args: Prisma.SessionPositionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>
+        }
+        update: {
+          args: Prisma.SessionPositionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SessionPositionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SessionPositionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SessionPositionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SessionPositionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionPositionPayload>
+        }
+        aggregate: {
+          args: Prisma.SessionPositionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSessionPosition>
+        }
+        groupBy: {
+          args: Prisma.SessionPositionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionPositionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SessionPositionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionPositionCountAggregateOutputType> | number
+        }
+      }
+    }
+    SessionStockSnapshot: {
+      payload: Prisma.$SessionStockSnapshotPayload<ExtArgs>
+      fields: Prisma.SessionStockSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SessionStockSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SessionStockSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.SessionStockSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SessionStockSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.SessionStockSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.SessionStockSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.SessionStockSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SessionStockSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.SessionStockSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>
+        }
+        update: {
+          args: Prisma.SessionStockSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.SessionStockSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SessionStockSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SessionStockSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.SessionStockSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SessionStockSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.SessionStockSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSessionStockSnapshot>
+        }
+        groupBy: {
+          args: Prisma.SessionStockSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionStockSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SessionStockSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SessionStockSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
+    CountRound: {
+      payload: Prisma.$CountRoundPayload<ExtArgs>
+      fields: Prisma.CountRoundFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CountRoundFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CountRoundFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>
+        }
+        findFirst: {
+          args: Prisma.CountRoundFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CountRoundFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>
+        }
+        findMany: {
+          args: Prisma.CountRoundFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>[]
+        }
+        create: {
+          args: Prisma.CountRoundCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>
+        }
+        createMany: {
+          args: Prisma.CountRoundCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CountRoundCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>[]
+        }
+        delete: {
+          args: Prisma.CountRoundDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>
+        }
+        update: {
+          args: Prisma.CountRoundUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>
+        }
+        deleteMany: {
+          args: Prisma.CountRoundDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CountRoundUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CountRoundUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>[]
+        }
+        upsert: {
+          args: Prisma.CountRoundUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountRoundPayload>
+        }
+        aggregate: {
+          args: Prisma.CountRoundAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCountRound>
+        }
+        groupBy: {
+          args: Prisma.CountRoundGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CountRoundGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CountRoundCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CountRoundCountAggregateOutputType> | number
+        }
+      }
+    }
+    CountIncident: {
+      payload: Prisma.$CountIncidentPayload<ExtArgs>
+      fields: Prisma.CountIncidentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CountIncidentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CountIncidentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>
+        }
+        findFirst: {
+          args: Prisma.CountIncidentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CountIncidentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>
+        }
+        findMany: {
+          args: Prisma.CountIncidentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>[]
+        }
+        create: {
+          args: Prisma.CountIncidentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>
+        }
+        createMany: {
+          args: Prisma.CountIncidentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CountIncidentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>[]
+        }
+        delete: {
+          args: Prisma.CountIncidentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>
+        }
+        update: {
+          args: Prisma.CountIncidentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>
+        }
+        deleteMany: {
+          args: Prisma.CountIncidentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CountIncidentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CountIncidentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>[]
+        }
+        upsert: {
+          args: Prisma.CountIncidentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CountIncidentPayload>
+        }
+        aggregate: {
+          args: Prisma.CountIncidentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCountIncident>
+        }
+        groupBy: {
+          args: Prisma.CountIncidentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CountIncidentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CountIncidentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CountIncidentCountAggregateOutputType> | number
+        }
+      }
+    }
     Warehouse: {
       payload: Prisma.$WarehousePayload<ExtArgs>
       fields: Prisma.WarehouseFieldRefs
@@ -2102,10 +2402,84 @@ export const CountEventScalarFieldEnum = {
   quantity: 'quantity',
   inputMethod: 'inputMethod',
   createdAt: 'createdAt',
-  reversedAt: 'reversedAt'
+  reversedAt: 'reversedAt',
+  positionId: 'positionId',
+  countRoundId: 'countRoundId',
+  packageId: 'packageId',
+  packageCount: 'packageCount',
+  unitsPerPackage: 'unitsPerPackage',
+  looseQuantity: 'looseQuantity',
+  reversedById: 'reversedById',
+  reversalReason: 'reversalReason'
 } as const
 
 export type CountEventScalarFieldEnum = (typeof CountEventScalarFieldEnum)[keyof typeof CountEventScalarFieldEnum]
+
+
+export const SessionPositionScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  positionId: 'positionId',
+  status: 'status',
+  assignedToId: 'assignedToId',
+  assignedById: 'assignedById',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  approvedAt: 'approvedAt',
+  approvedById: 'approvedById',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SessionPositionScalarFieldEnum = (typeof SessionPositionScalarFieldEnum)[keyof typeof SessionPositionScalarFieldEnum]
+
+
+export const SessionStockSnapshotScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  positionId: 'positionId',
+  productId: 'productId',
+  theoreticalStock: 'theoreticalStock',
+  source: 'source',
+  capturedAt: 'capturedAt'
+} as const
+
+export type SessionStockSnapshotScalarFieldEnum = (typeof SessionStockSnapshotScalarFieldEnum)[keyof typeof SessionStockSnapshotScalarFieldEnum]
+
+
+export const CountRoundScalarFieldEnum = {
+  id: 'id',
+  sessionPositionId: 'sessionPositionId',
+  roundNumber: 'roundNumber',
+  operatorId: 'operatorId',
+  status: 'status',
+  startedAt: 'startedAt',
+  submittedAt: 'submittedAt',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CountRoundScalarFieldEnum = (typeof CountRoundScalarFieldEnum)[keyof typeof CountRoundScalarFieldEnum]
+
+
+export const CountIncidentScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  positionId: 'positionId',
+  reportedById: 'reportedById',
+  type: 'type',
+  description: 'description',
+  resolved: 'resolved',
+  resolvedById: 'resolvedById',
+  resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CountIncidentScalarFieldEnum = (typeof CountIncidentScalarFieldEnum)[keyof typeof CountIncidentScalarFieldEnum]
 
 
 export const WarehouseScalarFieldEnum = {
@@ -2377,6 +2751,34 @@ export type ListEnumInputMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$
 
 
 /**
+ * Reference to a field of type 'PositionStatus'
+ */
+export type EnumPositionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PositionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PositionStatus[]'
+ */
+export type ListEnumPositionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PositionStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CountRoundStatus'
+ */
+export type EnumCountRoundStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CountRoundStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CountRoundStatus[]'
+ */
+export type ListEnumCountRoundStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CountRoundStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -2540,6 +2942,10 @@ export type GlobalOmitConfig = {
   sessionProduct?: Prisma.SessionProductOmit
   sessionParticipant?: Prisma.SessionParticipantOmit
   countEvent?: Prisma.CountEventOmit
+  sessionPosition?: Prisma.SessionPositionOmit
+  sessionStockSnapshot?: Prisma.SessionStockSnapshotOmit
+  countRound?: Prisma.CountRoundOmit
+  countIncident?: Prisma.CountIncidentOmit
   warehouse?: Prisma.WarehouseOmit
   floor?: Prisma.FloorOmit
   warehouseZone?: Prisma.WarehouseZoneOmit

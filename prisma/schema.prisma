@@ -18,6 +18,7 @@ enum SessionStatus {
   DRAFT
   OPEN
   PAUSED
+  REVIEW
   CLOSED
   CANCELLED
 }
@@ -26,6 +27,24 @@ enum InputMethod {
   CAMERA
   MANUAL
   USB
+}
+
+enum PositionStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  RECOUNT_REQUIRED
+  APPROVED
+  EXCLUDED
+}
+
+enum CountRoundStatus {
+  OPEN
+  SUBMITTED
+  REJECTED
+  APPROVED
+  CANCELLED
 }
 
 model User {
@@ -100,6 +119,7 @@ model Product {
   barcodes         ProductBarcode[]
   packages         ProductPackage[]
   locationStocks   ProductLocationStock[]
+  stockSnapshots   SessionStockSnapshot[]
 
   @@map("products")
 }
@@ -180,6 +200,9 @@ model InventorySession {
   sessionProducts      SessionProduct[]
   sessionParticipants  SessionParticipant[]
   countEvents          CountEvent[]
+  sessionPositions     SessionPosition[]
+  stockSnapshots       SessionStockSnapshot[]
+  incidents            CountIncident[]
 
   @@map("inventory_sessions")
 }
@@ -210,23 +233,115 @@ model SessionParticipant {
 }
 
 model CountEvent {
-  id           String      @id @default(uuid())
-  operationId  String      @unique @map("operation_id")
-  sessionId    String      @map("session_id")
-  productId    String      @map("product_id")
-  operatorId   String      @map("operator_id")
-  quantity     Decimal     @db.Decimal(14, 3)
-  inputMethod  InputMethod @default(CAMERA) @map("input_method")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  reversedAt   DateTime?   @map("reversed_at")
+  id              String      @id @default(uuid())
+  operationId     String      @unique @map("operation_id")
+  sessionId       String      @map("session_id")
+  productId       String      @map("product_id")
+  operatorId      String      @map("operator_id")
+  quantity        Decimal     @db.Decimal(14, 3)
+  inputMethod     InputMethod @default(CAMERA) @map("input_method")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  reversedAt      DateTime?   @map("reversed_at")
 
-  session  InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  product  Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
-  operator Operator         @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+  // V2 only fields (nullable for V1 compatibility)
+  positionId      String?     @map("position_id")
+  countRoundId    String?     @map("count_round_id")
+  packageId       String?     @map("package_id")
+  packageCount    Decimal?    @map("package_count") @db.Decimal(14, 3)
+  unitsPerPackage Decimal?    @map("units_per_package") @db.Decimal(14, 3)
+  looseQuantity   Decimal?    @map("loose_quantity") @db.Decimal(14, 3)
+  reversedById    String?     @map("reversed_by_id")
+  reversalReason  String?     @map("reversal_reason")
+
+  session    InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  product    Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
+  operator   Operator         @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+  countRound CountRound?      @relation(fields: [countRoundId], references: [id])
 
   @@index([sessionId, productId])
   @@index([sessionId, createdAt(sort: Desc)])
+  @@index([sessionId, positionId, productId])
+  @@index([countRoundId, createdAt])
   @@map("count_events")
+}
+
+model SessionPosition {
+  id            String         @id @default(uuid())
+  sessionId     String         @map("session_id")
+  positionId    String         @map("position_id")
+  status        PositionStatus @default(PENDING)
+  assignedToId  String?        @map("assigned_to_id")
+  assignedById  String?        @map("assigned_by_id")
+  startedAt     DateTime?      @map("started_at")
+  completedAt   DateTime?      @map("completed_at")
+  approvedAt    DateTime?      @map("approved_at")
+  approvedById  String?        @map("approved_by_id")
+  notes         String?
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  session  InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  position StoragePosition  @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  rounds   CountRound[]
+
+  @@unique([sessionId, positionId])
+  @@map("session_positions")
+}
+
+model SessionStockSnapshot {
+  id               String   @id @default(uuid())
+  sessionId        String   @map("session_id")
+  positionId       String   @map("position_id")
+  productId        String   @map("product_id")
+  theoreticalStock Decimal  @map("theoretical_stock") @db.Decimal(14, 3)
+  source           String?
+  capturedAt       DateTime @default(now()) @map("captured_at")
+
+  session  InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  position StoragePosition  @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  product  Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, positionId, productId])
+  @@map("session_stock_snapshots")
+}
+
+model CountRound {
+  id                String           @id @default(uuid())
+  sessionPositionId String           @map("session_position_id")
+  roundNumber       Int              @map("round_number")
+  operatorId        String           @map("operator_id")
+  status            CountRoundStatus @default(OPEN)
+  startedAt         DateTime         @default(now()) @map("started_at")
+  submittedAt       DateTime?        @map("submitted_at")
+  reviewedById      String?          @map("reviewed_by_id")
+  reviewedAt        DateTime?        @map("reviewed_at")
+  notes             String?
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  sessionPosition SessionPosition @relation(fields: [sessionPositionId], references: [id], onDelete: Cascade)
+  events          CountEvent[]
+
+  @@unique([sessionPositionId, roundNumber])
+  @@map("count_rounds")
+}
+
+model CountIncident {
+  id            String   @id @default(uuid())
+  sessionId     String   @map("session_id")
+  positionId    String   @map("position_id")
+  reportedById  String   @map("reported_by_id")
+  type          String
+  description   String
+  resolved      Boolean  @default(false)
+  resolvedById  String?  @map("resolved_by_id")
+  resolvedAt    DateTime? @map("resolved_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  session  InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  position StoragePosition  @relation(fields: [positionId], references: [id], onDelete: Restrict)
+
+  @@map("count_incidents")
 }
 
 enum DepthKind {
@@ -370,6 +485,9 @@ model StoragePosition {
   compartment   RackCompartment       @relation(fields: [compartmentId], references: [id])
   depthSlot     RackDepthSlot         @relation(fields: [depthSlotId], references: [id])
   locationStocks ProductLocationStock[]
+  sessionPositions SessionPosition[]
+  stockSnapshots   SessionStockSnapshot[]
+  incidents        CountIncident[]
 
   @@index([rackId])
   @@index([compartmentId])

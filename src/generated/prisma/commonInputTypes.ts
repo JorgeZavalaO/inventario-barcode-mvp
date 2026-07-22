@@ -307,6 +307,40 @@ export type EnumInputMethodWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumInputMethodFilter<$PrismaModel>
 }
 
+export type EnumPositionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PositionStatus | Prisma.EnumPositionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPositionStatusFilter<$PrismaModel> | $Enums.PositionStatus
+}
+
+export type EnumPositionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PositionStatus | Prisma.EnumPositionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPositionStatusWithAggregatesFilter<$PrismaModel> | $Enums.PositionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPositionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPositionStatusFilter<$PrismaModel>
+}
+
+export type EnumCountRoundStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CountRoundStatus | Prisma.EnumCountRoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCountRoundStatusFilter<$PrismaModel> | $Enums.CountRoundStatus
+}
+
+export type EnumCountRoundStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CountRoundStatus | Prisma.EnumCountRoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCountRoundStatusWithAggregatesFilter<$PrismaModel> | $Enums.CountRoundStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCountRoundStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCountRoundStatusFilter<$PrismaModel>
+}
+
 export type JsonNullableFilter<$PrismaModel = never> =
 | Prisma.PatchUndefined<
     Prisma.Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -679,6 +713,40 @@ export type NestedEnumInputMethodWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumInputMethodFilter<$PrismaModel>
   _max?: Prisma.NestedEnumInputMethodFilter<$PrismaModel>
+}
+
+export type NestedEnumPositionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.PositionStatus | Prisma.EnumPositionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPositionStatusFilter<$PrismaModel> | $Enums.PositionStatus
+}
+
+export type NestedEnumPositionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PositionStatus | Prisma.EnumPositionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PositionStatus[] | Prisma.ListEnumPositionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPositionStatusWithAggregatesFilter<$PrismaModel> | $Enums.PositionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPositionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPositionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumCountRoundStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CountRoundStatus | Prisma.EnumCountRoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCountRoundStatusFilter<$PrismaModel> | $Enums.CountRoundStatus
+}
+
+export type NestedEnumCountRoundStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CountRoundStatus | Prisma.EnumCountRoundStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CountRoundStatus[] | Prisma.ListEnumCountRoundStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCountRoundStatusWithAggregatesFilter<$PrismaModel> | $Enums.CountRoundStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCountRoundStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCountRoundStatusFilter<$PrismaModel>
 }
 
 export type NestedJsonNullableFilter<$PrismaModel = never> =

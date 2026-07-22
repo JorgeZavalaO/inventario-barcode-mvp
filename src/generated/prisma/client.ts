@@ -107,6 +107,26 @@ export type SessionParticipant = Prisma.SessionParticipantModel
  */
 export type CountEvent = Prisma.CountEventModel
 /**
+ * Model SessionPosition
+ * 
+ */
+export type SessionPosition = Prisma.SessionPositionModel
+/**
+ * Model SessionStockSnapshot
+ * 
+ */
+export type SessionStockSnapshot = Prisma.SessionStockSnapshotModel
+/**
+ * Model CountRound
+ * 
+ */
+export type CountRound = Prisma.CountRoundModel
+/**
+ * Model CountIncident
+ * 
+ */
+export type CountIncident = Prisma.CountIncidentModel
+/**
  * Model Warehouse
  * 
  */

@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ensureDatabase, getDb } from "@/lib/db";
 import { apiError } from "@/lib/http";
-import { requireRole } from "@/server/guards";
+import { requireRole, requireAuth } from "@/server/guards";
+
+const DESTRUCTIVE_DISABLED = process.env.DISABLE_DESTRUCTIVE_API === "true";
 
 const DEMO_PRODUCTS = [
   ["MANG-001", "7750000000017", "Manguera hidráulica 1/2 pulgada", "MTR", "Mangueras", 24],
@@ -14,6 +16,7 @@ const DEMO_PRODUCTS = [
 
 export async function POST() {
   try {
+    if (DESTRUCTIVE_DISABLED) return NextResponse.json({ error: "Acción deshabilitada en este entorno" }, { status: 403 });
     const auth = await requireRole("ADMIN");
     if (!auth.authorized) return auth.response;
 
@@ -45,8 +48,16 @@ export async function POST() {
 
 export async function DELETE() {
   try {
-    const auth = await requireRole("ADMIN");
+    if (DESTRUCTIVE_DISABLED) return NextResponse.json({ error: "Acción deshabilitada en este entorno" }, { status: 403 });
+    const auth = await requireAuth();
     if (!auth.authorized) return auth.response;
+    const user = auth.session!.user;
+
+    if (user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Solo administradores pueden borrar datos" }, { status: 403 });
+    }
+
+    console.log(`[AUDIT] DELETE /api/setup by user ${user.id} (${user.email})`);
 
     await ensureDatabase();
     const sql = getDb();

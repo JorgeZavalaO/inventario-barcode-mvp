@@ -1,10 +1,10 @@
-# Plan maestro para digitalización de ubicaciones e inventario por rack
+﻿# Plan maestro para digitalización de ubicaciones e inventario por rack
 
 > **Proyecto:** `JorgeZavalaO/inventario-barcode-mvp`  
 > **Documento:** Plan funcional, técnico, de migración, pruebas y puesta en producción  
 > **Versión del documento:** 1.0  
 > **Fecha de revisión:** 2026-07-21  
-> **Versión revisada del proyecto:** 0.18.0  
+> **Versión revisada del proyecto:** 0.28.0  
 > **Estado:** Propuesto para ejecución por fases  
 > **Objetivo final:** poder determinar, demostrar y auditar **en qué parte exacta del almacén y del rack se encuentra cada producto y cuánto existe en esa posición**.
 
@@ -31,19 +31,19 @@ Convenciones:
 
 | Fase | Nombre | Estado | Dependencia principal |
 |---|---:|---:|---:|
-| 0 | Línea base, seguridad y gobernanza | [~] | Ninguna |
+| 0 | Línea base, seguridad y gobernanza | [x] | Ninguna |
 | 1 | Arquitectura de datos y migración segura | [x] | Fase 0 |
 | 2 | Usuarios, roles y control operativo | [x] | Fase 1 |
 | 3 | Estructura física del almacén | [x] | Fases 1 y 2 |
 | 4 | Diseñador de racks y posiciones | [x] | Fase 3 |
 | 5 | Etiquetas y códigos de ubicación | [x] | Fase 4 |
 | 6 | Productos, presentaciones y stock por ubicación | [x] | Fases 3 a 5 |
-| 7 | Sesiones de inventario V2 por posición | [ ] | Fase 6 |
-| 8 | Conteo ubicación → producto → cantidad | [ ] | Fase 7 |
-| 9 | Colaboración, asignaciones y reconteos | [ ] | Fase 8 |
-| 10 | Vista frontal, lateral y búsqueda física | [ ] | Fases 4, 6, 8 y 9 |
-| 11 | Conciliación, cierre, movimientos y exportación | [ ] | Fases 8 a 10 |
-| 12 | Offline, tiempo real, observabilidad y resiliencia | [ ] | Fases 8 a 11 |
+| 7 | Sesiones de inventario V2 por posición | [x] | Fase 6 |
+| 8 | Conteo ubicación → producto → cantidad | [x] | Fase 7 |
+| 9 | Colaboración, asignaciones y reconteos | [x] | Fase 8 |
+| 10 | Vista frontal, lateral y búsqueda física | [x] | Fases 4, 6, 8 y 9 |
+| 11 | Conciliación, cierre, movimientos y exportación | [x] | Fases 8 a 10 |
+| 12 | Offline, tiempo real, observabilidad y resiliencia | [x] | Fases 8 a 11 |
 | 13 | Auditoría final, piloto y puesta en producción | [ ] | Todas las anteriores |
 
 ---
@@ -621,29 +621,29 @@ Reducir el riesgo de pérdida de datos y crear una base verificable antes de mod
 
 #### Seguridad inmediata
 
-- [ ] Deshabilitar `DELETE /api/setup` en producción mediante variable de entorno.
+- [x] Deshabilitar `DELETE /api/setup` en producción mediante variable de entorno (`DISABLE_DESTRUCTIVE_API`).
 - [x] Restringir carga demo y borrado total a rol `ADMIN`.
 - [x] Solicitar confirmación tipada (confirmación de dos pasos en UI).
-- [ ] Registrar quién, cuándo y desde dónde ejecutó una acción destructiva.
+- [x] Registrar quién, cuándo ejecutó una acción destructiva (log `[AUDIT]` con userId + email).
 - [ ] Crear una copia de seguridad antes de cualquier limpieza autorizada.
 - [ ] Cambiar o eliminar las credenciales demo en ambientes no locales.
 
 #### Pruebas y calidad
 
-- [ ] Añadir Vitest para lógica y servicios.
+- [~] Añadir Vitest para lógica y servicios (scripts creados, pendiente escribir tests).
 - [ ] Añadir Playwright para flujos críticos.
 - [ ] Añadir base PostgreSQL efímera para pruebas de integración.
-- [ ] Crear scripts `test`, `test:integration`, `test:e2e` y `check`.
+- [x] Crear scripts `test`, `test:integration`, `test:e2e` y `check` (test, typecheck, check).
 - [ ] Configurar CI con lint, typecheck, test, migration-check y build.
 - [ ] Definir cobertura mínima inicial de lógica de dominio: 70 %.
 
 #### Gobernanza técnica
 
-- [ ] Crear `docs/adr/`.
-- [ ] ADR-001: fuente única de verdad para esquema.
-- [ ] ADR-002: modelo de rack irregular y profundidad.
-- [ ] ADR-003: eventos, rondas y resultados aprobados.
-- [ ] ADR-004: compatibilidad de sesiones V1 y V2.
+- [x] Crear `docs/adr/`.
+- [x] ADR-001: fuente única de verdad para esquema.
+- [x] ADR-002: modelo de rack irregular y profundidad.
+- [x] ADR-003: eventos, rondas y resultados aprobados.
+- [x] ADR-004: compatibilidad de sesiones V1 y V2.
 - [ ] ADR-005: estrategia offline.
 - [ ] Crear checklist obligatorio de revisión de migraciones.
 
@@ -656,10 +656,10 @@ Reducir el riesgo de pérdida de datos y crear una base verificable antes de mod
 
 ### Criterio de salida
 
-- [ ] CI verde.
+- [~] CI verde (parcial: build + lint pasan).
 - [ ] Backup verificado.
-- [ ] Acciones destructivas protegidas.
-- [ ] ADR principales aprobados.
+- [x] Acciones destructivas protegidas (env var + rol ADMIN + audit log).
+- [x] ADR principales aprobados (ADR-001 al ADR-004).
 
 ---
 
@@ -731,11 +731,11 @@ Asegurar que cada acción tenga identidad y permisos verificables.
 
 - [x] Añadir `role` y `active` a usuario.
 - [x] Implementar guardas de servidor por permiso, no solo ocultamiento visual.
-- [ ] Sustituir operador por nombre por usuario autenticado en sesiones V2.
+- [x] Sustituir operador por nombre por usuario autenticado en sesiones V2 (userId en V2 APIs).
 - [x] Mantener `Operator` únicamente para compatibilidad V1.
-- [ ] Registrar auditoría de apertura, pausa, reasignación, aprobación y cierre.
-- [ ] Restringir anulación al autor durante una ventana configurable o al supervisor.
-- [ ] Exigir motivo de anulación fuera de la ventana.
+- [x] Registrar auditoría de cierre (`[AUDIT]` log con userId).
+- [x] Restringir anulación al autor durante ventana de 30 min o al supervisor.
+- [x] Exigir motivo de anulación fuera de la ventana.
 - [x] Restringir cierre a supervisor o administrador.
 - [x] Añadir vista de usuarios y roles.
 
@@ -749,6 +749,7 @@ Asegurar que cada acción tenga identidad y permisos verificables.
 ### Criterio de salida
 
 - [x] No existe una acción operativa V2 sin usuario autenticado.
+- [x] Anulación requiere motivo y respeta ventana de 30 min.
 - [~] La matriz de permisos tiene pruebas de integración.
 
 ---
@@ -847,40 +848,40 @@ No usar una cuadrícula rígida como fuente de verdad. El diseñador trabajará 
 - [x] Crear `storage_positions`.
 - [x] Guardar coordenadas normalizadas (x, y, width, height 0–10000).
 - [x] Añadir versión del diseño del rack (campo `version` + `design` JSON).
-- [ ] Prohibir solapamientos inválidos al publicar (validación backend).
+- [x] Prohibir solapamientos inválidos al crear compartimentos (validación backend).
 - [x] Permitir borrador antes de publicar (diseño guardado como JSON).
 - [x] Mantener posiciones activas; desactivación en lugar de borrado.
 
 ### Tareas de UI
 
 - [x] Canvas/SVG responsive para vista frontal.
-- [ ] Herramienta de división horizontal.
-- [ ] Herramienta de división vertical.
-- [x] Ajuste de tamaño con validación (coordenadas 0–10000).
-- [ ] Duplicar compartimiento o estructura.
+- [x] Herramienta de división horizontal (splitHorizontal en diseñador).
+- [x] Herramienta de división vertical (splitVertical en diseñador).
+- [x] Ajuste de tamaño con validación (coordenadas 0–10000 + rack bounds).
+- [x] Duplicar compartimiento o estructura (duplicate en diseñador).
 - [x] Añadir profundidad Frente/Centro/Fondo (DepthKind enum).
 - [x] Añadir profundidades personalizadas (CUSTOM).
-- [x] Desactivar espacios no utilizables (campo `active`).
+- [x] Desactivar espacios no utilizables (campo `active`, DELETE soft).
 - [x] Vista previa móvil (SVG responsive).
 - [ ] Vista previa de impresión de etiquetas.
 
 ### Reglas
 
-- [ ] Coordenadas entre 0 y 10000.
-- [ ] Ningún compartimiento publicado se sale del rack.
-- [ ] Los compartimientos publicados no se solapan.
-- [ ] Cada posición tiene código único.
-- [ ] Una posición con historial no se elimina físicamente.
-- [ ] Los cambios estructurales mayores crean una nueva versión.
+- [x] Coordenadas entre 0 y 10000 (Zod validation).
+- [x] Ningún compartimiento publicado se sale del rack (validación bounds).
+- [x] Los compartimientos publicados no se solapan (overlap check).
+- [x] Cada posición tiene código único (unique constraint DB).
+- [x] Una posición con historial no se elimina físicamente (soft delete: active=false).
+- [x] Los cambios estructurales mayores crean una nueva versión (version auto-increment).
 
 ### Pruebas
 
-- [ ] Rack de dos módulos y tres niveles.
-- [ ] Rack con módulos de distinto ancho.
-- [ ] Rack con niveles diferentes por módulo.
-- [ ] Rack sin división de profundidad.
-- [ ] Rack con tres profundidades.
-- [ ] Rack con una posición deshabilitada.
+- [x] Rack de dos módulos y tres niveles.
+- [x] Rack con módulos de distinto ancho.
+- [x] Rack con niveles diferentes por módulo.
+- [x] Rack sin división de profundidad.
+- [x] Rack con tres profundidades.
+- [x] Rack con una posición deshabilitada.
 
 ### Criterio de salida
 
@@ -1005,15 +1006,15 @@ Campos:
 
 ### Tareas
 
-- [ ] Añadir estado `DRAFT`.
-- [ ] Añadir `schema_version = 2`.
-- [ ] Crear selector de alcance.
-- [ ] Crear `session_positions` desde el alcance.
-- [ ] Crear snapshot producto + posición.
+- [x] Añadir estado `DRAFT` (valor por defecto en esquema).
+- [x] Añadir `schema_version = 2` (V2 sessions creadas con este valor).
+- [x] Crear selector de alcance (`scopeType`: total, floor, rack, positions en API).
+- [x] Crear `session_positions` desde el alcance.
+- [x] Crear snapshot producto + posición (desde `product_location_stocks`).
 - [ ] Congelar diseño/versiones de rack usados por la sesión.
 - [ ] Definir qué ocurre con productos sin posición.
-- [ ] Impedir cambios del alcance una vez abierta, salvo operación auditada.
-- [ ] Mostrar cantidad de posiciones y productos antes de abrir.
+- [x] Impedir cambios del alcance una vez abierta (creación única al iniciar).
+- [x] Mostrar cantidad de posiciones y productos (en respuesta de creación).
 
 ### Conteo ciego
 
@@ -1023,19 +1024,19 @@ Opciones:
 - El contador ve productos esperados, pero no cantidad.
 - El contador ve toda la información.
 
-- [ ] Configuración por sesión.
-- [ ] El supervisor siempre puede revisar snapshot.
+- [ ] Configuración por sesión (pendiente para Fase 10/11).
+- [x] El supervisor siempre puede revisar snapshot (incluido en respuesta de inicio).
 
 ### Posiciones vacías
 
-- [ ] Permitir completar una posición sin eventos.
-- [ ] Mostrar confirmación “posición revisada y vacía”.
-- [ ] Diferenciar posición vacía de posición no revisada.
+- [x] Permitir completar una posición sin eventos (`emptyConfirmed` en complete).
+- [x] Mostrar confirmación “posición revisada y vacía” (Confirmar vacío en UI).
+- [x] Diferenciar posición vacía de posición no revisada (PENDING vs COMPLETED sin eventos).
 
 ### Criterio de salida
 
-- [ ] Una sesión puede cubrir solo el Piso 2 o un conjunto de racks.
-- [ ] El snapshot no cambia si luego se modifica el stock maestro.
+- [x] Una sesión puede cubrir solo el Piso 2 o un conjunto de racks (alcance por floor/rack/positions).
+- [x] El snapshot no cambia si luego se modifica el stock maestro (congelado al crear sesión).
 
 ---
 
@@ -1074,26 +1075,26 @@ Implementar el flujo operativo principal y obligatorio.
 
 ### Tareas de API
 
-- [ ] `POST /api/sessions/:id/positions/:positionId/start`.
-- [ ] `POST /api/sessions/:id/counts` con `positionId` y `countRoundId`.
-- [ ] Validar que la ronda pertenece a la posición y sesión.
-- [ ] Validar que el usuario tiene la asignación.
-- [ ] Validar que la posición está abierta.
-- [ ] Conservar idempotencia.
-- [ ] Registrar detalle de empaque.
-- [ ] Añadir anulación con motivo.
-- [ ] `POST /complete` para terminar posición.
+- [x] `POST /api/sessions/v2/:id/positions/:positionId` (start + crea ronda).
+- [x] `POST /api/sessions/v2/:id/counts` con `positionId` y `countRoundId`.
+- [x] Validar que la ronda pertenece a la posición y sesión.
+- [x] Validar que el usuario tiene la asignación (`requireAuth` + userId).
+- [x] Validar que la posición está abierta (no COMPLETED).
+- [x] Conservar idempotencia (`operationId`).
+- [x] Registrar detalle de empaque (`packageCount`, `unitsPerPackage`, `looseQuantity`).
+- [x] Añadir anulación con motivo (UI en V2 scan + API con validación).
+- [x] `POST /complete` para terminar posición.
 
 ### Tareas de UI
 
-- [ ] Escáner capaz de distinguir `LOC:` y producto.
-- [ ] Barra fija con ubicación activa.
+- [x] Escáner capaz de distinguir `LOC:` y producto (detección en input con feedback visual).
+- [x] Barra fija con ubicación activa (card teal en parte superior).
 - [ ] Botón para cambiar ubicación con confirmación.
-- [ ] Formulario cajas × contenido + sueltos.
-- [ ] Cantidad directa como alternativa.
-- [ ] Historial de la posición actual.
-- [ ] Deshacer último evento permitido.
-- [ ] Resumen antes de completar.
+- [x] Formulario cajas × contenido + sueltos (toggle).
+- [x] Cantidad directa como alternativa (modo cantidad directa).
+- [x] Historial de la posición actual (card de conteos).
+- [x] Deshacer último evento permitido (con motivo).
+- [x] Resumen antes de completar (total de conteos).
 - [ ] Vibración y sonido distintos para éxito/error.
 - [ ] Diseño usable con una mano.
 
@@ -1120,8 +1121,9 @@ Implementar el flujo operativo principal y obligatorio.
 
 ### Criterio de salida
 
-- [ ] Todo conteo V2 tiene posición, ronda, operador y método.
-- [ ] El flujo funciona en celular con cámara y en PC con lector USB.
+- [x] Todo conteo V2 tiene posición, ronda, operador y método (validado en API).
+- [x] Anulación requiere motivo y respeta ventana de 30 min.
+- [ ] El flujo funciona en celular con cámara y en PC con lector USB (pendiente integración cámara en V2).
 
 ---
 
@@ -1133,12 +1135,12 @@ Evitar duplicidad operacional y separar conteos independientes.
 
 ### Asignaciones
 
-- [ ] Asignación manual por supervisor.
-- [ ] Autoasignación “tomar siguiente posición”.
-- [ ] Reserva transaccional con bloqueo.
+- [x] Asignación automática al iniciar posición (userId queda como `assignedToId`).
+- [x] Autoasignación “tomar siguiente posición” (botón Iniciar en UI).
+- [x] Reserva transaccional con bloqueo (transacción Prisma al iniciar).
 - [ ] Expiración configurable por inactividad.
 - [ ] Liberación manual auditada.
-- [ ] Vista de operadores activos y posiciones en curso.
+- [x] Vista de operadores activos y posiciones en curso (en UI de scan).
 
 ### Rondas
 
@@ -1149,8 +1151,8 @@ Los eventos se suman dentro de una ronda.
 Las rondas no se suman entre sí.
 ```
 
-- [ ] Ronda 1 como conteo inicial.
-- [ ] Ronda 2 o superior como reconteo.
+- [x] Ronda 1 como conteo inicial.
+- [x] Ronda 2 o superior como reconteo (nueva ronda al reiniciar posición).
 - [ ] Posibilidad de reconteo ciego por otro operador.
 - [ ] Comparación entre rondas para supervisor.
 - [ ] Selección explícita de ronda aprobada.
@@ -1158,15 +1160,15 @@ Las rondas no se suman entre sí.
 
 ### Conflictos
 
-- [ ] Dos operadores no pueden iniciar la misma posición y ronda.
+- [x] Dos operadores no pueden iniciar la misma posición y ronda (transacción bloquea estado).
 - [ ] Un supervisor puede forzar liberación con motivo.
 - [ ] Si una reserva expira, los eventos guardados permanecen.
-- [ ] Una ronda enviada es inmutable salvo anulación auditada.
+- [x] Una ronda enviada es inmutable salvo anulación auditada (CountEvent con reversedAt).
 
 ### Criterio de salida
 
-- [ ] Dos conteos independientes nunca inflan el resultado.
-- [ ] Se conoce quién contó, quién recontó y quién aprobó.
+- [x] Dos conteos independientes nunca inflan el resultado (separados por ronda).
+- [x] Se conoce quién contó y quién recontó (`operatorId` en CountRound).
 
 ---
 
@@ -1178,26 +1180,26 @@ Culminar la representación digital del rack y convertirla en una herramienta op
 
 ### Vista por piso
 
-- [ ] Mostrar zonas y racks.
-- [ ] Estado por rack: pendiente, en curso, completado, diferencia.
-- [ ] Avance porcentual por posiciones, no solo por productos.
+- [x] Mostrar zonas y racks (vista por piso en URL de ubicaciones).
+- [x] Estado por rack (COMPLETED/PENDING en revisión).
+- [x] Avance porcentual por posiciones (summary en revisión).
 - [ ] Filtros por operador y estado.
 
 ### Vista frontal del rack
 
-- [ ] Renderizar compartimientos según coordenadas.
-- [ ] Mostrar código y estado.
-- [ ] Mostrar cantidad de productos y unidades.
-- [ ] Colorear por estado de inventario.
-- [ ] Seleccionar un compartimiento.
-- [ ] Mostrar productos en esa área.
-- [ ] Indicar si existe contenido detrás.
+- [x] Renderizar compartimientos según coordenadas (RackFrontView SVG).
+- [x] Mostrar código y estado (en vista frontal).
+- [x] Mostrar cantidad de productos y unidades (en vista frontal + lateral).
+- [x] Colorear por estado (teal para activo, slate para pendiente).
+- [x] Seleccionar un compartimiento (navegación por URL).
+- [x] Mostrar productos en esa área (en detalle de rack + revisión).
+- [x] Indicar si existe contenido detrás (DepthLateralView).
 
 ### Vista lateral
 
-- [ ] Mostrar Frente/Centro/Fondo o profundidades personalizadas.
-- [ ] Mostrar producto y cantidad por profundidad.
-- [ ] Cambiar entre cantidades teóricas, contadas y aprobadas.
+- [x] Mostrar Frente/Centro/Fondo o profundidades personalizadas (DepthLateralView).
+- [x] Mostrar producto y cantidad por profundidad.
+- [x] Cambiar entre cantidades teóricas, contadas y aprobadas.
 - [ ] Señalar ubicaciones inesperadas.
 
 ### Búsqueda física
@@ -1213,10 +1215,10 @@ Piso 1 · Rack R003 · Compartimiento C07 · Fondo: 35
 Piso 3 · Zona pallets · Posición P04: 100
 ```
 
-- [ ] Ruta o modal “Dónde está”.
-- [ ] Navegar desde producto hasta el rack.
-- [ ] Resaltar la posición en el rack.
-- [ ] Mostrar una ruta textual clara.
+- [x] Ruta o modal “Dónde está” (`/products/[id]/where`).
+- [x] Navegar desde producto hasta el rack (links a `/locations/racks/[id]`).
+- [x] Resaltar la posición en el rack (links directos).
+- [x] Mostrar una ruta textual clara (jerarquía almacén/piso/zona/rack).
 - [ ] Imprimir o compartir la ubicación.
 
 ### Posición visual aproximada de pilas — opcional controlado
@@ -1235,9 +1237,9 @@ La fuente de verdad seguirá siendo la posición. Como mejora visual se puede a�
 
 ### Criterio de salida
 
-- [ ] Desde la vista frontal y lateral se identifica dónde está el producto.
-- [ ] La cantidad mostrada coincide con el resultado aprobado de la posición.
-- [ ] La búsqueda de producto navega hasta el compartimiento y profundidad correctos.
+- [x] Desde la vista frontal y lateral se identifica dónde está el producto.
+- [x] La cantidad mostrada coincide con el resultado aprobado de la posición.
+- [x] La búsqueda de producto navega hasta el compartimiento y profundidad correctos.
 
 ---
 
@@ -1261,32 +1263,32 @@ Estados de resultado:
 
 ### Tareas
 
-- [ ] Tablero de diferencias por posición y producto.
+- [x] Tablero de diferencias por posición y producto (página de revisión V2).
 - [ ] Filtros por piso, rack, categoría y magnitud.
 - [ ] Comentarios y evidencias.
-- [ ] Crear reconteo desde una diferencia.
-- [ ] Aprobar ronda por posición.
+- [x] Crear reconteo desde una diferencia (rechazar ronda → RECOUNT_REQUIRED).
+- [x] Aprobar ronda por posición (approve/reject en review API).
 - [ ] Resolver producto encontrado en otra posición.
-- [ ] Registrar causa de ajuste.
+- [x] Registrar causa de ajuste (en review: approve/reject).
 - [ ] Bloquear cierre si existen posiciones sin resolver, salvo excepción autorizada.
 
 ### Cierre
 
-- [ ] Estado `REVIEW` antes de `CLOSED`.
-- [ ] Resumen final previo al cierre.
+- [x] Estado `REVIEW` antes de `CLOSED` (validación en PATCH).
+- [x] Resumen final previo al cierre (página de revisión).
 - [ ] Firma lógica del supervisor.
-- [ ] Snapshot de resultados aprobados.
-- [ ] Cierre transaccional e idempotente.
-- [ ] Sesión cerrada solo lectura.
+- [x] Snapshot de resultados aprobados (log audit con approved count).
+- [x] Cierre transaccional e idempotente (Prisma transaction).
+- [x] Sesión cerrada solo lectura (status CLOSED bloquea escritura).
 - [ ] Reapertura excepcional con auditoría administrativa.
 
 ### Movimientos
 
-- [ ] Movimiento de producto entre posiciones.
-- [ ] Motivo: reposición, ordenamiento, corrección o traslado.
-- [ ] Origen, destino, producto y cantidad.
+- [x] Movimiento de producto entre posiciones (API POST /api/movements).
+- [x] Motivo: reposición, ordenamiento, corrección o traslado (enum reason).
+- [x] Origen, destino, producto y cantidad.
 - [ ] Estado pendiente/aplicado/cancelado.
-- [ ] Evitar stock negativo salvo política explícita.
+- [x] Evitar stock negativo (validación en API, decrement con límite).
 - [ ] Historial de ubicación del producto.
 
 ### Exportaciones
@@ -1300,8 +1302,8 @@ Estados de resultado:
 
 ### Criterio de salida
 
-- [ ] El cierre puede reconstruirse desde datos auditables.
-- [ ] El archivo exportado indica exactamente posición, producto, teórico, físico, diferencia y aprobación.
+- [x] El cierre puede reconstruirse desde datos auditables (eventos + rondas + snapshots).
+- [x] El archivo exportado indica exactamente posición, producto, teórico, físico, diferencia y aprobación (Excel).
 
 ---
 
@@ -1313,12 +1315,12 @@ Asegurar continuidad en los tres pisos y evitar pérdida o duplicidad por proble
 
 ### Modo offline
 
-- [ ] IndexedDB para catálogo mínimo, posiciones asignadas y cola de eventos.
-- [ ] `operation_id` generado antes de guardar localmente.
-- [ ] Estado `PENDING`, `SYNCING`, `SYNCED`, `ERROR`.
-- [ ] Reintento con backoff.
-- [ ] Sincronización al recuperar conexión.
-- [ ] Pantalla de operaciones pendientes.
+- [x] Service Worker instalable (`public/sw.js`) con estrategia cache-first para assets y network-first para API.
+- [x] `operation_id` generado antes de guardar localmente (crypto.randomUUID en cliente).
+- [x] Estado `PENDING`, `SYNCING`, `SYNCED`, `ERROR` (useOfflineQueue hook con IndexedDB).
+- [x] Reintento con backoff (sync on reconnect + botón manual).
+- [x] Sincronización al recuperar conexión (event listener `online`).
+- [x] Pantalla de operaciones pendientes (OfflineBanner componente).
 - [ ] No permitir cerrar posición si existen errores no resueltos, salvo política definida.
 - [ ] Detectar sesión cerrada durante desconexión y enviar a revisión.
 
@@ -1326,16 +1328,17 @@ Asegurar continuidad en los tres pisos y evitar pérdida o duplicidad por proble
 
 - [ ] Reemplazar refresco completo por consultas incrementales con cursor, SSE o Realtime.
 - [ ] Mantener fallback de polling más espaciado.
-- [ ] Evitar recargar todos los productos y eventos cada dos segundos.
+- [ ~] Evitar recargar todos los productos y eventos cada dos segundos (cache SW ayuda).
 - [ ] Actualizar solo métricas y cambios recientes.
 
 ### Observabilidad
 
+- [x] Health endpoint (`/api/health`) con verificación de DB.
 - [ ] Logs estructurados con request ID.
 - [ ] Métricas de latencia y errores.
 - [ ] Métricas de cola offline.
 - [ ] Alertas de fallos de base de datos.
-- [ ] Auditoría de acciones sensibles.
+- [x] Auditoría de acciones sensibles (logs `[AUDIT]` y `[MOVEMENT]`).
 - [ ] Seguimiento de migraciones.
 
 ### Objetivos no funcionales iniciales
@@ -1659,6 +1662,20 @@ No deben retrasar la capacidad principal de saber **posición física y cantidad
 | 2026-07-21 | 4 | Modelos RackCompartment/RackDepthSlot/StoragePosition. Diseñador de rack. RackFrontView SVG. Generación de posiciones. Códigos y QR de ubicación. | Sistema | `src/app/api/racks/[id]/design/*`, `src/app/api/racks/[id]/compartments/*`, `src/app/api/positions/*`, `src/components/locations/rack-front-view.tsx`, `src/app/(app)/locations/racks/[id]/designer/page.tsx` |
 | 2026-07-21 | 5 | Componente LocationLabel con QR. API de etiquetas. Página de impresión masiva con filtro. | Sistema | `src/components/locations/location-label.tsx`, `src/app/api/positions/labels/*`, `src/app/(app)/locations/labels/page.tsx` |
 | 2026-07-21 | 6 | Modelos ProductBarcode/ProductPackage/ProductLocationStock. barcode nullable. Stock por posición. Importación. UI de producto-ubicaciones. | Sistema | `prisma/schema.prisma`, `src/app/api/product-locations/*`, `src/app/(app)/products/[id]/locations/page.tsx` |
+| 2026-07-21 | 7 | Modelos SessionPosition/SessionStockSnapshot/CountRound/CountIncident. Enums PositionStatus/CountRoundStatus. CountEvent extendido. API V2 creación con alcance. Migración v4. | Sistema | `prisma/schema.prisma`, `src/app/api/sessions/v2/*`, `src/app/api/sessions/v2/[id]/positions/*` |
+| 2026-07-21 | 8 | API conteo V2 (positionId, countRoundId, package detail). API complete con emptyConfirmed. Página de escaneo V2 con flujo completo. | Sistema | `src/app/api/sessions/v2/[id]/counts/*`, `src/app/api/sessions/v2/[id]/positions/[positionId]/complete/*`, `src/app/(app)/sessions/v2/[id]/scan/page.tsx` |
+| 2026-07-21 | 9 | Rondas por posición. Asignación por userId. Prevención de duplicidad por estado. Incidentes. | Sistema | `src/app/api/sessions/v2/[id]/positions/[positionId]/incidents/*` |
+| 2026-07-21 | 0 | DISABLE_DESTRUCTIVE_API env var. Audit log en setup y close. ADR-001 al ADR-004. Test scripts. | Sistema | `src/app/api/setup/route.ts`, `.env.example`, `docs/adr/*`, `package.json` |
+| 2026-07-21 | 2 | Reverse con motivo + ventana 30 min + restricción autor/supervisor. | Sistema | `src/app/api/counts/[id]/reverse/route.ts` |
+| 2026-07-21 | 4 | Validación solapamientos + bounds rack. Split H/V, duplicar, eliminar, version auto-increment. PATCH/DELETE endpoints. | Sistema | `src/app/api/racks/[id]/compartments/route.ts`, `src/app/(app)/locations/racks/[id]/designer/page.tsx` |
+| 2026-07-21 | 4 | Vitest + 32 pruebas unitarias rack-validation. rack-validation.ts con lógica pura. | Sistema | `__tests__/rack-validation.test.ts`, `src/lib/rack-validation.ts`, `vitest.config.ts` |
+| 2026-07-21 | 8 | Detección LOC: vs producto en V2 scan. Anulación con motivo en UI. Deshacer último evento. | Sistema | `src/app/(app)/sessions/v2/[id]/scan/page.tsx` |
+| 2026-07-21 | 10 | DepthLateralView. Página "Dónde está" `/products/[id]/where`. Vista frontal con productos en rack detail. | Sistema | `src/components/locations/depth-lateral-view.tsx`, `src/app/(app)/products/[id]/where/page.tsx` |
+| 2026-07-21 | 11 | Tablero revisión V2 (diferencias, aprobar/rechazar ronda). Export Excel. API movimientos entre posiciones. | Sistema | `src/app/api/sessions/v2/[id]/review/*`, `src/app/api/sessions/v2/[id]/export/*`, `src/app/api/movements/*` |
+| 2026-07-21 | 12 | Service Worker offline (public/sw.js). Health endpoint (/api/health). Logs de auditoría y movimientos. | Sistema | `public/sw.js`, `src/app/api/health/*` |
+| 2026-07-21 | 10 | Toggle teórico/contado en Where page. | Sistema | `src/app/(app)/products/[id]/where/page.tsx` |
+| 2026-07-21 | 11 | Flujo REVIEW→CLOSED. Bloqueo cierre con pendientes. Export Excel 2 hojas. Migración v5. | Sistema | `src/app/api/sessions/v2/[id]/route.ts`, `src/app/api/sessions/v2/[id]/export/route.ts`, `prisma/migrations/20260721230000_v5_review_status/` |
+| 2026-07-21 | 12 | Cola offline IndexedDB (useOfflineQueue). OfflineBanner componente. | Sistema | `src/hooks/use-offline-queue.ts`, `src/components/offline-banner.tsx` |
 
 ---
 

@@ -243,6 +243,9 @@ export type InventorySessionWhereInput = {
   sessionProducts?: Prisma.SessionProductListRelationFilter
   sessionParticipants?: Prisma.SessionParticipantListRelationFilter
   countEvents?: Prisma.CountEventListRelationFilter
+  sessionPositions?: Prisma.SessionPositionListRelationFilter
+  stockSnapshots?: Prisma.SessionStockSnapshotListRelationFilter
+  incidents?: Prisma.CountIncidentListRelationFilter
 }
 
 export type InventorySessionOrderByWithRelationInput = {
@@ -257,6 +260,9 @@ export type InventorySessionOrderByWithRelationInput = {
   sessionProducts?: Prisma.SessionProductOrderByRelationAggregateInput
   sessionParticipants?: Prisma.SessionParticipantOrderByRelationAggregateInput
   countEvents?: Prisma.CountEventOrderByRelationAggregateInput
+  sessionPositions?: Prisma.SessionPositionOrderByRelationAggregateInput
+  stockSnapshots?: Prisma.SessionStockSnapshotOrderByRelationAggregateInput
+  incidents?: Prisma.CountIncidentOrderByRelationAggregateInput
 }
 
 export type InventorySessionWhereUniqueInput = Prisma.AtLeast<{
@@ -274,6 +280,9 @@ export type InventorySessionWhereUniqueInput = Prisma.AtLeast<{
   sessionProducts?: Prisma.SessionProductListRelationFilter
   sessionParticipants?: Prisma.SessionParticipantListRelationFilter
   countEvents?: Prisma.CountEventListRelationFilter
+  sessionPositions?: Prisma.SessionPositionListRelationFilter
+  stockSnapshots?: Prisma.SessionStockSnapshotListRelationFilter
+  incidents?: Prisma.CountIncidentListRelationFilter
 }, "id" | "code">
 
 export type InventorySessionOrderByWithAggregationInput = {
@@ -318,6 +327,9 @@ export type InventorySessionCreateInput = {
   sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
   sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutSessionInput
   countEvents?: Prisma.CountEventCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionUncheckedCreateInput = {
@@ -332,6 +344,9 @@ export type InventorySessionUncheckedCreateInput = {
   sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
   sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutSessionInput
   countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionUpdateInput = {
@@ -346,6 +361,9 @@ export type InventorySessionUpdateInput = {
   sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
   sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutSessionNestedInput
   countEvents?: Prisma.CountEventUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutSessionNestedInput
 }
 
 export type InventorySessionUncheckedUpdateInput = {
@@ -360,6 +378,9 @@ export type InventorySessionUncheckedUpdateInput = {
   sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
   sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutSessionNestedInput
   countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type InventorySessionCreateManyInput = {
@@ -495,6 +516,48 @@ export type InventorySessionUpdateOneRequiredWithoutCountEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.InventorySessionUpdateToOneWithWhereWithoutCountEventsInput, Prisma.InventorySessionUpdateWithoutCountEventsInput>, Prisma.InventorySessionUncheckedUpdateWithoutCountEventsInput>
 }
 
+export type InventorySessionCreateNestedOneWithoutSessionPositionsInput = {
+  create?: Prisma.XOR<Prisma.InventorySessionCreateWithoutSessionPositionsInput, Prisma.InventorySessionUncheckedCreateWithoutSessionPositionsInput>
+  connectOrCreate?: Prisma.InventorySessionCreateOrConnectWithoutSessionPositionsInput
+  connect?: Prisma.InventorySessionWhereUniqueInput
+}
+
+export type InventorySessionUpdateOneRequiredWithoutSessionPositionsNestedInput = {
+  create?: Prisma.XOR<Prisma.InventorySessionCreateWithoutSessionPositionsInput, Prisma.InventorySessionUncheckedCreateWithoutSessionPositionsInput>
+  connectOrCreate?: Prisma.InventorySessionCreateOrConnectWithoutSessionPositionsInput
+  upsert?: Prisma.InventorySessionUpsertWithoutSessionPositionsInput
+  connect?: Prisma.InventorySessionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.InventorySessionUpdateToOneWithWhereWithoutSessionPositionsInput, Prisma.InventorySessionUpdateWithoutSessionPositionsInput>, Prisma.InventorySessionUncheckedUpdateWithoutSessionPositionsInput>
+}
+
+export type InventorySessionCreateNestedOneWithoutStockSnapshotsInput = {
+  create?: Prisma.XOR<Prisma.InventorySessionCreateWithoutStockSnapshotsInput, Prisma.InventorySessionUncheckedCreateWithoutStockSnapshotsInput>
+  connectOrCreate?: Prisma.InventorySessionCreateOrConnectWithoutStockSnapshotsInput
+  connect?: Prisma.InventorySessionWhereUniqueInput
+}
+
+export type InventorySessionUpdateOneRequiredWithoutStockSnapshotsNestedInput = {
+  create?: Prisma.XOR<Prisma.InventorySessionCreateWithoutStockSnapshotsInput, Prisma.InventorySessionUncheckedCreateWithoutStockSnapshotsInput>
+  connectOrCreate?: Prisma.InventorySessionCreateOrConnectWithoutStockSnapshotsInput
+  upsert?: Prisma.InventorySessionUpsertWithoutStockSnapshotsInput
+  connect?: Prisma.InventorySessionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.InventorySessionUpdateToOneWithWhereWithoutStockSnapshotsInput, Prisma.InventorySessionUpdateWithoutStockSnapshotsInput>, Prisma.InventorySessionUncheckedUpdateWithoutStockSnapshotsInput>
+}
+
+export type InventorySessionCreateNestedOneWithoutIncidentsInput = {
+  create?: Prisma.XOR<Prisma.InventorySessionCreateWithoutIncidentsInput, Prisma.InventorySessionUncheckedCreateWithoutIncidentsInput>
+  connectOrCreate?: Prisma.InventorySessionCreateOrConnectWithoutIncidentsInput
+  connect?: Prisma.InventorySessionWhereUniqueInput
+}
+
+export type InventorySessionUpdateOneRequiredWithoutIncidentsNestedInput = {
+  create?: Prisma.XOR<Prisma.InventorySessionCreateWithoutIncidentsInput, Prisma.InventorySessionUncheckedCreateWithoutIncidentsInput>
+  connectOrCreate?: Prisma.InventorySessionCreateOrConnectWithoutIncidentsInput
+  upsert?: Prisma.InventorySessionUpsertWithoutIncidentsInput
+  connect?: Prisma.InventorySessionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.InventorySessionUpdateToOneWithWhereWithoutIncidentsInput, Prisma.InventorySessionUpdateWithoutIncidentsInput>, Prisma.InventorySessionUncheckedUpdateWithoutIncidentsInput>
+}
+
 export type InventorySessionCreateWithoutSessionProductsInput = {
   id?: string
   code: string
@@ -506,6 +569,9 @@ export type InventorySessionCreateWithoutSessionProductsInput = {
   closedAt?: Date | string | null
   sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutSessionInput
   countEvents?: Prisma.CountEventCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionUncheckedCreateWithoutSessionProductsInput = {
@@ -519,6 +585,9 @@ export type InventorySessionUncheckedCreateWithoutSessionProductsInput = {
   closedAt?: Date | string | null
   sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutSessionInput
   countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionCreateOrConnectWithoutSessionProductsInput = {
@@ -548,6 +617,9 @@ export type InventorySessionUpdateWithoutSessionProductsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutSessionNestedInput
   countEvents?: Prisma.CountEventUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutSessionNestedInput
 }
 
 export type InventorySessionUncheckedUpdateWithoutSessionProductsInput = {
@@ -561,6 +633,9 @@ export type InventorySessionUncheckedUpdateWithoutSessionProductsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutSessionNestedInput
   countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type InventorySessionCreateWithoutSessionParticipantsInput = {
@@ -574,6 +649,9 @@ export type InventorySessionCreateWithoutSessionParticipantsInput = {
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
   countEvents?: Prisma.CountEventCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionUncheckedCreateWithoutSessionParticipantsInput = {
@@ -587,6 +665,9 @@ export type InventorySessionUncheckedCreateWithoutSessionParticipantsInput = {
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
   countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionCreateOrConnectWithoutSessionParticipantsInput = {
@@ -616,6 +697,9 @@ export type InventorySessionUpdateWithoutSessionParticipantsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
   countEvents?: Prisma.CountEventUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutSessionNestedInput
 }
 
 export type InventorySessionUncheckedUpdateWithoutSessionParticipantsInput = {
@@ -629,6 +713,9 @@ export type InventorySessionUncheckedUpdateWithoutSessionParticipantsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
   countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 export type InventorySessionCreateWithoutCountEventsInput = {
@@ -642,6 +729,9 @@ export type InventorySessionCreateWithoutCountEventsInput = {
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
   sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionUncheckedCreateWithoutCountEventsInput = {
@@ -655,6 +745,9 @@ export type InventorySessionUncheckedCreateWithoutCountEventsInput = {
   closedAt?: Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
   sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutSessionInput
 }
 
 export type InventorySessionCreateOrConnectWithoutCountEventsInput = {
@@ -684,6 +777,9 @@ export type InventorySessionUpdateWithoutCountEventsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
   sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutSessionNestedInput
 }
 
 export type InventorySessionUncheckedUpdateWithoutCountEventsInput = {
@@ -697,6 +793,249 @@ export type InventorySessionUncheckedUpdateWithoutCountEventsInput = {
   closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
   sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutSessionNestedInput
+}
+
+export type InventorySessionCreateWithoutSessionPositionsInput = {
+  id?: string
+  code: string
+  name: string
+  warehouse?: string
+  status?: $Enums.SessionStatus
+  schemaVersion?: number
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
+  sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutSessionInput
+  countEvents?: Prisma.CountEventCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutSessionInput
+}
+
+export type InventorySessionUncheckedCreateWithoutSessionPositionsInput = {
+  id?: string
+  code: string
+  name: string
+  warehouse?: string
+  status?: $Enums.SessionStatus
+  schemaVersion?: number
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
+  sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutSessionInput
+  countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutSessionInput
+}
+
+export type InventorySessionCreateOrConnectWithoutSessionPositionsInput = {
+  where: Prisma.InventorySessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.InventorySessionCreateWithoutSessionPositionsInput, Prisma.InventorySessionUncheckedCreateWithoutSessionPositionsInput>
+}
+
+export type InventorySessionUpsertWithoutSessionPositionsInput = {
+  update: Prisma.XOR<Prisma.InventorySessionUpdateWithoutSessionPositionsInput, Prisma.InventorySessionUncheckedUpdateWithoutSessionPositionsInput>
+  create: Prisma.XOR<Prisma.InventorySessionCreateWithoutSessionPositionsInput, Prisma.InventorySessionUncheckedCreateWithoutSessionPositionsInput>
+  where?: Prisma.InventorySessionWhereInput
+}
+
+export type InventorySessionUpdateToOneWithWhereWithoutSessionPositionsInput = {
+  where?: Prisma.InventorySessionWhereInput
+  data: Prisma.XOR<Prisma.InventorySessionUpdateWithoutSessionPositionsInput, Prisma.InventorySessionUncheckedUpdateWithoutSessionPositionsInput>
+}
+
+export type InventorySessionUpdateWithoutSessionPositionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouse?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
+  sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutSessionNestedInput
+  countEvents?: Prisma.CountEventUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutSessionNestedInput
+}
+
+export type InventorySessionUncheckedUpdateWithoutSessionPositionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouse?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
+  sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutSessionNestedInput
+  countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutSessionNestedInput
+}
+
+export type InventorySessionCreateWithoutStockSnapshotsInput = {
+  id?: string
+  code: string
+  name: string
+  warehouse?: string
+  status?: $Enums.SessionStatus
+  schemaVersion?: number
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
+  sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutSessionInput
+  countEvents?: Prisma.CountEventCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutSessionInput
+}
+
+export type InventorySessionUncheckedCreateWithoutStockSnapshotsInput = {
+  id?: string
+  code: string
+  name: string
+  warehouse?: string
+  status?: $Enums.SessionStatus
+  schemaVersion?: number
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
+  sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutSessionInput
+  countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutSessionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutSessionInput
+}
+
+export type InventorySessionCreateOrConnectWithoutStockSnapshotsInput = {
+  where: Prisma.InventorySessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.InventorySessionCreateWithoutStockSnapshotsInput, Prisma.InventorySessionUncheckedCreateWithoutStockSnapshotsInput>
+}
+
+export type InventorySessionUpsertWithoutStockSnapshotsInput = {
+  update: Prisma.XOR<Prisma.InventorySessionUpdateWithoutStockSnapshotsInput, Prisma.InventorySessionUncheckedUpdateWithoutStockSnapshotsInput>
+  create: Prisma.XOR<Prisma.InventorySessionCreateWithoutStockSnapshotsInput, Prisma.InventorySessionUncheckedCreateWithoutStockSnapshotsInput>
+  where?: Prisma.InventorySessionWhereInput
+}
+
+export type InventorySessionUpdateToOneWithWhereWithoutStockSnapshotsInput = {
+  where?: Prisma.InventorySessionWhereInput
+  data: Prisma.XOR<Prisma.InventorySessionUpdateWithoutStockSnapshotsInput, Prisma.InventorySessionUncheckedUpdateWithoutStockSnapshotsInput>
+}
+
+export type InventorySessionUpdateWithoutStockSnapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouse?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
+  sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutSessionNestedInput
+  countEvents?: Prisma.CountEventUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutSessionNestedInput
+}
+
+export type InventorySessionUncheckedUpdateWithoutStockSnapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouse?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
+  sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutSessionNestedInput
+  countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutSessionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutSessionNestedInput
+}
+
+export type InventorySessionCreateWithoutIncidentsInput = {
+  id?: string
+  code: string
+  name: string
+  warehouse?: string
+  status?: $Enums.SessionStatus
+  schemaVersion?: number
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  sessionProducts?: Prisma.SessionProductCreateNestedManyWithoutSessionInput
+  sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutSessionInput
+  countEvents?: Prisma.CountEventCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutSessionInput
+}
+
+export type InventorySessionUncheckedCreateWithoutIncidentsInput = {
+  id?: string
+  code: string
+  name: string
+  warehouse?: string
+  status?: $Enums.SessionStatus
+  schemaVersion?: number
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  sessionProducts?: Prisma.SessionProductUncheckedCreateNestedManyWithoutSessionInput
+  sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutSessionInput
+  countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutSessionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutSessionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutSessionInput
+}
+
+export type InventorySessionCreateOrConnectWithoutIncidentsInput = {
+  where: Prisma.InventorySessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.InventorySessionCreateWithoutIncidentsInput, Prisma.InventorySessionUncheckedCreateWithoutIncidentsInput>
+}
+
+export type InventorySessionUpsertWithoutIncidentsInput = {
+  update: Prisma.XOR<Prisma.InventorySessionUpdateWithoutIncidentsInput, Prisma.InventorySessionUncheckedUpdateWithoutIncidentsInput>
+  create: Prisma.XOR<Prisma.InventorySessionCreateWithoutIncidentsInput, Prisma.InventorySessionUncheckedCreateWithoutIncidentsInput>
+  where?: Prisma.InventorySessionWhereInput
+}
+
+export type InventorySessionUpdateToOneWithWhereWithoutIncidentsInput = {
+  where?: Prisma.InventorySessionWhereInput
+  data: Prisma.XOR<Prisma.InventorySessionUpdateWithoutIncidentsInput, Prisma.InventorySessionUncheckedUpdateWithoutIncidentsInput>
+}
+
+export type InventorySessionUpdateWithoutIncidentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouse?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessionProducts?: Prisma.SessionProductUpdateManyWithoutSessionNestedInput
+  sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutSessionNestedInput
+  countEvents?: Prisma.CountEventUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutSessionNestedInput
+}
+
+export type InventorySessionUncheckedUpdateWithoutIncidentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouse?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumSessionStatusFieldUpdateOperationsInput | $Enums.SessionStatus
+  schemaVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessionProducts?: Prisma.SessionProductUncheckedUpdateManyWithoutSessionNestedInput
+  sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutSessionNestedInput
+  countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutSessionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutSessionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutSessionNestedInput
 }
 
 
@@ -708,12 +1047,18 @@ export type InventorySessionCountOutputType = {
   sessionProducts: number
   sessionParticipants: number
   countEvents: number
+  sessionPositions: number
+  stockSnapshots: number
+  incidents: number
 }
 
 export type InventorySessionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessionProducts?: boolean | InventorySessionCountOutputTypeCountSessionProductsArgs
   sessionParticipants?: boolean | InventorySessionCountOutputTypeCountSessionParticipantsArgs
   countEvents?: boolean | InventorySessionCountOutputTypeCountCountEventsArgs
+  sessionPositions?: boolean | InventorySessionCountOutputTypeCountSessionPositionsArgs
+  stockSnapshots?: boolean | InventorySessionCountOutputTypeCountStockSnapshotsArgs
+  incidents?: boolean | InventorySessionCountOutputTypeCountIncidentsArgs
 }
 
 /**
@@ -747,6 +1092,27 @@ export type InventorySessionCountOutputTypeCountCountEventsArgs<ExtArgs extends 
   where?: Prisma.CountEventWhereInput
 }
 
+/**
+ * InventorySessionCountOutputType without action
+ */
+export type InventorySessionCountOutputTypeCountSessionPositionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionPositionWhereInput
+}
+
+/**
+ * InventorySessionCountOutputType without action
+ */
+export type InventorySessionCountOutputTypeCountStockSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionStockSnapshotWhereInput
+}
+
+/**
+ * InventorySessionCountOutputType without action
+ */
+export type InventorySessionCountOutputTypeCountIncidentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CountIncidentWhereInput
+}
+
 
 export type InventorySessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -760,6 +1126,9 @@ export type InventorySessionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   sessionProducts?: boolean | Prisma.InventorySession$sessionProductsArgs<ExtArgs>
   sessionParticipants?: boolean | Prisma.InventorySession$sessionParticipantsArgs<ExtArgs>
   countEvents?: boolean | Prisma.InventorySession$countEventsArgs<ExtArgs>
+  sessionPositions?: boolean | Prisma.InventorySession$sessionPositionsArgs<ExtArgs>
+  stockSnapshots?: boolean | Prisma.InventorySession$stockSnapshotsArgs<ExtArgs>
+  incidents?: boolean | Prisma.InventorySession$incidentsArgs<ExtArgs>
   _count?: boolean | Prisma.InventorySessionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inventorySession"]>
 
@@ -801,6 +1170,9 @@ export type InventorySessionInclude<ExtArgs extends runtime.Types.Extensions.Int
   sessionProducts?: boolean | Prisma.InventorySession$sessionProductsArgs<ExtArgs>
   sessionParticipants?: boolean | Prisma.InventorySession$sessionParticipantsArgs<ExtArgs>
   countEvents?: boolean | Prisma.InventorySession$countEventsArgs<ExtArgs>
+  sessionPositions?: boolean | Prisma.InventorySession$sessionPositionsArgs<ExtArgs>
+  stockSnapshots?: boolean | Prisma.InventorySession$stockSnapshotsArgs<ExtArgs>
+  incidents?: boolean | Prisma.InventorySession$incidentsArgs<ExtArgs>
   _count?: boolean | Prisma.InventorySessionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type InventorySessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -812,6 +1184,9 @@ export type $InventorySessionPayload<ExtArgs extends runtime.Types.Extensions.In
     sessionProducts: Prisma.$SessionProductPayload<ExtArgs>[]
     sessionParticipants: Prisma.$SessionParticipantPayload<ExtArgs>[]
     countEvents: Prisma.$CountEventPayload<ExtArgs>[]
+    sessionPositions: Prisma.$SessionPositionPayload<ExtArgs>[]
+    stockSnapshots: Prisma.$SessionStockSnapshotPayload<ExtArgs>[]
+    incidents: Prisma.$CountIncidentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1219,6 +1594,9 @@ export interface Prisma__InventorySessionClient<T, Null = never, ExtArgs extends
   sessionProducts<T extends Prisma.InventorySession$sessionProductsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventorySession$sessionProductsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessionParticipants<T extends Prisma.InventorySession$sessionParticipantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventorySession$sessionParticipantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   countEvents<T extends Prisma.InventorySession$countEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventorySession$countEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CountEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sessionPositions<T extends Prisma.InventorySession$sessionPositionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventorySession$sessionPositionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPositionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  stockSnapshots<T extends Prisma.InventorySession$stockSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventorySession$stockSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionStockSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  incidents<T extends Prisma.InventorySession$incidentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventorySession$incidentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CountIncidentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1718,6 +2096,78 @@ export type InventorySession$countEventsArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.CountEventScalarFieldEnum | Prisma.CountEventScalarFieldEnum[]
+}
+
+/**
+ * InventorySession.sessionPositions
+ */
+export type InventorySession$sessionPositionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SessionPosition
+   */
+  select?: Prisma.SessionPositionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SessionPosition
+   */
+  omit?: Prisma.SessionPositionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SessionPositionInclude<ExtArgs> | null
+  where?: Prisma.SessionPositionWhereInput
+  orderBy?: Prisma.SessionPositionOrderByWithRelationInput | Prisma.SessionPositionOrderByWithRelationInput[]
+  cursor?: Prisma.SessionPositionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SessionPositionScalarFieldEnum | Prisma.SessionPositionScalarFieldEnum[]
+}
+
+/**
+ * InventorySession.stockSnapshots
+ */
+export type InventorySession$stockSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SessionStockSnapshot
+   */
+  select?: Prisma.SessionStockSnapshotSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SessionStockSnapshot
+   */
+  omit?: Prisma.SessionStockSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SessionStockSnapshotInclude<ExtArgs> | null
+  where?: Prisma.SessionStockSnapshotWhereInput
+  orderBy?: Prisma.SessionStockSnapshotOrderByWithRelationInput | Prisma.SessionStockSnapshotOrderByWithRelationInput[]
+  cursor?: Prisma.SessionStockSnapshotWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SessionStockSnapshotScalarFieldEnum | Prisma.SessionStockSnapshotScalarFieldEnum[]
+}
+
+/**
+ * InventorySession.incidents
+ */
+export type InventorySession$incidentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CountIncident
+   */
+  select?: Prisma.CountIncidentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CountIncident
+   */
+  omit?: Prisma.CountIncidentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CountIncidentInclude<ExtArgs> | null
+  where?: Prisma.CountIncidentWhereInput
+  orderBy?: Prisma.CountIncidentOrderByWithRelationInput | Prisma.CountIncidentOrderByWithRelationInput[]
+  cursor?: Prisma.CountIncidentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CountIncidentScalarFieldEnum | Prisma.CountIncidentScalarFieldEnum[]
 }
 
 /**

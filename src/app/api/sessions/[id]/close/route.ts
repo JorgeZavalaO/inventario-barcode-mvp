@@ -14,6 +14,10 @@ export async function POST(
     await ensureDatabase();
     const { id } = await context.params;
     const sql = getDb();
+
+    const userId = auth.session!.user.id;
+    const userEmail = auth.session!.user.email;
+
     const [session] = await sql`
       UPDATE inventory_sessions
       SET status = 'CLOSED', closed_at = NOW()
@@ -24,6 +28,8 @@ export async function POST(
     if (!session) {
       return NextResponse.json({ error: "La sesión ya está cerrada o no existe" }, { status: 400 });
     }
+
+    console.log(`[AUDIT] Close session ${session.code} by user ${userId} (${userEmail})`);
 
     return NextResponse.json({ session });
   } catch (error) {

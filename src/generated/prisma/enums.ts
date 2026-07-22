@@ -23,6 +23,7 @@ export const SessionStatus = {
   DRAFT: 'DRAFT',
   OPEN: 'OPEN',
   PAUSED: 'PAUSED',
+  REVIEW: 'REVIEW',
   CLOSED: 'CLOSED',
   CANCELLED: 'CANCELLED'
 } as const
@@ -37,6 +38,30 @@ export const InputMethod = {
 } as const
 
 export type InputMethod = (typeof InputMethod)[keyof typeof InputMethod]
+
+
+export const PositionStatus = {
+  PENDING: 'PENDING',
+  ASSIGNED: 'ASSIGNED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  RECOUNT_REQUIRED: 'RECOUNT_REQUIRED',
+  APPROVED: 'APPROVED',
+  EXCLUDED: 'EXCLUDED'
+} as const
+
+export type PositionStatus = (typeof PositionStatus)[keyof typeof PositionStatus]
+
+
+export const CountRoundStatus = {
+  OPEN: 'OPEN',
+  SUBMITTED: 'SUBMITTED',
+  REJECTED: 'REJECTED',
+  APPROVED: 'APPROVED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type CountRoundStatus = (typeof CountRoundStatus)[keyof typeof CountRoundStatus]
 
 
 export const DepthKind = {

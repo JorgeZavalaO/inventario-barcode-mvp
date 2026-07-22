@@ -33,6 +33,16 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Etiquetas de ubicación imprimibles con QR y código legible (individuales o masivas).
 - Stock teórico por ubicación física (producto → múltiples posiciones).
 - Productos con múltiples códigos de barras y presentaciones (cajas, paquetes).
+- Sesiones de inventario V2 con alcance por posición (piso, rack o posiciones específicas).
+- Conteo por posición con rondas independientes (reconteo no suma).
+- Flujo operativo: iniciar posición → escanear producto → registrar cantidad → completar.
+- Soporte para conteo por cajas + unidades sueltas.
+- Vista lateral de profundidad del rack (Frente/Centro/Fondo) con productos.
+- Búsqueda "Dónde está" que muestra todas las posiciones de un producto.
+- Tablero de revisión de diferencias con aprobación/rechazo de rondas.
+- Exportación a Excel de resultados de inventario.
+- Movimientos de stock entre posiciones.
+- Health endpoint y Service Worker para resiliencia.
 - Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
 - Escáner inteligente: acceso directo con selector de sesión activa.
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
@@ -185,7 +195,7 @@ Esto permite que varias personas registren cantidades al mismo tiempo sin sobres
 - Requiere conexión a Internet; todavía no almacena lecturas offline en IndexedDB.
 - No actualiza automáticamente el stock de un ERP después de cerrar el conteo.
 - La impresión está orientada a etiquetas del navegador; no incluye integración directa con Zebra/ZPL.
-- Las sesiones de inventario V2 con conteo por posición aún no están implementadas.
+- La funcionalidad offline (IndexedDB) y exportación a Excel están pendientes.
 
 ## Siguiente etapa recomendada
 

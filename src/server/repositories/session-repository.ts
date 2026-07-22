@@ -5,7 +5,7 @@ export type SessionRow = {
   code: string;
   name: string;
   warehouse: string;
-  status: "DRAFT" | "OPEN" | "PAUSED" | "CLOSED" | "CANCELLED";
+  status: "DRAFT" | "OPEN" | "PAUSED" | "REVIEW" | "CLOSED" | "CANCELLED";
   schemaVersion: number;
   createdAt: Date;
   closedAt: Date | null;
@@ -47,7 +47,7 @@ export async function createSession(data: {
   });
 }
 
-export async function updateStatus(id: string, status: "OPEN" | "PAUSED" | "CLOSED" | "CANCELLED") {
+export async function updateStatus(id: string, status: "OPEN" | "PAUSED" | "REVIEW" | "CLOSED" | "CANCELLED") {
   return prisma.inventorySession.update({
     where: { id },
     data: {

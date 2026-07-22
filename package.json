@@ -1,13 +1,16 @@
 {
   "name": "inventario-barcode-mvp",
-  "version": "0.18.0",
+  "version": "0.28.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check": "npm run lint && npm run build",
+    "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
@@ -63,7 +66,8 @@
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "description": "MVP de inventario colaborativo con lectura de códigos de barras"
 }

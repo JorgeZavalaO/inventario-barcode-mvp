@@ -1,5 +1,147 @@
 # Changelog
 
+## 0.28.0 (2026-07-21)
+
+### Added (Fase 4 — Pruebas)
+
+- **Vitest:** Configurado Vitest para pruebas unitarias de lógica de dominio.
+- **rack-validation.ts:** Módulo con lógica pura extraíble para tests: `rectsOverlap`, `isWithinBounds`, `validateCompartment`, `splitHorizontal`, `splitVertical`, `duplicateCompartment`, `generatePositionCode`, `areCoordsValid`.
+- **32 pruebas unitarias** cubriendo:
+  - Validación de solapamiento de rectángulos (overlap, adjacent, containment).
+  - Validación de límites del rack (bounds, negative coords, exact fit).
+  - Validación de compartimento contra existentes (overlap, bounds, duplicate code, self-update).
+  - División horizontal (half height, odd height, coordinate preservation).
+  - División vertical (half width, odd width, coordinate preservation).
+  - Duplicación (offset, clamping to bounds).
+  - Generación de códigos de posición.
+  - Validación de coordenadas 0–10000.
+  - Escenarios del PLAN: rack 2 módulos 3 niveles, distinto ancho, niveles diferentes, sin profundidad, 3 profundidades, posición deshabilitada.
+- Scripts `pnpm test` y `pnpm test:watch` funcionales.
+
+## 0.27.0 (2026-07-21)
+
+### Added (Fase 4 — Diseñador de racks — pendientes)
+
+- **Herramienta dividir horizontal:** Divide un compartimento seleccionado en dos mitades verticales (A/B).
+- **Herramienta dividir vertical:** Divide un compartimento seleccionado en dos mitades horizontales (Izq/Der).
+- **Duplicar compartimento:** Crea una copia del compartimento seleccionado con offset de 50px y sufijo `-DUP`.
+- **Eliminar (soft delete):** Botón para desactivar compartimentos (active=false) con confirmación.
+- **Selección de compartimento:** Click en la lista para habilitar herramientas de edición.
+- **Validación de límites del rack:** Al crear compartimentos se valida que x+width ≤ rack.widthMm y y+height ≤ rack.heightMm.
+- **Auto-incremento de versión:** Cada creación, modificación o eliminación de compartimento incrementa `rack.version`.
+- **PATCH/DELETE endpoints:** API actualizada con PATCH para modificar y DELETE para desactivar compartimentos.
+
+## 0.26.0 (2026-07-21)
+
+### Added (Fase 10 — pendientes)
+
+- **Toggle teórico/contado:** La página "Dónde está" ahora tiene botones para filtrar por todo, solo stock teórico o solo contado.
+- **Estado REVIEW en SessionStatus:** Nuevo valor `REVIEW` en enum `SessionStatus` requerido antes de `CLOSED` para sesiones V2.
+
+### Added (Fase 11 — pendientes)
+
+- **Flujo REVIEW → CLOSED:** La API PATCH de sesión V2 ahora requiere pasar por estado `REVIEW` antes de cerrar. Valida que todas las posiciones estén aprobadas o excluidas.
+- **Bloqueo de cierre con pendientes:** Si hay posiciones sin resolver, el cierre retorna error con el conteo de pendientes.
+- **Snapshot de cierre:** Al cerrar sesión V2 se registra en audit log el número de posiciones aprobadas.
+- **Export mejorado:** El Excel ahora incluye dos hojas: "Detalle eventos" (con operador, método, fechas) y "Resumen por posición" (teórico, contado, diferencia, resultado).
+
+### Added (Fase 12 — pendientes)
+
+- **Cola offline con IndexedDB:** Nuevo hook `useOfflineQueue` que almacena operaciones en IndexedDB con estados `PENDING → SYNCING → SYNCED → ERROR`. Sincroniza automáticamente al recuperar conexión.
+- **OfflineBanner:** Componente que muestra el estado de la cola offline (pendientes de sincronizar o sin conexión) con botones de sincronizar y limpiar.
+- **Migración v5:** Nuevo enum value `REVIEW` en `SessionStatus`.
+
+### Fixed
+
+- `SessionStatus` ahora incluye `REVIEW` en schema y tipos.
+- V2 session PATCH actualizado para manejar el flujo DRAFT → OPEN → PAUSED → REVIEW → CLOSED.
+
+## 0.25.0 (2026-07-21)
+
+### Added (Fase 10 — Vista frontal, lateral y búsqueda física)
+
+- **DepthLateralView:** Nuevo componente que renderiza la profundidad del rack (Frente/Centro/Fondo) con productos y cantidades.
+- **Página "Dónde está":** `/products/[id]/where` muestra todas las posiciones de un producto con ruta jerárquica, cantidades y enlace directo al rack.
+- **Vista frontal enriquecida:** La página de detalle de rack ahora muestra datos de productos y stock teórico en cada compartimento.
+
+### Added (Fase 11 — Conciliación, cierre, movimientos y exportación)
+
+- **Tablero de revisión V2:** `/sessions/v2/[id]/review` con diferencias por posición, comparación teórico vs contado, estados (coincide/faltante/sobrante), y acciones aprobar/rechazar ronda.
+- **API de revisión:** `GET /api/sessions/v2/[id]/review` devuelve diferencias calculadas. `POST` permite approve (→ APPROVED) o reject (→ RECOUNT_REQUIRED).
+- **Exportación Excel:** `GET /api/sessions/v2/[id]/export` genera archivo .xlsx con posición, producto, cantidad, ronda y estado.
+- **Movimientos entre posiciones:** `POST /api/movements` para transferir stock teórico entre posiciones con motivo (replenishment, reordering, correction, transfer). Registra log `[MOVEMENT]`.
+- **Resumen automático:** Totales de posiciones completadas, coincidentes y con diferencia en la cabecera de revisión.
+
+### Added (Fase 12 — Offline, tiempo real, observabilidad y resiliencia)
+
+- **Service Worker:** `public/sw.js` con estrategia cache-first para assets estáticos y network-first para APIs. Instalable como PWA.
+- **Health endpoint:** `GET /api/health` verifica conectividad con base de datos y retorna estado general.
+
+### Infrastructure
+
+- 60 rutas totales (30 páginas, 30 APIs).
+
+## 0.22.0 (2026-07-21)
+
+### Added (Fase 0 — Línea base, seguridad y gobernanza)
+
+- **Protección destructiva:** Nueva variable `DISABLE_DESTRUCTIVE_API` en `.env.example` (default `true`). Cuando está activa, `DELETE /api/setup` y carga demo responden 403.
+- **Auditoría de acciones destructivas:** `DELETE /api/setup` y cierre de sesión registran `[AUDIT]` log con userId y email.
+- **ADR documents:** Creados `docs/adr/ADR-001` (fuente única esquema), `ADR-002` (rack irregular), `ADR-003` (eventos/rondas), `ADR-004` (compatibilidad V1/V2).
+- **Scripts de prueba:** Añadidos `test` (vitest), `typecheck` (tsc --noEmit) a package.json.
+
+### Added (Fase 2 — Usuarios, roles y control operativo)
+
+- **Anulación con motivo:** `POST /api/counts/[id]/reverse` ahora requiere motivo (mín 5 caracteres), restringe anulación al autor dentro de ventana de 30 min o a supervisor/admin.
+- **Auditoría de cierre:** Log `[AUDIT]` al cerrar sesión con userId.
+
+### Added (Fase 4 — Diseñador de racks y posiciones)
+
+- **Validación de solapamientos:** Al crear compartimentos se verifica que no solapen con existentes (coordenadas normalizadas).
+
+### Added (Fase 8 — Conteo ubicación → producto → cantidad)
+
+- **Detección LOC: vs producto:** El input de escaneo en V2 detecta si el código es de ubicación (`LOC:v1:`) o de producto, con feedback visual (etiqueta color ambar/teal).
+- **Anulación en UI:** Botón "Deshacer último" en la página V2 scan con diálogo de motivo.
+- **Focus automático:** El input de escaneo recupera foco después de cada registro.
+
+### Infrastructure
+
+- Prisma Client regenerado.
+- 28 rutas de página, 26 rutas de API.
+
+## 0.21.0 (2026-07-21)
+
+### Added (Fase 7 — Sesiones de inventario V2 por posición)
+
+- **Modelos V2:** `SessionPosition` (posición en sesión con estados PENDING→COMPLETED), `SessionStockSnapshot` (stock teórico congelado por producto+posición), `CountRound` (rondas de conteo con estados OPEN→APPROVED), `CountIncident` (incidencias reportadas).
+- **Enums:** `PositionStatus`, `CountRoundStatus`.
+- **CountEvent extendido:** Nuevos campos opcionales `positionId`, `countRoundId`, `packageCount`, `unitsPerPackage`, `looseQuantity`, `reversedById`, `reversalReason` (compatible V1).
+- **API de creación V2:** `POST /api/sessions/v2` con alcance `total`, `floor`, `rack` o `positions`. Crea session_positions y congela snapshot desde `product_location_stocks`.
+- **API de detalle V2:** `GET /api/sessions/v2/[id]` con posiciones, estado, rondas.
+- **API de inicio de posición:** `POST /api/sessions/v2/[id]/positions/[positionId]` — inicia ronda, valida estado, devuelve snapshot.
+- **Control de estado:** Sesiones V2 comienzan en `DRAFT`, se abren con PATCH.
+- **Migración expansiva:** `20260721150000_v4_sessions_v2` con 4 nuevas tablas, índices y columnas en count_events.
+
+### Added (Fase 8 — Conteo ubicación → producto → cantidad)
+
+- **API de conteo V2:** `POST /api/sessions/v2/[id]/counts` con validación de sesión abierta, posición activa, ronda abierta, idempotencia por `operationId`. Soporta `packageCount`, `unitsPerPackage`, `looseQuantity`.
+- **API de completar posición:** `POST /api/sessions/v2/[id]/positions/[positionId]/complete` — cierra ronda como SUBMITTED, marca posición COMPLETED. Soporta `emptyConfirmed` para posición vacía.
+- **API de incidencias:** `POST /api/sessions/v2/[id]/positions/[positionId]/incidents` para reportar problemas.
+- **Página de escaneo V2:** `/sessions/v2/[id]/scan` con flujo completo: seleccionar posición → escanear producto → registrar cantidad (cajas+sueltos o directa) → completar posición.
+- **Estados de UI:** Posiciones pendientes, activa (con barra fija), completadas; formulario de cantidad con modo cajas+sueltos.
+
+### Added (Fase 9 — Colaboración, asignaciones y reconteos)
+
+- **Rondas de conteo:** Cada inicio de posición crea una `CountRound`. Los eventos se asocian a la ronda activa. Al completar, la ronda se envía (`SUBMITTED`).
+- **Asignación de operador:** Al iniciar una posición, el usuario autenticado queda como `assignedToId` / `operatorId`. La sesión `auth.user.id` reemplaza al operador por nombre en V2.
+- **Prevención de duplicidad:** Una posición completada no acepta nuevos eventos. Una ronda abierta solo acepta eventos del mismo operador.
+
+### Infrastructure
+
+- Prisma Client regenerado con 4 nuevos modelos y 2 enums.
+- 11 nuevas rutas de API y 1 nueva página.
+
 ## 0.18.0 (2026-07-21)
 
 ### Added (Fase 5 — Etiquetas y códigos de ubicación)

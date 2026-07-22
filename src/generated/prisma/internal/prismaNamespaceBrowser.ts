@@ -64,6 +64,10 @@ export const ModelName = {
   SessionProduct: 'SessionProduct',
   SessionParticipant: 'SessionParticipant',
   CountEvent: 'CountEvent',
+  SessionPosition: 'SessionPosition',
+  SessionStockSnapshot: 'SessionStockSnapshot',
+  CountRound: 'CountRound',
+  CountIncident: 'CountIncident',
   Warehouse: 'Warehouse',
   Floor: 'Floor',
   WarehouseZone: 'WarehouseZone',
@@ -249,10 +253,84 @@ export const CountEventScalarFieldEnum = {
   quantity: 'quantity',
   inputMethod: 'inputMethod',
   createdAt: 'createdAt',
-  reversedAt: 'reversedAt'
+  reversedAt: 'reversedAt',
+  positionId: 'positionId',
+  countRoundId: 'countRoundId',
+  packageId: 'packageId',
+  packageCount: 'packageCount',
+  unitsPerPackage: 'unitsPerPackage',
+  looseQuantity: 'looseQuantity',
+  reversedById: 'reversedById',
+  reversalReason: 'reversalReason'
 } as const
 
 export type CountEventScalarFieldEnum = (typeof CountEventScalarFieldEnum)[keyof typeof CountEventScalarFieldEnum]
+
+
+export const SessionPositionScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  positionId: 'positionId',
+  status: 'status',
+  assignedToId: 'assignedToId',
+  assignedById: 'assignedById',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  approvedAt: 'approvedAt',
+  approvedById: 'approvedById',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SessionPositionScalarFieldEnum = (typeof SessionPositionScalarFieldEnum)[keyof typeof SessionPositionScalarFieldEnum]
+
+
+export const SessionStockSnapshotScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  positionId: 'positionId',
+  productId: 'productId',
+  theoreticalStock: 'theoreticalStock',
+  source: 'source',
+  capturedAt: 'capturedAt'
+} as const
+
+export type SessionStockSnapshotScalarFieldEnum = (typeof SessionStockSnapshotScalarFieldEnum)[keyof typeof SessionStockSnapshotScalarFieldEnum]
+
+
+export const CountRoundScalarFieldEnum = {
+  id: 'id',
+  sessionPositionId: 'sessionPositionId',
+  roundNumber: 'roundNumber',
+  operatorId: 'operatorId',
+  status: 'status',
+  startedAt: 'startedAt',
+  submittedAt: 'submittedAt',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CountRoundScalarFieldEnum = (typeof CountRoundScalarFieldEnum)[keyof typeof CountRoundScalarFieldEnum]
+
+
+export const CountIncidentScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  positionId: 'positionId',
+  reportedById: 'reportedById',
+  type: 'type',
+  description: 'description',
+  resolved: 'resolved',
+  resolvedById: 'resolvedById',
+  resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CountIncidentScalarFieldEnum = (typeof CountIncidentScalarFieldEnum)[keyof typeof CountIncidentScalarFieldEnum]
 
 
 export const WarehouseScalarFieldEnum = {
