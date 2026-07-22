@@ -3,44 +3,61 @@ import { apiError } from "@/lib/http";
 import { requireRole } from "@/server/guards";
 import { prisma } from "@/lib/prisma";
 
+const TABLE_NOT_FOUND = "P2021";
+
+type TxOp = () => Promise<{ count: number }>;
+
 export async function DELETE() {
   try {
     const auth = await requireRole("ADMIN");
     if (!auth.authorized) return auth.response;
 
-    const result = await prisma.$transaction(async (tx) => {
-      const stats: Record<string, number> = {};
+    const stats: Record<string, number> = {};
+    const operations: Record<string, TxOp> = {
+      countEvents: () => prisma.countEvent.deleteMany(),
+      boxCountEntries: () => prisma.boxCountEntry.deleteMany(),
+      boxProducts: () => prisma.boxProduct.deleteMany(),
+      countRounds: () => prisma.countRound.deleteMany(),
+      sessionPositions: () => prisma.sessionPosition.deleteMany(),
+      sessionStockSnapshots: () => prisma.sessionStockSnapshot.deleteMany(),
+      sessionParticipants: () => prisma.sessionParticipant.deleteMany(),
+      sessionProducts: () => prisma.sessionProduct.deleteMany(),
+      countIncidents: () => prisma.countIncident.deleteMany(),
+      productLocationStocks: () => prisma.productLocationStock.deleteMany(),
+      productBarcodes: () => prisma.productBarcode.deleteMany(),
+      productPackages: () => prisma.productPackage.deleteMany(),
+      boxes: () => prisma.box.deleteMany(),
+      pallets: () => prisma.pallet.deleteMany(),
+      imports: () => prisma.import.deleteMany(),
+      storagePositions: () => prisma.storagePosition.deleteMany(),
+      rackDepthSlots: () => prisma.rackDepthSlot.deleteMany(),
+      rackCompartments: () => prisma.rackCompartment.deleteMany(),
+      racks: () => prisma.rack.deleteMany(),
+      warehouseZones: () => prisma.warehouseZone.deleteMany(),
+      floors: () => prisma.floor.deleteMany(),
+      warehouses: () => prisma.warehouse.deleteMany(),
+      products: () => prisma.product.deleteMany(),
+      inventorySessions: () => prisma.inventorySession.deleteMany(),
+      operators: () => prisma.operator.deleteMany(),
+    };
 
-      stats.countEvents = (await tx.countEvent.deleteMany()).count;
-      stats.boxCountEntries = (await tx.boxCountEntry.deleteMany()).count;
-      stats.boxProducts = (await tx.boxProduct.deleteMany()).count;
-      stats.countRounds = (await tx.countRound.deleteMany()).count;
-      stats.sessionPositions = (await tx.sessionPosition.deleteMany()).count;
-      stats.sessionStockSnapshots = (await tx.sessionStockSnapshot.deleteMany()).count;
-      stats.sessionParticipants = (await tx.sessionParticipant.deleteMany()).count;
-      stats.sessionProducts = (await tx.sessionProduct.deleteMany()).count;
-      stats.countIncidents = (await tx.countIncident.deleteMany()).count;
-      stats.productLocationStocks = (await tx.productLocationStock.deleteMany()).count;
-      stats.productBarcodes = (await tx.productBarcode.deleteMany()).count;
-      stats.productPackages = (await tx.productPackage.deleteMany()).count;
-      stats.boxes = (await tx.box.deleteMany()).count;
-      stats.pallets = (await tx.pallet.deleteMany()).count;
-      stats.imports = (await tx.import.deleteMany()).count;
-      stats.storagePositions = (await tx.storagePosition.deleteMany()).count;
-      stats.rackDepthSlots = (await tx.rackDepthSlot.deleteMany()).count;
-      stats.rackCompartments = (await tx.rackCompartment.deleteMany()).count;
-      stats.racks = (await tx.rack.deleteMany()).count;
-      stats.warehouseZones = (await tx.warehouseZone.deleteMany()).count;
-      stats.floors = (await tx.floor.deleteMany()).count;
-      stats.warehouses = (await tx.warehouse.deleteMany()).count;
-      stats.products = (await tx.product.deleteMany()).count;
-      stats.inventorySessions = (await tx.inventorySession.deleteMany()).count;
-      stats.operators = (await tx.operator.deleteMany()).count;
+    const errors: string[] = [];
+    for (const [name, op] of Object.entries(operations)) {
+      try {
+        const result = await op();
+        stats[name] = result.count;
+      } catch (error: unknown) {
+        const err = error as { code?: string; message?: string };
+        if (err?.code === TABLE_NOT_FOUND || (err?.message?.includes?.("does not exist"))) {
+          stats[name] = -1;
+        } else {
+          stats[name] = -2;
+          errors.push(`${name}: ${err?.message || "Error desconocido"}`);
+        }
+      }
+    }
 
-      return stats;
-    });
-
-    return NextResponse.json({ ok: true, deleted: result });
+    return NextResponse.json({ ok: errors.length === 0, deleted: stats, warnings: errors.length > 0 ? errors : undefined });
   } catch (error) {
     return apiError(error);
   }

@@ -84,13 +84,17 @@ export default function SettingsPage() {
   async function deleteAll() {
     setBusy(true);
     try {
-      const result = await apiFetch<{ deleted: Record<string, number> }>("/api/admin/reset", { method: "DELETE" });
-      const total = Object.values(result.deleted).reduce((s, c) => s + c, 0);
-      setToast(`Sistema reiniciado: ${total} registros eliminados`);
+      const result = await apiFetch<{ deleted: Record<string, number>; warnings?: string[] }>("/api/admin/reset", { method: "DELETE" });
+      const deleted = Object.values(result.deleted).filter((c) => c > 0);
+      const skipped = Object.entries(result.deleted).filter(([, c]) => c === -1).map(([k]) => k);
+      const total = deleted.reduce((s, c) => s + c, 0);
+      const msg = `Sistema reiniciado: ${total} registros eliminados` + (skipped.length > 0 ? `. Tablas ignoradas: ${skipped.join(", ")}` : "");
+      setToast(msg);
+      if (result.warnings?.length) console.warn("Reset warnings:", result.warnings);
       setConfirmDelete(false);
       await load();
-    } catch {
-      setToast("Error al eliminar datos");
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error al reiniciar el sistema");
     } finally {
       setBusy(false);
     }
