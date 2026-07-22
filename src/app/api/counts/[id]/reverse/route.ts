@@ -15,7 +15,7 @@ export async function POST(
   try {
     const auth = await requireRole("SUPERVISOR", "ADMIN", "COUNTER");
     if (!auth.authorized) return auth.response;
-    const userId = auth.session!.user.id;
+    const userId = auth.session.user.id;
 
     const { id } = await context.params;
     const body = schema.parse(await request.json());

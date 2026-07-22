@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, LoaderCircle, Printer, Info } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { BarcodeLabel, type LabelFormat } from "@/components/barcode-label";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/client";
@@ -23,6 +23,14 @@ const FORMAT_OPTIONS: { id: LabelFormat; label: string }[] = [
 ];
 
 export default function LabelsPage() {
+  return (
+    <Suspense fallback={<div className="grid min-h-[40vh] place-items-center"><LoaderCircle className="animate-spin text-teal-700" size={34} /></div>}>
+      <LabelsContent />
+    </Suspense>
+  );
+}
+
+function LabelsContent() {
   const searchParams = useSearchParams();
   const ids = searchParams.get("ids");
   const [products, setProducts] = useState<Product[]>([]);
