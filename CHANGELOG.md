@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.29.0 (2026-07-22)
+
+### Added
+
+- **Botón "Añadir rack" en la página de zona:** Nuevo formulario inline para crear racks directamente desde la UI de cada zona, eliminando la necesidad de usar la importación masiva o crear racks programáticamente.
+- **Flujo completo de creación de ubicaciones:** Ahora es posible crear toda la jerarquía (Almacén → Piso → Zona → Rack → Compartimentos → Posiciones) desde la interfaz de usuario.
+
+### Changed
+
+- Texto de ayuda actualizado: "Sin racks. Haz clic en 'Añadir rack' para crear uno nuevo."
+
 ## 0.28.0 (2026-07-21)
 
 ### Added (Fase 4 — Pruebas)

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { ArrowLeft, MapPin, Plus, LoaderCircle, Rows3 } from "lucide-react";
+import { ArrowLeft, MapPin, Plus, LoaderCircle, Rows3, Package } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,10 +15,15 @@ export default function FloorDetailPage() {
 
   const [floor, setFloor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showZoneForm, setShowZoneForm] = useState(false);
   const [zoneCode, setZoneCode] = useState("");
   const [zoneName, setZoneName] = useState("");
   const [creating, setCreating] = useState(false);
+
+  const [showRackForm, setShowRackForm] = useState<string | null>(null);
+  const [rackCode, setRackCode] = useState("");
+  const [rackName, setRackName] = useState("");
+  const [creatingRack, setCreatingRack] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -38,9 +43,22 @@ export default function FloorDetailPage() {
         method: "POST",
         body: JSON.stringify({ floorId: id, code: zoneCode, name: zoneName, orderIndex: floor?.zones.length ?? 0 }),
       });
-      setZoneCode(""); setZoneName(""); setShowForm(false); await load();
+      setZoneCode(""); setZoneName(""); setShowZoneForm(false); await load();
     } catch { /* silent */ }
     finally { setCreating(false); }
+  }
+
+  async function addRack(zoneId: string) {
+    if (!rackCode.trim() || !rackName.trim()) return;
+    setCreatingRack(true);
+    try {
+      await apiFetch("/api/racks", {
+        method: "POST",
+        body: JSON.stringify({ zoneId, code: rackCode, name: rackName }),
+      });
+      setRackCode(""); setRackName(""); setShowRackForm(null); await load();
+    } catch { /* silent */ }
+    finally { setCreatingRack(false); }
   }
 
   if (loading) return <div className="flex items-center justify-center py-16 text-slate-500"><LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...</div>;
@@ -56,10 +74,10 @@ export default function FloorDetailPage() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{floor.zones?.length ?? 0} zona{(floor.zones?.length ?? 0) !== 1 ? "s" : ""}</p>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}><Plus size={14} /> Añadir zona</Button>
+        <Button size="sm" onClick={() => setShowZoneForm(!showZoneForm)}><Plus size={14} /> Añadir zona</Button>
       </div>
 
-      {showForm && (
+      {showZoneForm && (
         <Card><CardContent className="flex items-end gap-3 pt-4">
           <div><label className="mb-1 block text-xs font-medium text-slate-600">Código</label><Input value={zoneCode} onChange={(e) => setZoneCode(e.target.value)} placeholder="ZA" /></div>
           <div className="flex-1"><label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label><Input value={zoneName} onChange={(e) => setZoneName(e.target.value)} placeholder="Zona A" /></div>
@@ -70,8 +88,22 @@ export default function FloorDetailPage() {
       <div className="space-y-3">
         {(floor.zones ?? []).map((zone: any) => (
           <Card key={zone.id}>
-            <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><MapPin size={16} />{zone.name} <span className="text-xs font-normal text-slate-400">({zone.code})</span></CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-base"><MapPin size={16} />{zone.name} <span className="text-xs font-normal text-slate-400">({zone.code})</span></CardTitle>
+                <Button size="sm" variant="outline" onClick={() => setShowRackForm(showRackForm === zone.id ? null : zone.id)}>
+                  <Plus size={14} /> Añadir rack
+                </Button>
+              </div>
+            </CardHeader>
             <CardContent>
+              {showRackForm === zone.id && (
+                <div className="mb-4 flex items-end gap-3 rounded-lg border border-dashed border-teal-300 bg-teal-50 p-3">
+                  <div><label className="mb-1 block text-xs font-medium text-slate-600">Código</label><Input value={rackCode} onChange={(e) => setRackCode(e.target.value)} placeholder="R01" /></div>
+                  <div className="flex-1"><label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label><Input value={rackName} onChange={(e) => setRackName(e.target.value)} placeholder="Rack 1" /></div>
+                  <Button onClick={() => void addRack(zone.id)} disabled={creatingRack}>{creatingRack ? <LoaderCircle className="animate-spin" size={14} /> : <Plus size={14} />} Crear</Button>
+                </div>
+              )}
               {zone.racks?.length > 0 ? (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {zone.racks.map((rack: any) => (
@@ -85,7 +117,7 @@ export default function FloorDetailPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-400">Sin racks. Crea racks desde la importación o desde la zona.</p>
+                <p className="text-xs text-slate-400">Sin racks. Haz clic en "Añadir rack" para crear uno nuevo.</p>
               )}
             </CardContent>
           </Card>
