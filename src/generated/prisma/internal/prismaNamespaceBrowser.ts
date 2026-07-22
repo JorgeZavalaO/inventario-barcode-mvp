@@ -59,6 +59,11 @@ export const ModelName = {
   ProductBarcode: 'ProductBarcode',
   ProductPackage: 'ProductPackage',
   ProductLocationStock: 'ProductLocationStock',
+  Import: 'Import',
+  Pallet: 'Pallet',
+  Box: 'Box',
+  BoxProduct: 'BoxProduct',
+  BoxCountEntry: 'BoxCountEntry',
   Operator: 'Operator',
   InventorySession: 'InventorySession',
   SessionProduct: 'SessionProduct',
@@ -202,6 +207,66 @@ export const ProductLocationStockScalarFieldEnum = {
 export type ProductLocationStockScalarFieldEnum = (typeof ProductLocationStockScalarFieldEnum)[keyof typeof ProductLocationStockScalarFieldEnum]
 
 
+export const ImportScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  description: 'description',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ImportScalarFieldEnum = (typeof ImportScalarFieldEnum)[keyof typeof ImportScalarFieldEnum]
+
+
+export const PalletScalarFieldEnum = {
+  id: 'id',
+  importId: 'importId',
+  number: 'number',
+  active: 'active'
+} as const
+
+export type PalletScalarFieldEnum = (typeof PalletScalarFieldEnum)[keyof typeof PalletScalarFieldEnum]
+
+
+export const BoxScalarFieldEnum = {
+  id: 'id',
+  palletId: 'palletId',
+  number: 'number',
+  expectedPositionId: 'expectedPositionId',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BoxScalarFieldEnum = (typeof BoxScalarFieldEnum)[keyof typeof BoxScalarFieldEnum]
+
+
+export const BoxProductScalarFieldEnum = {
+  id: 'id',
+  boxId: 'boxId',
+  productId: 'productId',
+  orderIndex: 'orderIndex',
+  expectedQty: 'expectedQty',
+  active: 'active'
+} as const
+
+export type BoxProductScalarFieldEnum = (typeof BoxProductScalarFieldEnum)[keyof typeof BoxProductScalarFieldEnum]
+
+
+export const BoxCountEntryScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  countRoundId: 'countRoundId',
+  boxId: 'boxId',
+  positionId: 'positionId',
+  operatorId: 'operatorId',
+  createdAt: 'createdAt'
+} as const
+
+export type BoxCountEntryScalarFieldEnum = (typeof BoxCountEntryScalarFieldEnum)[keyof typeof BoxCountEntryScalarFieldEnum]
+
+
 export const OperatorScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -261,7 +326,8 @@ export const CountEventScalarFieldEnum = {
   unitsPerPackage: 'unitsPerPackage',
   looseQuantity: 'looseQuantity',
   reversedById: 'reversedById',
-  reversalReason: 'reversalReason'
+  reversalReason: 'reversalReason',
+  boxCountEntryId: 'boxCountEntryId'
 } as const
 
 export type CountEventScalarFieldEnum = (typeof CountEventScalarFieldEnum)[keyof typeof CountEventScalarFieldEnum]

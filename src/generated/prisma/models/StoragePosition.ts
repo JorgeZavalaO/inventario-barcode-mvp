@@ -311,6 +311,8 @@ export type StoragePositionWhereInput = {
   sessionPositions?: Prisma.SessionPositionListRelationFilter
   stockSnapshots?: Prisma.SessionStockSnapshotListRelationFilter
   incidents?: Prisma.CountIncidentListRelationFilter
+  expectedBoxes?: Prisma.BoxListRelationFilter
+  boxCountEntries?: Prisma.BoxCountEntryListRelationFilter
 }
 
 export type StoragePositionOrderByWithRelationInput = {
@@ -336,6 +338,8 @@ export type StoragePositionOrderByWithRelationInput = {
   sessionPositions?: Prisma.SessionPositionOrderByRelationAggregateInput
   stockSnapshots?: Prisma.SessionStockSnapshotOrderByRelationAggregateInput
   incidents?: Prisma.CountIncidentOrderByRelationAggregateInput
+  expectedBoxes?: Prisma.BoxOrderByRelationAggregateInput
+  boxCountEntries?: Prisma.BoxCountEntryOrderByRelationAggregateInput
 }
 
 export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
@@ -365,6 +369,8 @@ export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
   sessionPositions?: Prisma.SessionPositionListRelationFilter
   stockSnapshots?: Prisma.SessionStockSnapshotListRelationFilter
   incidents?: Prisma.CountIncidentListRelationFilter
+  expectedBoxes?: Prisma.BoxListRelationFilter
+  boxCountEntries?: Prisma.BoxCountEntryListRelationFilter
 }, "id" | "code" | "qrValue" | "depthSlotId_columnIndex_stackIndex">
 
 export type StoragePositionOrderByWithAggregationInput = {
@@ -431,6 +437,8 @@ export type StoragePositionCreateInput = {
   sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateInput = {
@@ -453,6 +461,8 @@ export type StoragePositionUncheckedCreateInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUpdateInput = {
@@ -475,6 +485,8 @@ export type StoragePositionUpdateInput = {
   sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateInput = {
@@ -497,6 +509,8 @@ export type StoragePositionUncheckedUpdateInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionCreateManyInput = {
@@ -553,6 +567,11 @@ export type StoragePositionUncheckedUpdateManyInput = {
 export type StoragePositionScalarRelationFilter = {
   is?: Prisma.StoragePositionWhereInput
   isNot?: Prisma.StoragePositionWhereInput
+}
+
+export type StoragePositionNullableScalarRelationFilter = {
+  is?: Prisma.StoragePositionWhereInput | null
+  isNot?: Prisma.StoragePositionWhereInput | null
 }
 
 export type StoragePositionListRelationFilter = {
@@ -649,6 +668,36 @@ export type StoragePositionUpdateOneRequiredWithoutLocationStocksNestedInput = {
   upsert?: Prisma.StoragePositionUpsertWithoutLocationStocksInput
   connect?: Prisma.StoragePositionWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.StoragePositionUpdateToOneWithWhereWithoutLocationStocksInput, Prisma.StoragePositionUpdateWithoutLocationStocksInput>, Prisma.StoragePositionUncheckedUpdateWithoutLocationStocksInput>
+}
+
+export type StoragePositionCreateNestedOneWithoutExpectedBoxesInput = {
+  create?: Prisma.XOR<Prisma.StoragePositionCreateWithoutExpectedBoxesInput, Prisma.StoragePositionUncheckedCreateWithoutExpectedBoxesInput>
+  connectOrCreate?: Prisma.StoragePositionCreateOrConnectWithoutExpectedBoxesInput
+  connect?: Prisma.StoragePositionWhereUniqueInput
+}
+
+export type StoragePositionUpdateOneWithoutExpectedBoxesNestedInput = {
+  create?: Prisma.XOR<Prisma.StoragePositionCreateWithoutExpectedBoxesInput, Prisma.StoragePositionUncheckedCreateWithoutExpectedBoxesInput>
+  connectOrCreate?: Prisma.StoragePositionCreateOrConnectWithoutExpectedBoxesInput
+  upsert?: Prisma.StoragePositionUpsertWithoutExpectedBoxesInput
+  disconnect?: Prisma.StoragePositionWhereInput | boolean
+  delete?: Prisma.StoragePositionWhereInput | boolean
+  connect?: Prisma.StoragePositionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StoragePositionUpdateToOneWithWhereWithoutExpectedBoxesInput, Prisma.StoragePositionUpdateWithoutExpectedBoxesInput>, Prisma.StoragePositionUncheckedUpdateWithoutExpectedBoxesInput>
+}
+
+export type StoragePositionCreateNestedOneWithoutBoxCountEntriesInput = {
+  create?: Prisma.XOR<Prisma.StoragePositionCreateWithoutBoxCountEntriesInput, Prisma.StoragePositionUncheckedCreateWithoutBoxCountEntriesInput>
+  connectOrCreate?: Prisma.StoragePositionCreateOrConnectWithoutBoxCountEntriesInput
+  connect?: Prisma.StoragePositionWhereUniqueInput
+}
+
+export type StoragePositionUpdateOneRequiredWithoutBoxCountEntriesNestedInput = {
+  create?: Prisma.XOR<Prisma.StoragePositionCreateWithoutBoxCountEntriesInput, Prisma.StoragePositionUncheckedCreateWithoutBoxCountEntriesInput>
+  connectOrCreate?: Prisma.StoragePositionCreateOrConnectWithoutBoxCountEntriesInput
+  upsert?: Prisma.StoragePositionUpsertWithoutBoxCountEntriesInput
+  connect?: Prisma.StoragePositionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StoragePositionUpdateToOneWithWhereWithoutBoxCountEntriesInput, Prisma.StoragePositionUpdateWithoutBoxCountEntriesInput>, Prisma.StoragePositionUncheckedUpdateWithoutBoxCountEntriesInput>
 }
 
 export type StoragePositionCreateNestedOneWithoutSessionPositionsInput = {
@@ -838,6 +887,8 @@ export type StoragePositionCreateWithoutLocationStocksInput = {
   sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutLocationStocksInput = {
@@ -859,6 +910,8 @@ export type StoragePositionUncheckedCreateWithoutLocationStocksInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutLocationStocksInput = {
@@ -896,6 +949,8 @@ export type StoragePositionUpdateWithoutLocationStocksInput = {
   sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutLocationStocksInput = {
@@ -917,6 +972,224 @@ export type StoragePositionUncheckedUpdateWithoutLocationStocksInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
+}
+
+export type StoragePositionCreateWithoutExpectedBoxesInput = {
+  id?: string
+  columnIndex?: number
+  stackIndex?: number
+  code: string
+  qrValue: string
+  capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: string | null
+  active?: boolean
+  countable?: boolean
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rack: Prisma.RackCreateNestedOneWithoutPositionsInput
+  compartment: Prisma.RackCompartmentCreateNestedOneWithoutPositionsInput
+  depthSlot: Prisma.RackDepthSlotCreateNestedOneWithoutPositionsInput
+  locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
+}
+
+export type StoragePositionUncheckedCreateWithoutExpectedBoxesInput = {
+  id?: string
+  rackId: string
+  compartmentId: string
+  depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
+  code: string
+  qrValue: string
+  capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: string | null
+  active?: boolean
+  countable?: boolean
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
+}
+
+export type StoragePositionCreateOrConnectWithoutExpectedBoxesInput = {
+  where: Prisma.StoragePositionWhereUniqueInput
+  create: Prisma.XOR<Prisma.StoragePositionCreateWithoutExpectedBoxesInput, Prisma.StoragePositionUncheckedCreateWithoutExpectedBoxesInput>
+}
+
+export type StoragePositionUpsertWithoutExpectedBoxesInput = {
+  update: Prisma.XOR<Prisma.StoragePositionUpdateWithoutExpectedBoxesInput, Prisma.StoragePositionUncheckedUpdateWithoutExpectedBoxesInput>
+  create: Prisma.XOR<Prisma.StoragePositionCreateWithoutExpectedBoxesInput, Prisma.StoragePositionUncheckedCreateWithoutExpectedBoxesInput>
+  where?: Prisma.StoragePositionWhereInput
+}
+
+export type StoragePositionUpdateToOneWithWhereWithoutExpectedBoxesInput = {
+  where?: Prisma.StoragePositionWhereInput
+  data: Prisma.XOR<Prisma.StoragePositionUpdateWithoutExpectedBoxesInput, Prisma.StoragePositionUncheckedUpdateWithoutExpectedBoxesInput>
+}
+
+export type StoragePositionUpdateWithoutExpectedBoxesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  qrValue?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  countable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rack?: Prisma.RackUpdateOneRequiredWithoutPositionsNestedInput
+  compartment?: Prisma.RackCompartmentUpdateOneRequiredWithoutPositionsNestedInput
+  depthSlot?: Prisma.RackDepthSlotUpdateOneRequiredWithoutPositionsNestedInput
+  locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
+}
+
+export type StoragePositionUncheckedUpdateWithoutExpectedBoxesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rackId?: Prisma.StringFieldUpdateOperationsInput | string
+  compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  qrValue?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  countable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
+}
+
+export type StoragePositionCreateWithoutBoxCountEntriesInput = {
+  id?: string
+  columnIndex?: number
+  stackIndex?: number
+  code: string
+  qrValue: string
+  capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: string | null
+  active?: boolean
+  countable?: boolean
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  rack: Prisma.RackCreateNestedOneWithoutPositionsInput
+  compartment: Prisma.RackCompartmentCreateNestedOneWithoutPositionsInput
+  depthSlot: Prisma.RackDepthSlotCreateNestedOneWithoutPositionsInput
+  locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
+  sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
+  incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+}
+
+export type StoragePositionUncheckedCreateWithoutBoxCountEntriesInput = {
+  id?: string
+  rackId: string
+  compartmentId: string
+  depthSlotId: string
+  columnIndex?: number
+  stackIndex?: number
+  code: string
+  qrValue: string
+  capacityQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: string | null
+  active?: boolean
+  countable?: boolean
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
+  sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
+  incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+}
+
+export type StoragePositionCreateOrConnectWithoutBoxCountEntriesInput = {
+  where: Prisma.StoragePositionWhereUniqueInput
+  create: Prisma.XOR<Prisma.StoragePositionCreateWithoutBoxCountEntriesInput, Prisma.StoragePositionUncheckedCreateWithoutBoxCountEntriesInput>
+}
+
+export type StoragePositionUpsertWithoutBoxCountEntriesInput = {
+  update: Prisma.XOR<Prisma.StoragePositionUpdateWithoutBoxCountEntriesInput, Prisma.StoragePositionUncheckedUpdateWithoutBoxCountEntriesInput>
+  create: Prisma.XOR<Prisma.StoragePositionCreateWithoutBoxCountEntriesInput, Prisma.StoragePositionUncheckedCreateWithoutBoxCountEntriesInput>
+  where?: Prisma.StoragePositionWhereInput
+}
+
+export type StoragePositionUpdateToOneWithWhereWithoutBoxCountEntriesInput = {
+  where?: Prisma.StoragePositionWhereInput
+  data: Prisma.XOR<Prisma.StoragePositionUpdateWithoutBoxCountEntriesInput, Prisma.StoragePositionUncheckedUpdateWithoutBoxCountEntriesInput>
+}
+
+export type StoragePositionUpdateWithoutBoxCountEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  qrValue?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  countable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rack?: Prisma.RackUpdateOneRequiredWithoutPositionsNestedInput
+  compartment?: Prisma.RackCompartmentUpdateOneRequiredWithoutPositionsNestedInput
+  depthSlot?: Prisma.RackDepthSlotUpdateOneRequiredWithoutPositionsNestedInput
+  locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
+  sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
+  incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+}
+
+export type StoragePositionUncheckedUpdateWithoutBoxCountEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rackId?: Prisma.StringFieldUpdateOperationsInput | string
+  compartmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  depthSlotId?: Prisma.StringFieldUpdateOperationsInput | string
+  columnIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  stackIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  qrValue?: Prisma.StringFieldUpdateOperationsInput | string
+  capacityQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  capacityUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  countable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
+  sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
+  stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
+  incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
 }
 
 export type StoragePositionCreateWithoutSessionPositionsInput = {
@@ -938,6 +1211,8 @@ export type StoragePositionCreateWithoutSessionPositionsInput = {
   locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutSessionPositionsInput = {
@@ -959,6 +1234,8 @@ export type StoragePositionUncheckedCreateWithoutSessionPositionsInput = {
   locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutSessionPositionsInput = {
@@ -996,6 +1273,8 @@ export type StoragePositionUpdateWithoutSessionPositionsInput = {
   locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutSessionPositionsInput = {
@@ -1017,6 +1296,8 @@ export type StoragePositionUncheckedUpdateWithoutSessionPositionsInput = {
   locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionCreateWithoutStockSnapshotsInput = {
@@ -1038,6 +1319,8 @@ export type StoragePositionCreateWithoutStockSnapshotsInput = {
   locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
   sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutStockSnapshotsInput = {
@@ -1059,6 +1342,8 @@ export type StoragePositionUncheckedCreateWithoutStockSnapshotsInput = {
   locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
   sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutStockSnapshotsInput = {
@@ -1096,6 +1381,8 @@ export type StoragePositionUpdateWithoutStockSnapshotsInput = {
   locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
   sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutStockSnapshotsInput = {
@@ -1117,6 +1404,8 @@ export type StoragePositionUncheckedUpdateWithoutStockSnapshotsInput = {
   locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
   sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionCreateWithoutIncidentsInput = {
@@ -1138,6 +1427,8 @@ export type StoragePositionCreateWithoutIncidentsInput = {
   locationStocks?: Prisma.ProductLocationStockCreateNestedManyWithoutPositionInput
   sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutIncidentsInput = {
@@ -1159,6 +1450,8 @@ export type StoragePositionUncheckedCreateWithoutIncidentsInput = {
   locationStocks?: Prisma.ProductLocationStockUncheckedCreateNestedManyWithoutPositionInput
   sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutIncidentsInput = {
@@ -1196,6 +1489,8 @@ export type StoragePositionUpdateWithoutIncidentsInput = {
   locationStocks?: Prisma.ProductLocationStockUpdateManyWithoutPositionNestedInput
   sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutIncidentsInput = {
@@ -1217,6 +1512,8 @@ export type StoragePositionUncheckedUpdateWithoutIncidentsInput = {
   locationStocks?: Prisma.ProductLocationStockUncheckedUpdateManyWithoutPositionNestedInput
   sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionCreateWithoutRackInput = {
@@ -1238,6 +1535,8 @@ export type StoragePositionCreateWithoutRackInput = {
   sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutRackInput = {
@@ -1259,6 +1558,8 @@ export type StoragePositionUncheckedCreateWithoutRackInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutRackInput = {
@@ -1327,6 +1628,8 @@ export type StoragePositionCreateWithoutCompartmentInput = {
   sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutCompartmentInput = {
@@ -1348,6 +1651,8 @@ export type StoragePositionUncheckedCreateWithoutCompartmentInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutCompartmentInput = {
@@ -1395,6 +1700,8 @@ export type StoragePositionCreateWithoutDepthSlotInput = {
   sessionPositions?: Prisma.SessionPositionCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionUncheckedCreateWithoutDepthSlotInput = {
@@ -1416,6 +1723,8 @@ export type StoragePositionUncheckedCreateWithoutDepthSlotInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedCreateNestedManyWithoutPositionInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedCreateNestedManyWithoutPositionInput
   incidents?: Prisma.CountIncidentUncheckedCreateNestedManyWithoutPositionInput
+  expectedBoxes?: Prisma.BoxUncheckedCreateNestedManyWithoutExpectedPositionInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutPositionInput
 }
 
 export type StoragePositionCreateOrConnectWithoutDepthSlotInput = {
@@ -1480,6 +1789,8 @@ export type StoragePositionUpdateWithoutRackInput = {
   sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutRackInput = {
@@ -1501,6 +1812,8 @@ export type StoragePositionUncheckedUpdateWithoutRackInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateManyWithoutRackInput = {
@@ -1556,6 +1869,8 @@ export type StoragePositionUpdateWithoutCompartmentInput = {
   sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutCompartmentInput = {
@@ -1577,6 +1892,8 @@ export type StoragePositionUncheckedUpdateWithoutCompartmentInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateManyWithoutCompartmentInput = {
@@ -1632,6 +1949,8 @@ export type StoragePositionUpdateWithoutDepthSlotInput = {
   sessionPositions?: Prisma.SessionPositionUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateWithoutDepthSlotInput = {
@@ -1653,6 +1972,8 @@ export type StoragePositionUncheckedUpdateWithoutDepthSlotInput = {
   sessionPositions?: Prisma.SessionPositionUncheckedUpdateManyWithoutPositionNestedInput
   stockSnapshots?: Prisma.SessionStockSnapshotUncheckedUpdateManyWithoutPositionNestedInput
   incidents?: Prisma.CountIncidentUncheckedUpdateManyWithoutPositionNestedInput
+  expectedBoxes?: Prisma.BoxUncheckedUpdateManyWithoutExpectedPositionNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutPositionNestedInput
 }
 
 export type StoragePositionUncheckedUpdateManyWithoutDepthSlotInput = {
@@ -1682,6 +2003,8 @@ export type StoragePositionCountOutputType = {
   sessionPositions: number
   stockSnapshots: number
   incidents: number
+  expectedBoxes: number
+  boxCountEntries: number
 }
 
 export type StoragePositionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1689,6 +2012,8 @@ export type StoragePositionCountOutputTypeSelect<ExtArgs extends runtime.Types.E
   sessionPositions?: boolean | StoragePositionCountOutputTypeCountSessionPositionsArgs
   stockSnapshots?: boolean | StoragePositionCountOutputTypeCountStockSnapshotsArgs
   incidents?: boolean | StoragePositionCountOutputTypeCountIncidentsArgs
+  expectedBoxes?: boolean | StoragePositionCountOutputTypeCountExpectedBoxesArgs
+  boxCountEntries?: boolean | StoragePositionCountOutputTypeCountBoxCountEntriesArgs
 }
 
 /**
@@ -1729,6 +2054,20 @@ export type StoragePositionCountOutputTypeCountIncidentsArgs<ExtArgs extends run
   where?: Prisma.CountIncidentWhereInput
 }
 
+/**
+ * StoragePositionCountOutputType without action
+ */
+export type StoragePositionCountOutputTypeCountExpectedBoxesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BoxWhereInput
+}
+
+/**
+ * StoragePositionCountOutputType without action
+ */
+export type StoragePositionCountOutputTypeCountBoxCountEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BoxCountEntryWhereInput
+}
+
 
 export type StoragePositionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1753,6 +2092,8 @@ export type StoragePositionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   sessionPositions?: boolean | Prisma.StoragePosition$sessionPositionsArgs<ExtArgs>
   stockSnapshots?: boolean | Prisma.StoragePosition$stockSnapshotsArgs<ExtArgs>
   incidents?: boolean | Prisma.StoragePosition$incidentsArgs<ExtArgs>
+  expectedBoxes?: boolean | Prisma.StoragePosition$expectedBoxesArgs<ExtArgs>
+  boxCountEntries?: boolean | Prisma.StoragePosition$boxCountEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.StoragePositionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["storagePosition"]>
 
@@ -1825,6 +2166,8 @@ export type StoragePositionInclude<ExtArgs extends runtime.Types.Extensions.Inte
   sessionPositions?: boolean | Prisma.StoragePosition$sessionPositionsArgs<ExtArgs>
   stockSnapshots?: boolean | Prisma.StoragePosition$stockSnapshotsArgs<ExtArgs>
   incidents?: boolean | Prisma.StoragePosition$incidentsArgs<ExtArgs>
+  expectedBoxes?: boolean | Prisma.StoragePosition$expectedBoxesArgs<ExtArgs>
+  boxCountEntries?: boolean | Prisma.StoragePosition$boxCountEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.StoragePositionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StoragePositionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1848,6 +2191,8 @@ export type $StoragePositionPayload<ExtArgs extends runtime.Types.Extensions.Int
     sessionPositions: Prisma.$SessionPositionPayload<ExtArgs>[]
     stockSnapshots: Prisma.$SessionStockSnapshotPayload<ExtArgs>[]
     incidents: Prisma.$CountIncidentPayload<ExtArgs>[]
+    expectedBoxes: Prisma.$BoxPayload<ExtArgs>[]
+    boxCountEntries: Prisma.$BoxCountEntryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2266,6 +2611,8 @@ export interface Prisma__StoragePositionClient<T, Null = never, ExtArgs extends 
   sessionPositions<T extends Prisma.StoragePosition$sessionPositionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StoragePosition$sessionPositionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPositionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stockSnapshots<T extends Prisma.StoragePosition$stockSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StoragePosition$stockSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionStockSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   incidents<T extends Prisma.StoragePosition$incidentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StoragePosition$incidentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CountIncidentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  expectedBoxes<T extends Prisma.StoragePosition$expectedBoxesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StoragePosition$expectedBoxesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BoxPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  boxCountEntries<T extends Prisma.StoragePosition$boxCountEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StoragePosition$boxCountEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BoxCountEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2804,6 +3151,54 @@ export type StoragePosition$incidentsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.CountIncidentScalarFieldEnum | Prisma.CountIncidentScalarFieldEnum[]
+}
+
+/**
+ * StoragePosition.expectedBoxes
+ */
+export type StoragePosition$expectedBoxesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Box
+   */
+  select?: Prisma.BoxSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Box
+   */
+  omit?: Prisma.BoxOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BoxInclude<ExtArgs> | null
+  where?: Prisma.BoxWhereInput
+  orderBy?: Prisma.BoxOrderByWithRelationInput | Prisma.BoxOrderByWithRelationInput[]
+  cursor?: Prisma.BoxWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BoxScalarFieldEnum | Prisma.BoxScalarFieldEnum[]
+}
+
+/**
+ * StoragePosition.boxCountEntries
+ */
+export type StoragePosition$boxCountEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BoxCountEntry
+   */
+  select?: Prisma.BoxCountEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BoxCountEntry
+   */
+  omit?: Prisma.BoxCountEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BoxCountEntryInclude<ExtArgs> | null
+  where?: Prisma.BoxCountEntryWhereInput
+  orderBy?: Prisma.BoxCountEntryOrderByWithRelationInput | Prisma.BoxCountEntryOrderByWithRelationInput[]
+  cursor?: Prisma.BoxCountEntryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BoxCountEntryScalarFieldEnum | Prisma.BoxCountEntryScalarFieldEnum[]
 }
 
 /**

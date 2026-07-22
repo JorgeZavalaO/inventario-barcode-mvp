@@ -120,6 +120,7 @@ model Product {
   packages         ProductPackage[]
   locationStocks   ProductLocationStock[]
   stockSnapshots   SessionStockSnapshot[]
+  boxProducts      BoxProduct[]
 
   @@map("products")
 }
@@ -176,6 +177,85 @@ model ProductLocationStock {
   @@map("product_location_stocks")
 }
 
+model Import {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pallets Pallet[]
+
+  @@map("imports")
+}
+
+model Pallet {
+  id       String @id @default(uuid())
+  importId String @map("import_id")
+  number   String
+  active   Boolean @default(true)
+
+  import Import @relation(fields: [importId], references: [id])
+  boxes  Box[]
+
+  @@unique([importId, number])
+  @@map("pallets")
+}
+
+model Box {
+  id                  String           @id @default(uuid())
+  palletId            String           @map("pallet_id")
+  number              String
+  expectedPositionId  String?          @map("expected_position_id")
+  active              Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  pallet           Pallet           @relation(fields: [palletId], references: [id])
+  expectedPosition StoragePosition? @relation("BoxExpectedPosition", fields: [expectedPositionId], references: [id])
+  boxProducts      BoxProduct[]
+  countEntries     BoxCountEntry[]
+
+  @@unique([palletId, number])
+  @@map("boxes")
+}
+
+model BoxProduct {
+  id          String   @id @default(uuid())
+  boxId       String   @map("box_id")
+  productId   String   @map("product_id")
+  orderIndex  Int      @map("order_index")
+  expectedQty Decimal? @map("expected_qty") @db.Decimal(14, 3)
+  active      Boolean  @default(true)
+
+  box     Box     @relation(fields: [boxId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([boxId, productId])
+  @@map("box_products")
+}
+
+model BoxCountEntry {
+  id           String   @id @default(uuid())
+  sessionId    String   @map("session_id")
+  countRoundId String   @map("count_round_id")
+  boxId        String   @map("box_id")
+  positionId   String   @map("position_id")
+  operatorId   String   @map("operator_id")
+  createdAt    DateTime @default(now())
+
+  session    InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  countRound CountRound       @relation(fields: [countRoundId], references: [id])
+  box        Box              @relation(fields: [boxId], references: [id])
+  position   StoragePosition  @relation(fields: [positionId], references: [id])
+  operator   Operator         @relation(fields: [operatorId], references: [id])
+  countEvents CountEvent[]
+
+  @@unique([countRoundId, boxId])
+  @@map("box_count_entries")
+}
+
 model Operator {
   id        String   @id @default(uuid())
   name      String
@@ -183,6 +263,7 @@ model Operator {
 
   sessionParticipants SessionParticipant[]
   countEvents         CountEvent[]
+  boxCountEntries     BoxCountEntry[]
 
   @@map("operators")
 }
@@ -203,6 +284,7 @@ model InventorySession {
   sessionPositions     SessionPosition[]
   stockSnapshots       SessionStockSnapshot[]
   incidents            CountIncident[]
+  boxCountEntries      BoxCountEntry[]
 
   @@map("inventory_sessions")
 }
@@ -252,16 +334,19 @@ model CountEvent {
   looseQuantity   Decimal?    @map("loose_quantity") @db.Decimal(14, 3)
   reversedById    String?     @map("reversed_by_id")
   reversalReason  String?     @map("reversal_reason")
+  boxCountEntryId String?     @map("box_count_entry_id")
 
   session    InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   product    Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
   operator   Operator         @relation(fields: [operatorId], references: [id], onDelete: Restrict)
   countRound CountRound?      @relation(fields: [countRoundId], references: [id])
+  boxCountEntry BoxCountEntry? @relation(fields: [boxCountEntryId], references: [id])
 
   @@index([sessionId, productId])
   @@index([sessionId, createdAt(sort: Desc)])
   @@index([sessionId, positionId, productId])
   @@index([countRoundId, createdAt])
+  @@index([boxCountEntryId])
   @@map("count_events")
 }
 
@@ -321,6 +406,7 @@ model CountRound {
 
   sessionPosition SessionPosition @relation(fields: [sessionPositionId], references: [id], onDelete: Cascade)
   events          CountEvent[]
+  boxCountEntries BoxCountEntry[]
 
   @@unique([sessionPositionId, roundNumber])
   @@map("count_rounds")
@@ -492,6 +578,8 @@ model StoragePosition {
   sessionPositions SessionPosition[]
   stockSnapshots   SessionStockSnapshot[]
   incidents        CountIncident[]
+  expectedBoxes    Box[]               @relation("BoxExpectedPosition")
+  boxCountEntries  BoxCountEntry[]
 
   @@index([rackId])
   @@index([compartmentId])

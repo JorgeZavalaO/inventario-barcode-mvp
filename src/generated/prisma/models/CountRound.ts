@@ -274,6 +274,7 @@ export type CountRoundWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"CountRound"> | Date | string
   sessionPosition?: Prisma.XOR<Prisma.SessionPositionScalarRelationFilter, Prisma.SessionPositionWhereInput>
   events?: Prisma.CountEventListRelationFilter
+  boxCountEntries?: Prisma.BoxCountEntryListRelationFilter
 }
 
 export type CountRoundOrderByWithRelationInput = {
@@ -291,6 +292,7 @@ export type CountRoundOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   sessionPosition?: Prisma.SessionPositionOrderByWithRelationInput
   events?: Prisma.CountEventOrderByRelationAggregateInput
+  boxCountEntries?: Prisma.BoxCountEntryOrderByRelationAggregateInput
 }
 
 export type CountRoundWhereUniqueInput = Prisma.AtLeast<{
@@ -312,6 +314,7 @@ export type CountRoundWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"CountRound"> | Date | string
   sessionPosition?: Prisma.XOR<Prisma.SessionPositionScalarRelationFilter, Prisma.SessionPositionWhereInput>
   events?: Prisma.CountEventListRelationFilter
+  boxCountEntries?: Prisma.BoxCountEntryListRelationFilter
 }, "id" | "sessionPositionId_roundNumber">
 
 export type CountRoundOrderByWithAggregationInput = {
@@ -366,6 +369,7 @@ export type CountRoundCreateInput = {
   updatedAt?: Date | string
   sessionPosition: Prisma.SessionPositionCreateNestedOneWithoutRoundsInput
   events?: Prisma.CountEventCreateNestedManyWithoutCountRoundInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountRoundInput
 }
 
 export type CountRoundUncheckedCreateInput = {
@@ -382,6 +386,7 @@ export type CountRoundUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountRoundInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountRoundInput
 }
 
 export type CountRoundUpdateInput = {
@@ -398,6 +403,7 @@ export type CountRoundUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionPosition?: Prisma.SessionPositionUpdateOneRequiredWithoutRoundsNestedInput
   events?: Prisma.CountEventUpdateManyWithoutCountRoundNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountRoundNestedInput
 }
 
 export type CountRoundUncheckedUpdateInput = {
@@ -414,6 +420,7 @@ export type CountRoundUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.CountEventUncheckedUpdateManyWithoutCountRoundNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountRoundNestedInput
 }
 
 export type CountRoundCreateManyInput = {
@@ -458,6 +465,11 @@ export type CountRoundUncheckedUpdateManyInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CountRoundScalarRelationFilter = {
+  is?: Prisma.CountRoundWhereInput
+  isNot?: Prisma.CountRoundWhereInput
 }
 
 export type CountRoundNullableScalarRelationFilter = {
@@ -533,6 +545,20 @@ export type CountRoundSumOrderByAggregateInput = {
   roundNumber?: Prisma.SortOrder
 }
 
+export type CountRoundCreateNestedOneWithoutBoxCountEntriesInput = {
+  create?: Prisma.XOR<Prisma.CountRoundCreateWithoutBoxCountEntriesInput, Prisma.CountRoundUncheckedCreateWithoutBoxCountEntriesInput>
+  connectOrCreate?: Prisma.CountRoundCreateOrConnectWithoutBoxCountEntriesInput
+  connect?: Prisma.CountRoundWhereUniqueInput
+}
+
+export type CountRoundUpdateOneRequiredWithoutBoxCountEntriesNestedInput = {
+  create?: Prisma.XOR<Prisma.CountRoundCreateWithoutBoxCountEntriesInput, Prisma.CountRoundUncheckedCreateWithoutBoxCountEntriesInput>
+  connectOrCreate?: Prisma.CountRoundCreateOrConnectWithoutBoxCountEntriesInput
+  upsert?: Prisma.CountRoundUpsertWithoutBoxCountEntriesInput
+  connect?: Prisma.CountRoundWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CountRoundUpdateToOneWithWhereWithoutBoxCountEntriesInput, Prisma.CountRoundUpdateWithoutBoxCountEntriesInput>, Prisma.CountRoundUncheckedUpdateWithoutBoxCountEntriesInput>
+}
+
 export type CountRoundCreateNestedOneWithoutEventsInput = {
   create?: Prisma.XOR<Prisma.CountRoundCreateWithoutEventsInput, Prisma.CountRoundUncheckedCreateWithoutEventsInput>
   connectOrCreate?: Prisma.CountRoundCreateOrConnectWithoutEventsInput
@@ -595,6 +621,86 @@ export type EnumCountRoundStatusFieldUpdateOperationsInput = {
   set?: $Enums.CountRoundStatus
 }
 
+export type CountRoundCreateWithoutBoxCountEntriesInput = {
+  id?: string
+  roundNumber: number
+  operatorId: string
+  status?: $Enums.CountRoundStatus
+  startedAt?: Date | string
+  submittedAt?: Date | string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessionPosition: Prisma.SessionPositionCreateNestedOneWithoutRoundsInput
+  events?: Prisma.CountEventCreateNestedManyWithoutCountRoundInput
+}
+
+export type CountRoundUncheckedCreateWithoutBoxCountEntriesInput = {
+  id?: string
+  sessionPositionId: string
+  roundNumber: number
+  operatorId: string
+  status?: $Enums.CountRoundStatus
+  startedAt?: Date | string
+  submittedAt?: Date | string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  events?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountRoundInput
+}
+
+export type CountRoundCreateOrConnectWithoutBoxCountEntriesInput = {
+  where: Prisma.CountRoundWhereUniqueInput
+  create: Prisma.XOR<Prisma.CountRoundCreateWithoutBoxCountEntriesInput, Prisma.CountRoundUncheckedCreateWithoutBoxCountEntriesInput>
+}
+
+export type CountRoundUpsertWithoutBoxCountEntriesInput = {
+  update: Prisma.XOR<Prisma.CountRoundUpdateWithoutBoxCountEntriesInput, Prisma.CountRoundUncheckedUpdateWithoutBoxCountEntriesInput>
+  create: Prisma.XOR<Prisma.CountRoundCreateWithoutBoxCountEntriesInput, Prisma.CountRoundUncheckedCreateWithoutBoxCountEntriesInput>
+  where?: Prisma.CountRoundWhereInput
+}
+
+export type CountRoundUpdateToOneWithWhereWithoutBoxCountEntriesInput = {
+  where?: Prisma.CountRoundWhereInput
+  data: Prisma.XOR<Prisma.CountRoundUpdateWithoutBoxCountEntriesInput, Prisma.CountRoundUncheckedUpdateWithoutBoxCountEntriesInput>
+}
+
+export type CountRoundUpdateWithoutBoxCountEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  roundNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  operatorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCountRoundStatusFieldUpdateOperationsInput | $Enums.CountRoundStatus
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionPosition?: Prisma.SessionPositionUpdateOneRequiredWithoutRoundsNestedInput
+  events?: Prisma.CountEventUpdateManyWithoutCountRoundNestedInput
+}
+
+export type CountRoundUncheckedUpdateWithoutBoxCountEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sessionPositionId?: Prisma.StringFieldUpdateOperationsInput | string
+  roundNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  operatorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumCountRoundStatusFieldUpdateOperationsInput | $Enums.CountRoundStatus
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.CountEventUncheckedUpdateManyWithoutCountRoundNestedInput
+}
+
 export type CountRoundCreateWithoutEventsInput = {
   id?: string
   roundNumber: number
@@ -608,6 +714,7 @@ export type CountRoundCreateWithoutEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessionPosition: Prisma.SessionPositionCreateNestedOneWithoutRoundsInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountRoundInput
 }
 
 export type CountRoundUncheckedCreateWithoutEventsInput = {
@@ -623,6 +730,7 @@ export type CountRoundUncheckedCreateWithoutEventsInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountRoundInput
 }
 
 export type CountRoundCreateOrConnectWithoutEventsInput = {
@@ -654,6 +762,7 @@ export type CountRoundUpdateWithoutEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionPosition?: Prisma.SessionPositionUpdateOneRequiredWithoutRoundsNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountRoundNestedInput
 }
 
 export type CountRoundUncheckedUpdateWithoutEventsInput = {
@@ -669,6 +778,7 @@ export type CountRoundUncheckedUpdateWithoutEventsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountRoundNestedInput
 }
 
 export type CountRoundCreateWithoutSessionPositionInput = {
@@ -684,6 +794,7 @@ export type CountRoundCreateWithoutSessionPositionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.CountEventCreateNestedManyWithoutCountRoundInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountRoundInput
 }
 
 export type CountRoundUncheckedCreateWithoutSessionPositionInput = {
@@ -699,6 +810,7 @@ export type CountRoundUncheckedCreateWithoutSessionPositionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountRoundInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountRoundInput
 }
 
 export type CountRoundCreateOrConnectWithoutSessionPositionInput = {
@@ -772,6 +884,7 @@ export type CountRoundUpdateWithoutSessionPositionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.CountEventUpdateManyWithoutCountRoundNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountRoundNestedInput
 }
 
 export type CountRoundUncheckedUpdateWithoutSessionPositionInput = {
@@ -787,6 +900,7 @@ export type CountRoundUncheckedUpdateWithoutSessionPositionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.CountEventUncheckedUpdateManyWithoutCountRoundNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountRoundNestedInput
 }
 
 export type CountRoundUncheckedUpdateManyWithoutSessionPositionInput = {
@@ -810,10 +924,12 @@ export type CountRoundUncheckedUpdateManyWithoutSessionPositionInput = {
 
 export type CountRoundCountOutputType = {
   events: number
+  boxCountEntries: number
 }
 
 export type CountRoundCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | CountRoundCountOutputTypeCountEventsArgs
+  boxCountEntries?: boolean | CountRoundCountOutputTypeCountBoxCountEntriesArgs
 }
 
 /**
@@ -833,6 +949,13 @@ export type CountRoundCountOutputTypeCountEventsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.CountEventWhereInput
 }
 
+/**
+ * CountRoundCountOutputType without action
+ */
+export type CountRoundCountOutputTypeCountBoxCountEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BoxCountEntryWhereInput
+}
+
 
 export type CountRoundSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -849,6 +972,7 @@ export type CountRoundSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   updatedAt?: boolean
   sessionPosition?: boolean | Prisma.SessionPositionDefaultArgs<ExtArgs>
   events?: boolean | Prisma.CountRound$eventsArgs<ExtArgs>
+  boxCountEntries?: boolean | Prisma.CountRound$boxCountEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.CountRoundCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["countRound"]>
 
@@ -903,6 +1027,7 @@ export type CountRoundOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type CountRoundInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessionPosition?: boolean | Prisma.SessionPositionDefaultArgs<ExtArgs>
   events?: boolean | Prisma.CountRound$eventsArgs<ExtArgs>
+  boxCountEntries?: boolean | Prisma.CountRound$boxCountEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.CountRoundCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CountRoundIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -917,6 +1042,7 @@ export type $CountRoundPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     sessionPosition: Prisma.$SessionPositionPayload<ExtArgs>
     events: Prisma.$CountEventPayload<ExtArgs>[]
+    boxCountEntries: Prisma.$BoxCountEntryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1327,6 +1453,7 @@ export interface Prisma__CountRoundClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessionPosition<T extends Prisma.SessionPositionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SessionPositionDefaultArgs<ExtArgs>>): Prisma.Prisma__SessionPositionClient<runtime.Types.Result.GetResult<Prisma.$SessionPositionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   events<T extends Prisma.CountRound$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CountRound$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CountEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  boxCountEntries<T extends Prisma.CountRound$boxCountEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CountRound$boxCountEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BoxCountEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1790,6 +1917,30 @@ export type CountRound$eventsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.CountEventScalarFieldEnum | Prisma.CountEventScalarFieldEnum[]
+}
+
+/**
+ * CountRound.boxCountEntries
+ */
+export type CountRound$boxCountEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BoxCountEntry
+   */
+  select?: Prisma.BoxCountEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BoxCountEntry
+   */
+  omit?: Prisma.BoxCountEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BoxCountEntryInclude<ExtArgs> | null
+  where?: Prisma.BoxCountEntryWhereInput
+  orderBy?: Prisma.BoxCountEntryOrderByWithRelationInput | Prisma.BoxCountEntryOrderByWithRelationInput[]
+  cursor?: Prisma.BoxCountEntryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BoxCountEntryScalarFieldEnum | Prisma.BoxCountEntryScalarFieldEnum[]
 }
 
 /**

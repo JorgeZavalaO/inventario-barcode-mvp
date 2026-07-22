@@ -84,8 +84,9 @@ export default function SettingsPage() {
   async function deleteAll() {
     setBusy(true);
     try {
-      await apiFetch("/api/setup", { method: "DELETE" });
-      setToast("Todos los datos fueron eliminados");
+      const result = await apiFetch<{ deleted: Record<string, number> }>("/api/admin/reset", { method: "DELETE" });
+      const total = Object.values(result.deleted).reduce((s, c) => s + c, 0);
+      setToast(`Sistema reiniciado: ${total} registros eliminados`);
       setConfirmDelete(false);
       await load();
     } catch {
@@ -226,27 +227,28 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {productCount !== null && productCount > 0 && (
+          {productCount !== null && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="mt-0.5 shrink-0 text-red-500" size={20} />
                 <div className="flex-1">
-                  <p className="font-semibold text-sm text-red-800">Zona peligrosa</p>
+                  <p className="font-semibold text-sm text-red-800">Reiniciar sistema</p>
                   <p className="text-xs text-red-600">
-                    Borrar todos los datos elimina productos, sesiones, conteos y operadores. Esta acción no se puede deshacer.
+                    Borra productos, ubicaciones, sesiones, cajas y operadores. Los usuarios y la configuración se conservan.
+                    Esta acción no se puede deshacer.
                   </p>
                 </div>
               </div>
               <div className="mt-4">
                 {!confirmDelete ? (
                   <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(true)} disabled={busy}>
-                    <Trash2 size={16} /> Borrar todos los datos
+                    <Trash2 size={16} /> Reiniciar sistema
                   </Button>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Button variant="destructive" size="sm" onClick={() => void deleteAll()} disabled={busy}>
                       {busy ? <LoaderCircle className="animate-spin" size={16} /> : <Trash2 size={16} />}
-                      Confirmar borrado
+                      Confirmar reinicio
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)} disabled={busy}>
                       Cancelar

@@ -58,6 +58,7 @@ export type CountEventMinAggregateOutputType = {
   looseQuantity: runtime.Decimal | null
   reversedById: string | null
   reversalReason: string | null
+  boxCountEntryId: string | null
 }
 
 export type CountEventMaxAggregateOutputType = {
@@ -78,6 +79,7 @@ export type CountEventMaxAggregateOutputType = {
   looseQuantity: runtime.Decimal | null
   reversedById: string | null
   reversalReason: string | null
+  boxCountEntryId: string | null
 }
 
 export type CountEventCountAggregateOutputType = {
@@ -98,6 +100,7 @@ export type CountEventCountAggregateOutputType = {
   looseQuantity: number
   reversedById: number
   reversalReason: number
+  boxCountEntryId: number
   _all: number
 }
 
@@ -134,6 +137,7 @@ export type CountEventMinAggregateInputType = {
   looseQuantity?: true
   reversedById?: true
   reversalReason?: true
+  boxCountEntryId?: true
 }
 
 export type CountEventMaxAggregateInputType = {
@@ -154,6 +158,7 @@ export type CountEventMaxAggregateInputType = {
   looseQuantity?: true
   reversedById?: true
   reversalReason?: true
+  boxCountEntryId?: true
 }
 
 export type CountEventCountAggregateInputType = {
@@ -174,6 +179,7 @@ export type CountEventCountAggregateInputType = {
   looseQuantity?: true
   reversedById?: true
   reversalReason?: true
+  boxCountEntryId?: true
   _all?: true
 }
 
@@ -281,6 +287,7 @@ export type CountEventGroupByOutputType = {
   looseQuantity: runtime.Decimal | null
   reversedById: string | null
   reversalReason: string | null
+  boxCountEntryId: string | null
   _count: CountEventCountAggregateOutputType | null
   _avg: CountEventAvgAggregateOutputType | null
   _sum: CountEventSumAggregateOutputType | null
@@ -324,10 +331,12 @@ export type CountEventWhereInput = {
   looseQuantity?: Prisma.DecimalNullableFilter<"CountEvent"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.StringNullableFilter<"CountEvent"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"CountEvent"> | string | null
+  boxCountEntryId?: Prisma.StringNullableFilter<"CountEvent"> | string | null
   session?: Prisma.XOR<Prisma.InventorySessionScalarRelationFilter, Prisma.InventorySessionWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   operator?: Prisma.XOR<Prisma.OperatorScalarRelationFilter, Prisma.OperatorWhereInput>
   countRound?: Prisma.XOR<Prisma.CountRoundNullableScalarRelationFilter, Prisma.CountRoundWhereInput> | null
+  boxCountEntry?: Prisma.XOR<Prisma.BoxCountEntryNullableScalarRelationFilter, Prisma.BoxCountEntryWhereInput> | null
 }
 
 export type CountEventOrderByWithRelationInput = {
@@ -348,10 +357,12 @@ export type CountEventOrderByWithRelationInput = {
   looseQuantity?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedById?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  boxCountEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   session?: Prisma.InventorySessionOrderByWithRelationInput
   product?: Prisma.ProductOrderByWithRelationInput
   operator?: Prisma.OperatorOrderByWithRelationInput
   countRound?: Prisma.CountRoundOrderByWithRelationInput
+  boxCountEntry?: Prisma.BoxCountEntryOrderByWithRelationInput
 }
 
 export type CountEventWhereUniqueInput = Prisma.AtLeast<{
@@ -375,10 +386,12 @@ export type CountEventWhereUniqueInput = Prisma.AtLeast<{
   looseQuantity?: Prisma.DecimalNullableFilter<"CountEvent"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.StringNullableFilter<"CountEvent"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"CountEvent"> | string | null
+  boxCountEntryId?: Prisma.StringNullableFilter<"CountEvent"> | string | null
   session?: Prisma.XOR<Prisma.InventorySessionScalarRelationFilter, Prisma.InventorySessionWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   operator?: Prisma.XOR<Prisma.OperatorScalarRelationFilter, Prisma.OperatorWhereInput>
   countRound?: Prisma.XOR<Prisma.CountRoundNullableScalarRelationFilter, Prisma.CountRoundWhereInput> | null
+  boxCountEntry?: Prisma.XOR<Prisma.BoxCountEntryNullableScalarRelationFilter, Prisma.BoxCountEntryWhereInput> | null
 }, "id" | "operationId">
 
 export type CountEventOrderByWithAggregationInput = {
@@ -399,6 +412,7 @@ export type CountEventOrderByWithAggregationInput = {
   looseQuantity?: Prisma.SortOrderInput | Prisma.SortOrder
   reversedById?: Prisma.SortOrderInput | Prisma.SortOrder
   reversalReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  boxCountEntryId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.CountEventCountOrderByAggregateInput
   _avg?: Prisma.CountEventAvgOrderByAggregateInput
   _max?: Prisma.CountEventMaxOrderByAggregateInput
@@ -427,6 +441,7 @@ export type CountEventScalarWhereWithAggregatesInput = {
   looseQuantity?: Prisma.DecimalNullableWithAggregatesFilter<"CountEvent"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.StringNullableWithAggregatesFilter<"CountEvent"> | string | null
   reversalReason?: Prisma.StringNullableWithAggregatesFilter<"CountEvent"> | string | null
+  boxCountEntryId?: Prisma.StringNullableWithAggregatesFilter<"CountEvent"> | string | null
 }
 
 export type CountEventCreateInput = {
@@ -447,6 +462,7 @@ export type CountEventCreateInput = {
   product: Prisma.ProductCreateNestedOneWithoutCountEventsInput
   operator: Prisma.OperatorCreateNestedOneWithoutCountEventsInput
   countRound?: Prisma.CountRoundCreateNestedOneWithoutEventsInput
+  boxCountEntry?: Prisma.BoxCountEntryCreateNestedOneWithoutCountEventsInput
 }
 
 export type CountEventUncheckedCreateInput = {
@@ -467,6 +483,7 @@ export type CountEventUncheckedCreateInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventUpdateInput = {
@@ -487,6 +504,7 @@ export type CountEventUpdateInput = {
   product?: Prisma.ProductUpdateOneRequiredWithoutCountEventsNestedInput
   operator?: Prisma.OperatorUpdateOneRequiredWithoutCountEventsNestedInput
   countRound?: Prisma.CountRoundUpdateOneWithoutEventsNestedInput
+  boxCountEntry?: Prisma.BoxCountEntryUpdateOneWithoutCountEventsNestedInput
 }
 
 export type CountEventUncheckedUpdateInput = {
@@ -507,6 +525,7 @@ export type CountEventUncheckedUpdateInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventCreateManyInput = {
@@ -527,6 +546,7 @@ export type CountEventCreateManyInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventUpdateManyMutationInput = {
@@ -563,6 +583,7 @@ export type CountEventUncheckedUpdateManyInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventListRelationFilter = {
@@ -593,6 +614,7 @@ export type CountEventCountOrderByAggregateInput = {
   looseQuantity?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
+  boxCountEntryId?: Prisma.SortOrder
 }
 
 export type CountEventAvgOrderByAggregateInput = {
@@ -620,6 +642,7 @@ export type CountEventMaxOrderByAggregateInput = {
   looseQuantity?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
+  boxCountEntryId?: Prisma.SortOrder
 }
 
 export type CountEventMinOrderByAggregateInput = {
@@ -640,6 +663,7 @@ export type CountEventMinOrderByAggregateInput = {
   looseQuantity?: Prisma.SortOrder
   reversedById?: Prisma.SortOrder
   reversalReason?: Prisma.SortOrder
+  boxCountEntryId?: Prisma.SortOrder
 }
 
 export type CountEventSumOrderByAggregateInput = {
@@ -688,6 +712,48 @@ export type CountEventUncheckedUpdateManyWithoutProductNestedInput = {
   connect?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
   update?: Prisma.CountEventUpdateWithWhereUniqueWithoutProductInput | Prisma.CountEventUpdateWithWhereUniqueWithoutProductInput[]
   updateMany?: Prisma.CountEventUpdateManyWithWhereWithoutProductInput | Prisma.CountEventUpdateManyWithWhereWithoutProductInput[]
+  deleteMany?: Prisma.CountEventScalarWhereInput | Prisma.CountEventScalarWhereInput[]
+}
+
+export type CountEventCreateNestedManyWithoutBoxCountEntryInput = {
+  create?: Prisma.XOR<Prisma.CountEventCreateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput> | Prisma.CountEventCreateWithoutBoxCountEntryInput[] | Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput[]
+  connectOrCreate?: Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput | Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput[]
+  createMany?: Prisma.CountEventCreateManyBoxCountEntryInputEnvelope
+  connect?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+}
+
+export type CountEventUncheckedCreateNestedManyWithoutBoxCountEntryInput = {
+  create?: Prisma.XOR<Prisma.CountEventCreateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput> | Prisma.CountEventCreateWithoutBoxCountEntryInput[] | Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput[]
+  connectOrCreate?: Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput | Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput[]
+  createMany?: Prisma.CountEventCreateManyBoxCountEntryInputEnvelope
+  connect?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+}
+
+export type CountEventUpdateManyWithoutBoxCountEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.CountEventCreateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput> | Prisma.CountEventCreateWithoutBoxCountEntryInput[] | Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput[]
+  connectOrCreate?: Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput | Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput[]
+  upsert?: Prisma.CountEventUpsertWithWhereUniqueWithoutBoxCountEntryInput | Prisma.CountEventUpsertWithWhereUniqueWithoutBoxCountEntryInput[]
+  createMany?: Prisma.CountEventCreateManyBoxCountEntryInputEnvelope
+  set?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  disconnect?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  delete?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  connect?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  update?: Prisma.CountEventUpdateWithWhereUniqueWithoutBoxCountEntryInput | Prisma.CountEventUpdateWithWhereUniqueWithoutBoxCountEntryInput[]
+  updateMany?: Prisma.CountEventUpdateManyWithWhereWithoutBoxCountEntryInput | Prisma.CountEventUpdateManyWithWhereWithoutBoxCountEntryInput[]
+  deleteMany?: Prisma.CountEventScalarWhereInput | Prisma.CountEventScalarWhereInput[]
+}
+
+export type CountEventUncheckedUpdateManyWithoutBoxCountEntryNestedInput = {
+  create?: Prisma.XOR<Prisma.CountEventCreateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput> | Prisma.CountEventCreateWithoutBoxCountEntryInput[] | Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput[]
+  connectOrCreate?: Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput | Prisma.CountEventCreateOrConnectWithoutBoxCountEntryInput[]
+  upsert?: Prisma.CountEventUpsertWithWhereUniqueWithoutBoxCountEntryInput | Prisma.CountEventUpsertWithWhereUniqueWithoutBoxCountEntryInput[]
+  createMany?: Prisma.CountEventCreateManyBoxCountEntryInputEnvelope
+  set?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  disconnect?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  delete?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  connect?: Prisma.CountEventWhereUniqueInput | Prisma.CountEventWhereUniqueInput[]
+  update?: Prisma.CountEventUpdateWithWhereUniqueWithoutBoxCountEntryInput | Prisma.CountEventUpdateWithWhereUniqueWithoutBoxCountEntryInput[]
+  updateMany?: Prisma.CountEventUpdateManyWithWhereWithoutBoxCountEntryInput | Prisma.CountEventUpdateManyWithWhereWithoutBoxCountEntryInput[]
   deleteMany?: Prisma.CountEventScalarWhereInput | Prisma.CountEventScalarWhereInput[]
 }
 
@@ -838,6 +904,7 @@ export type CountEventCreateWithoutProductInput = {
   session: Prisma.InventorySessionCreateNestedOneWithoutCountEventsInput
   operator: Prisma.OperatorCreateNestedOneWithoutCountEventsInput
   countRound?: Prisma.CountRoundCreateNestedOneWithoutEventsInput
+  boxCountEntry?: Prisma.BoxCountEntryCreateNestedOneWithoutCountEventsInput
 }
 
 export type CountEventUncheckedCreateWithoutProductInput = {
@@ -857,6 +924,7 @@ export type CountEventUncheckedCreateWithoutProductInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventCreateOrConnectWithoutProductInput = {
@@ -906,6 +974,73 @@ export type CountEventScalarWhereInput = {
   looseQuantity?: Prisma.DecimalNullableFilter<"CountEvent"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.StringNullableFilter<"CountEvent"> | string | null
   reversalReason?: Prisma.StringNullableFilter<"CountEvent"> | string | null
+  boxCountEntryId?: Prisma.StringNullableFilter<"CountEvent"> | string | null
+}
+
+export type CountEventCreateWithoutBoxCountEntryInput = {
+  id?: string
+  operationId: string
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inputMethod?: $Enums.InputMethod
+  createdAt?: Date | string
+  reversedAt?: Date | string | null
+  positionId?: string | null
+  packageId?: string | null
+  packageCount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unitsPerPackage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+  session: Prisma.InventorySessionCreateNestedOneWithoutCountEventsInput
+  product: Prisma.ProductCreateNestedOneWithoutCountEventsInput
+  operator: Prisma.OperatorCreateNestedOneWithoutCountEventsInput
+  countRound?: Prisma.CountRoundCreateNestedOneWithoutEventsInput
+}
+
+export type CountEventUncheckedCreateWithoutBoxCountEntryInput = {
+  id?: string
+  operationId: string
+  sessionId: string
+  productId: string
+  operatorId: string
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inputMethod?: $Enums.InputMethod
+  createdAt?: Date | string
+  reversedAt?: Date | string | null
+  positionId?: string | null
+  countRoundId?: string | null
+  packageId?: string | null
+  packageCount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unitsPerPackage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+}
+
+export type CountEventCreateOrConnectWithoutBoxCountEntryInput = {
+  where: Prisma.CountEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.CountEventCreateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput>
+}
+
+export type CountEventCreateManyBoxCountEntryInputEnvelope = {
+  data: Prisma.CountEventCreateManyBoxCountEntryInput | Prisma.CountEventCreateManyBoxCountEntryInput[]
+  skipDuplicates?: boolean
+}
+
+export type CountEventUpsertWithWhereUniqueWithoutBoxCountEntryInput = {
+  where: Prisma.CountEventWhereUniqueInput
+  update: Prisma.XOR<Prisma.CountEventUpdateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedUpdateWithoutBoxCountEntryInput>
+  create: Prisma.XOR<Prisma.CountEventCreateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedCreateWithoutBoxCountEntryInput>
+}
+
+export type CountEventUpdateWithWhereUniqueWithoutBoxCountEntryInput = {
+  where: Prisma.CountEventWhereUniqueInput
+  data: Prisma.XOR<Prisma.CountEventUpdateWithoutBoxCountEntryInput, Prisma.CountEventUncheckedUpdateWithoutBoxCountEntryInput>
+}
+
+export type CountEventUpdateManyWithWhereWithoutBoxCountEntryInput = {
+  where: Prisma.CountEventScalarWhereInput
+  data: Prisma.XOR<Prisma.CountEventUpdateManyMutationInput, Prisma.CountEventUncheckedUpdateManyWithoutBoxCountEntryInput>
 }
 
 export type CountEventCreateWithoutOperatorInput = {
@@ -925,6 +1060,7 @@ export type CountEventCreateWithoutOperatorInput = {
   session: Prisma.InventorySessionCreateNestedOneWithoutCountEventsInput
   product: Prisma.ProductCreateNestedOneWithoutCountEventsInput
   countRound?: Prisma.CountRoundCreateNestedOneWithoutEventsInput
+  boxCountEntry?: Prisma.BoxCountEntryCreateNestedOneWithoutCountEventsInput
 }
 
 export type CountEventUncheckedCreateWithoutOperatorInput = {
@@ -944,6 +1080,7 @@ export type CountEventUncheckedCreateWithoutOperatorInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventCreateOrConnectWithoutOperatorInput = {
@@ -989,6 +1126,7 @@ export type CountEventCreateWithoutSessionInput = {
   product: Prisma.ProductCreateNestedOneWithoutCountEventsInput
   operator: Prisma.OperatorCreateNestedOneWithoutCountEventsInput
   countRound?: Prisma.CountRoundCreateNestedOneWithoutEventsInput
+  boxCountEntry?: Prisma.BoxCountEntryCreateNestedOneWithoutCountEventsInput
 }
 
 export type CountEventUncheckedCreateWithoutSessionInput = {
@@ -1008,6 +1146,7 @@ export type CountEventUncheckedCreateWithoutSessionInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventCreateOrConnectWithoutSessionInput = {
@@ -1053,6 +1192,7 @@ export type CountEventCreateWithoutCountRoundInput = {
   session: Prisma.InventorySessionCreateNestedOneWithoutCountEventsInput
   product: Prisma.ProductCreateNestedOneWithoutCountEventsInput
   operator: Prisma.OperatorCreateNestedOneWithoutCountEventsInput
+  boxCountEntry?: Prisma.BoxCountEntryCreateNestedOneWithoutCountEventsInput
 }
 
 export type CountEventUncheckedCreateWithoutCountRoundInput = {
@@ -1072,6 +1212,7 @@ export type CountEventUncheckedCreateWithoutCountRoundInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventCreateOrConnectWithoutCountRoundInput = {
@@ -1117,6 +1258,7 @@ export type CountEventCreateManyProductInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventUpdateWithoutProductInput = {
@@ -1136,6 +1278,7 @@ export type CountEventUpdateWithoutProductInput = {
   session?: Prisma.InventorySessionUpdateOneRequiredWithoutCountEventsNestedInput
   operator?: Prisma.OperatorUpdateOneRequiredWithoutCountEventsNestedInput
   countRound?: Prisma.CountRoundUpdateOneWithoutEventsNestedInput
+  boxCountEntry?: Prisma.BoxCountEntryUpdateOneWithoutCountEventsNestedInput
 }
 
 export type CountEventUncheckedUpdateWithoutProductInput = {
@@ -1155,12 +1298,94 @@ export type CountEventUncheckedUpdateWithoutProductInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventUncheckedUpdateManyWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   operationId?: Prisma.StringFieldUpdateOperationsInput | string
   sessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  operatorId?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inputMethod?: Prisma.EnumInputMethodFieldUpdateOperationsInput | $Enums.InputMethod
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  countRoundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  packageCount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unitsPerPackage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type CountEventCreateManyBoxCountEntryInput = {
+  id?: string
+  operationId: string
+  sessionId: string
+  productId: string
+  operatorId: string
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inputMethod?: $Enums.InputMethod
+  createdAt?: Date | string
+  reversedAt?: Date | string | null
+  positionId?: string | null
+  countRoundId?: string | null
+  packageId?: string | null
+  packageCount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unitsPerPackage?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  reversedById?: string | null
+  reversalReason?: string | null
+}
+
+export type CountEventUpdateWithoutBoxCountEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inputMethod?: Prisma.EnumInputMethodFieldUpdateOperationsInput | $Enums.InputMethod
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  packageCount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unitsPerPackage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  session?: Prisma.InventorySessionUpdateOneRequiredWithoutCountEventsNestedInput
+  product?: Prisma.ProductUpdateOneRequiredWithoutCountEventsNestedInput
+  operator?: Prisma.OperatorUpdateOneRequiredWithoutCountEventsNestedInput
+  countRound?: Prisma.CountRoundUpdateOneWithoutEventsNestedInput
+}
+
+export type CountEventUncheckedUpdateWithoutBoxCountEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
+  sessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  operatorId?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inputMethod?: Prisma.EnumInputMethodFieldUpdateOperationsInput | $Enums.InputMethod
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reversedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  positionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  countRoundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  packageCount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  unitsPerPackage?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type CountEventUncheckedUpdateManyWithoutBoxCountEntryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
+  sessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  productId?: Prisma.StringFieldUpdateOperationsInput | string
   operatorId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   inputMethod?: Prisma.EnumInputMethodFieldUpdateOperationsInput | $Enums.InputMethod
@@ -1193,6 +1418,7 @@ export type CountEventCreateManyOperatorInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventUpdateWithoutOperatorInput = {
@@ -1212,6 +1438,7 @@ export type CountEventUpdateWithoutOperatorInput = {
   session?: Prisma.InventorySessionUpdateOneRequiredWithoutCountEventsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutCountEventsNestedInput
   countRound?: Prisma.CountRoundUpdateOneWithoutEventsNestedInput
+  boxCountEntry?: Prisma.BoxCountEntryUpdateOneWithoutCountEventsNestedInput
 }
 
 export type CountEventUncheckedUpdateWithoutOperatorInput = {
@@ -1231,6 +1458,7 @@ export type CountEventUncheckedUpdateWithoutOperatorInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventUncheckedUpdateManyWithoutOperatorInput = {
@@ -1250,6 +1478,7 @@ export type CountEventUncheckedUpdateManyWithoutOperatorInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventCreateManySessionInput = {
@@ -1269,6 +1498,7 @@ export type CountEventCreateManySessionInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventUpdateWithoutSessionInput = {
@@ -1288,6 +1518,7 @@ export type CountEventUpdateWithoutSessionInput = {
   product?: Prisma.ProductUpdateOneRequiredWithoutCountEventsNestedInput
   operator?: Prisma.OperatorUpdateOneRequiredWithoutCountEventsNestedInput
   countRound?: Prisma.CountRoundUpdateOneWithoutEventsNestedInput
+  boxCountEntry?: Prisma.BoxCountEntryUpdateOneWithoutCountEventsNestedInput
 }
 
 export type CountEventUncheckedUpdateWithoutSessionInput = {
@@ -1307,6 +1538,7 @@ export type CountEventUncheckedUpdateWithoutSessionInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventUncheckedUpdateManyWithoutSessionInput = {
@@ -1326,6 +1558,7 @@ export type CountEventUncheckedUpdateManyWithoutSessionInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventCreateManyCountRoundInput = {
@@ -1345,6 +1578,7 @@ export type CountEventCreateManyCountRoundInput = {
   looseQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: string | null
   reversalReason?: string | null
+  boxCountEntryId?: string | null
 }
 
 export type CountEventUpdateWithoutCountRoundInput = {
@@ -1364,6 +1598,7 @@ export type CountEventUpdateWithoutCountRoundInput = {
   session?: Prisma.InventorySessionUpdateOneRequiredWithoutCountEventsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutCountEventsNestedInput
   operator?: Prisma.OperatorUpdateOneRequiredWithoutCountEventsNestedInput
+  boxCountEntry?: Prisma.BoxCountEntryUpdateOneWithoutCountEventsNestedInput
 }
 
 export type CountEventUncheckedUpdateWithoutCountRoundInput = {
@@ -1383,6 +1618,7 @@ export type CountEventUncheckedUpdateWithoutCountRoundInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CountEventUncheckedUpdateManyWithoutCountRoundInput = {
@@ -1402,6 +1638,7 @@ export type CountEventUncheckedUpdateManyWithoutCountRoundInput = {
   looseQuantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   reversedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reversalReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  boxCountEntryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1424,10 +1661,12 @@ export type CountEventSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   looseQuantity?: boolean
   reversedById?: boolean
   reversalReason?: boolean
+  boxCountEntryId?: boolean
   session?: boolean | Prisma.InventorySessionDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   operator?: boolean | Prisma.OperatorDefaultArgs<ExtArgs>
   countRound?: boolean | Prisma.CountEvent$countRoundArgs<ExtArgs>
+  boxCountEntry?: boolean | Prisma.CountEvent$boxCountEntryArgs<ExtArgs>
 }, ExtArgs["result"]["countEvent"]>
 
 export type CountEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1448,10 +1687,12 @@ export type CountEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   looseQuantity?: boolean
   reversedById?: boolean
   reversalReason?: boolean
+  boxCountEntryId?: boolean
   session?: boolean | Prisma.InventorySessionDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   operator?: boolean | Prisma.OperatorDefaultArgs<ExtArgs>
   countRound?: boolean | Prisma.CountEvent$countRoundArgs<ExtArgs>
+  boxCountEntry?: boolean | Prisma.CountEvent$boxCountEntryArgs<ExtArgs>
 }, ExtArgs["result"]["countEvent"]>
 
 export type CountEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1472,10 +1713,12 @@ export type CountEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   looseQuantity?: boolean
   reversedById?: boolean
   reversalReason?: boolean
+  boxCountEntryId?: boolean
   session?: boolean | Prisma.InventorySessionDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   operator?: boolean | Prisma.OperatorDefaultArgs<ExtArgs>
   countRound?: boolean | Prisma.CountEvent$countRoundArgs<ExtArgs>
+  boxCountEntry?: boolean | Prisma.CountEvent$boxCountEntryArgs<ExtArgs>
 }, ExtArgs["result"]["countEvent"]>
 
 export type CountEventSelectScalar = {
@@ -1496,26 +1739,30 @@ export type CountEventSelectScalar = {
   looseQuantity?: boolean
   reversedById?: boolean
   reversalReason?: boolean
+  boxCountEntryId?: boolean
 }
 
-export type CountEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "operationId" | "sessionId" | "productId" | "operatorId" | "quantity" | "inputMethod" | "createdAt" | "reversedAt" | "positionId" | "countRoundId" | "packageId" | "packageCount" | "unitsPerPackage" | "looseQuantity" | "reversedById" | "reversalReason", ExtArgs["result"]["countEvent"]>
+export type CountEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "operationId" | "sessionId" | "productId" | "operatorId" | "quantity" | "inputMethod" | "createdAt" | "reversedAt" | "positionId" | "countRoundId" | "packageId" | "packageCount" | "unitsPerPackage" | "looseQuantity" | "reversedById" | "reversalReason" | "boxCountEntryId", ExtArgs["result"]["countEvent"]>
 export type CountEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.InventorySessionDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   operator?: boolean | Prisma.OperatorDefaultArgs<ExtArgs>
   countRound?: boolean | Prisma.CountEvent$countRoundArgs<ExtArgs>
+  boxCountEntry?: boolean | Prisma.CountEvent$boxCountEntryArgs<ExtArgs>
 }
 export type CountEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.InventorySessionDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   operator?: boolean | Prisma.OperatorDefaultArgs<ExtArgs>
   countRound?: boolean | Prisma.CountEvent$countRoundArgs<ExtArgs>
+  boxCountEntry?: boolean | Prisma.CountEvent$boxCountEntryArgs<ExtArgs>
 }
 export type CountEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.InventorySessionDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   operator?: boolean | Prisma.OperatorDefaultArgs<ExtArgs>
   countRound?: boolean | Prisma.CountEvent$countRoundArgs<ExtArgs>
+  boxCountEntry?: boolean | Prisma.CountEvent$boxCountEntryArgs<ExtArgs>
 }
 
 export type $CountEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1525,6 +1772,7 @@ export type $CountEventPayload<ExtArgs extends runtime.Types.Extensions.Internal
     product: Prisma.$ProductPayload<ExtArgs>
     operator: Prisma.$OperatorPayload<ExtArgs>
     countRound: Prisma.$CountRoundPayload<ExtArgs> | null
+    boxCountEntry: Prisma.$BoxCountEntryPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1544,6 +1792,7 @@ export type $CountEventPayload<ExtArgs extends runtime.Types.Extensions.Internal
     looseQuantity: runtime.Decimal | null
     reversedById: string | null
     reversalReason: string | null
+    boxCountEntryId: string | null
   }, ExtArgs["result"]["countEvent"]>
   composites: {}
 }
@@ -1942,6 +2191,7 @@ export interface Prisma__CountEventClient<T, Null = never, ExtArgs extends runti
   product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   operator<T extends Prisma.OperatorDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OperatorDefaultArgs<ExtArgs>>): Prisma.Prisma__OperatorClient<runtime.Types.Result.GetResult<Prisma.$OperatorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   countRound<T extends Prisma.CountEvent$countRoundArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CountEvent$countRoundArgs<ExtArgs>>): Prisma.Prisma__CountRoundClient<runtime.Types.Result.GetResult<Prisma.$CountRoundPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  boxCountEntry<T extends Prisma.CountEvent$boxCountEntryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CountEvent$boxCountEntryArgs<ExtArgs>>): Prisma.Prisma__BoxCountEntryClient<runtime.Types.Result.GetResult<Prisma.$BoxCountEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1988,6 +2238,7 @@ export interface CountEventFieldRefs {
   readonly looseQuantity: Prisma.FieldRef<"CountEvent", 'Decimal'>
   readonly reversedById: Prisma.FieldRef<"CountEvent", 'String'>
   readonly reversalReason: Prisma.FieldRef<"CountEvent", 'String'>
+  readonly boxCountEntryId: Prisma.FieldRef<"CountEvent", 'String'>
 }
     
 
@@ -2405,6 +2656,25 @@ export type CountEvent$countRoundArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.CountRoundInclude<ExtArgs> | null
   where?: Prisma.CountRoundWhereInput
+}
+
+/**
+ * CountEvent.boxCountEntry
+ */
+export type CountEvent$boxCountEntryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BoxCountEntry
+   */
+  select?: Prisma.BoxCountEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BoxCountEntry
+   */
+  omit?: Prisma.BoxCountEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BoxCountEntryInclude<ExtArgs> | null
+  where?: Prisma.BoxCountEntryWhereInput
 }
 
 /**

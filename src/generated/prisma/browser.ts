@@ -58,6 +58,31 @@ export type ProductPackage = Prisma.ProductPackageModel
  */
 export type ProductLocationStock = Prisma.ProductLocationStockModel
 /**
+ * Model Import
+ * 
+ */
+export type Import = Prisma.ImportModel
+/**
+ * Model Pallet
+ * 
+ */
+export type Pallet = Prisma.PalletModel
+/**
+ * Model Box
+ * 
+ */
+export type Box = Prisma.BoxModel
+/**
+ * Model BoxProduct
+ * 
+ */
+export type BoxProduct = Prisma.BoxProductModel
+/**
+ * Model BoxCountEntry
+ * 
+ */
+export type BoxCountEntry = Prisma.BoxCountEntryModel
+/**
  * Model Operator
  * 
  */

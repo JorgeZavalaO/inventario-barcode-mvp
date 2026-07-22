@@ -36,6 +36,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Productos con múltiples códigos de barras y presentaciones (cajas, paquetes).
 - Sesiones de inventario V2 con alcance por posición (piso, rack o posiciones específicas).
 - Conteo por posición con rondas independientes (reconteo no suma).
+- Conteo por caja: identifica productos por importación, pallet y número de caja.
 - Flujo operativo: iniciar posición → escanear producto → registrar cantidad → completar.
 - Soporte para conteo por cajas + unidades sueltas.
 - Vista lateral de profundidad del rack (Frente/Centro/Fondo) con productos.

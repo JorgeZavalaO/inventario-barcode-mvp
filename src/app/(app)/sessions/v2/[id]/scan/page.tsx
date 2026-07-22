@@ -42,6 +42,12 @@ export default function V2ScanPage() {
   const [showUndo, setShowUndo] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastScannedType, setLastScannedType] = useState<"product" | "location" | "unknown">("unknown");
+  const [countMode, setCountMode] = useState<"box" | "legacy">("box");
+  const [boxImport, setBoxImport] = useState("");
+  const [boxPallet, setBoxPallet] = useState("");
+  const [boxNumber, setBoxNumber] = useState("");
+  const [resolvedBox, setResolvedBox] = useState<any>(null);
+  const [boxProducts, setBoxProducts] = useState<{ productId: string; productCode: string; productDescription: string; productUnit: string; quantity: string }[]>([]);
 
   const load = useCallback(async () => {
     try {
@@ -79,6 +85,48 @@ export default function V2ScanPage() {
     } else {
       setLastScannedType("unknown");
     }
+  }
+
+  async function resolveBox(importCode: string, palletNumber: string, boxNum: string) {
+    if (!importCode.trim() || !palletNumber.trim() || !boxNum.trim()) return;
+    setBusy(true);
+    try {
+      const data = await apiFetch<any>(`/api/boxes/resolve?import=${encodeURIComponent(importCode.trim())}&pallet=${encodeURIComponent(palletNumber.trim())}&box=${encodeURIComponent(boxNum.trim())}`);
+      setResolvedBox(data.box);
+      setBoxProducts(data.box.products.map((p: any) => ({ productId: p.productId, productCode: p.productCode, productDescription: p.productDescription, productUnit: p.productUnit, quantity: "" })));
+      setToast(`Caja encontrada: ${data.box.products.length} producto(s)`);
+    } catch (error) {
+      setResolvedBox(null);
+      setBoxProducts([]);
+      setToast(error instanceof Error ? error.message : "Caja no encontrada");
+    } finally { setBusy(false); }
+  }
+
+  async function registerBoxCount() {
+    if (!activeRound || !resolvedBox || boxProducts.length === 0) return;
+    if (boxProducts.some((p) => !p.quantity || parseFloat(p.quantity) <= 0)) { setToast("Todas las cantidades deben ser positivas"); return; }
+    setBusy(true);
+    const operationId = crypto.randomUUID();
+    try {
+      const result = await apiFetch<any>(`/api/sessions/v2/${id}/counts`, {
+        method: "POST",
+        body: JSON.stringify({
+          operationId,
+          positionId: activePosition.id,
+          countRoundId: activeRound.id,
+          inputMethod: "MANUAL",
+          boxIdentity: { importCode: boxImport.trim(), palletNumber: boxPallet.trim(), boxNumber: boxNumber.trim() },
+          items: boxProducts.map((p) => ({ productId: p.productId, quantity: parseFloat(p.quantity) })),
+        }),
+      });
+      setEvents((prev) => [...prev, ...result.eventIds.map((_: string, i: number) => ({ eventId: result.eventIds[i], productCode: boxProducts[i].productCode, quantity: parseFloat(boxProducts[i].quantity), productDescription: boxProducts[i].productDescription }))]);
+      setResolvedBox(null); setBoxProducts([]);
+      setBoxNumber("");
+      setToast("Caja registrada");
+      inputRef.current?.focus();
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error al registrar caja");
+    } finally { setBusy(false); }
   }
 
   async function registerCount() {
@@ -222,38 +270,76 @@ export default function V2ScanPage() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm"><ScanBarcode size={14} /> Registrar conteo</CardTitle></CardHeader>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm"><Package size={14} /> Registrar conteo</CardTitle>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant={countMode === "box" ? "default" : "outline"} onClick={() => setCountMode("box")}>Caja</Button>
+                    <Button size="sm" variant={countMode === "legacy" ? "default" : "outline"} onClick={() => setCountMode("legacy")}>Producto</Button>
+                  </div>
+                </div>
+              </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <Input ref={inputRef} placeholder="Código de producto o ubicación" value={scannedCode} onChange={(e) => handleScanInput(e.target.value)} className="flex-1" />
-                  {lastScannedType === "location" && <span className="flex items-center rounded bg-amber-100 px-2 text-xs text-amber-700"><MapPin size={12} className="mr-1" /> Ubicación</span>}
-                  {lastScannedType === "product" && <span className="flex items-center rounded bg-teal-100 px-2 text-xs text-teal-700"><Package size={12} className="mr-1" /> Producto</span>}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setUsePackage(!usePackage)} className={usePackage ? "bg-teal-50" : ""}>
-                    <SquareStack size={14} /> {usePackage ? "Cajas + sueltos" : "Cantidad directa"}
-                  </Button>
-                </div>
-
-                {usePackage ? (
+                {countMode === "box" ? (
                   <>
                     <div className="grid grid-cols-3 gap-2">
-                      <Input placeholder="Cajas" type="number" value={packageCount} onChange={(e) => setPackageCount(e.target.value)} min={0} />
-                      <Input placeholder="Unds/caja" type="number" value={unitsPerPackage} onChange={(e) => setUnitsPerPackage(e.target.value)} min={0} />
-                      <Input placeholder="Sueltas" type="number" value={looseQty} onChange={(e) => setLooseQty(e.target.value)} min={0} />
+                      <Input placeholder="Importación" value={boxImport} onChange={(e) => { setBoxImport(e.target.value); setResolvedBox(null); setBoxProducts([]); }} />
+                      <Input placeholder="Pallet" value={boxPallet} onChange={(e) => { setBoxPallet(e.target.value); setResolvedBox(null); setBoxProducts([]); }} />
+                      <Input placeholder="Caja" value={boxNumber} onChange={(e) => { setBoxNumber(e.target.value); if (boxImport.trim() && boxPallet.trim() && e.target.value.trim()) { void resolveBox(boxImport, boxPallet, e.target.value); } else { setResolvedBox(null); setBoxProducts([]); } }} />
                     </div>
-                    {packageCount && unitsPerPackage && (
-                      <p className="text-xs text-slate-500">Total: {parseFloat(packageCount || "0") * parseFloat(unitsPerPackage || "0") + parseFloat(looseQty || "0")} unidades</p>
+                    {resolvedBox && (
+                      <div className="rounded-lg border border-teal-200 bg-teal-50 p-3">
+                        <p className="mb-2 text-xs font-medium text-teal-700">
+                          {resolvedBox.import} / {resolvedBox.pallet} / {resolvedBox.number}
+                          {resolvedBox.expectedPosition && <span className="ml-2 font-normal text-teal-500">Esperada: {resolvedBox.expectedPosition.code}</span>}
+                        </p>
+                        <div className="space-y-2">
+                          {boxProducts.map((bp, i) => (
+                            <div key={bp.productId} className="flex items-center gap-2">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium">{bp.productDescription}</p>
+                                <p className="text-xs text-slate-500">{bp.productCode} · {bp.productUnit}</p>
+                              </div>
+                              <Input className="w-24 text-right" placeholder="Cant." type="number" value={bp.quantity} onChange={(e) => setBoxProducts((prev) => prev.map((p, j) => j === i ? { ...p, quantity: e.target.value } : p))} min={0} />
+                            </div>
+                          ))}
+                        </div>
+                        <Button className="mt-3 w-full" onClick={() => void registerBoxCount()} disabled={busy || boxProducts.some((p) => !p.quantity || parseFloat(p.quantity) <= 0)}>
+                          {busy ? <LoaderCircle className="animate-spin" size={14} /> : <Package size={14} />} Registrar caja
+                        </Button>
+                      </div>
                     )}
                   </>
                 ) : (
-                  <Input placeholder="Cantidad" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} min={0} />
+                  <>
+                    <div className="flex gap-2">
+                      <Input ref={inputRef} placeholder="Código de producto" value={scannedCode} onChange={(e) => handleScanInput(e.target.value)} className="flex-1" />
+                      {lastScannedType === "product" && <span className="flex items-center rounded bg-teal-100 px-2 text-xs text-teal-700"><Package size={12} className="mr-1" /> Producto</span>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setUsePackage(!usePackage)} className={usePackage ? "bg-teal-50" : ""}>
+                        <SquareStack size={14} /> {usePackage ? "Cajas + sueltos" : "Cantidad directa"}
+                      </Button>
+                    </div>
+                    {usePackage ? (
+                      <>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Input placeholder="Cajas" type="number" value={packageCount} onChange={(e) => setPackageCount(e.target.value)} min={0} />
+                          <Input placeholder="Unds/caja" type="number" value={unitsPerPackage} onChange={(e) => setUnitsPerPackage(e.target.value)} min={0} />
+                          <Input placeholder="Sueltas" type="number" value={looseQty} onChange={(e) => setLooseQty(e.target.value)} min={0} />
+                        </div>
+                        {packageCount && unitsPerPackage && (
+                          <p className="text-xs text-slate-500">Total: {parseFloat(packageCount || "0") * parseFloat(unitsPerPackage || "0") + parseFloat(looseQty || "0")} unidades</p>
+                        )}
+                      </>
+                    ) : (
+                      <Input placeholder="Cantidad" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} min={0} />
+                    )}
+                    <Button className="w-full" onClick={() => void registerCount()} disabled={busy || !scannedCode.trim()}>
+                      {busy ? <LoaderCircle className="animate-spin" size={14} /> : <Package size={14} />} Registrar
+                    </Button>
+                  </>
                 )}
-
-                <Button className="w-full" onClick={() => void registerCount()} disabled={busy || !scannedCode.trim()}>
-                  {busy ? <LoaderCircle className="animate-spin" size={14} /> : <Package size={14} />} Registrar
-                </Button>
               </CardContent>
             </Card>
 

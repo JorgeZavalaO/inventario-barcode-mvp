@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.33.0 (2026-07-22)
+
+### Added (Identificación por caja)
+
+- **Modelos de caja:** Nuevas tablas `imports`, `pallets`, `boxes`, `box_products` para estructurar el contenido físico del almacén.
+- **Importación de cajas:** `POST /api/boxes/import` recibe datos de importación, pallet, caja y producto desde Excel/CSV, creando registros faltantes automáticamente.
+- **Resolución de caja:** `GET /api/boxes/resolve?import=X&pallet=Y&box=Z` identifica la caja y devuelve sus productos con cantidades esperadas y posición esperada.
+- **Conteo por caja:** El endpoint `POST /api/sessions/v2/[id]/counts` acepta `boxIdentity` con `items` para registrar atómicamente una caja completa con hasta 3 productos.
+- **Prevención de doble conteo:** La caja no puede registrarse dos veces en la misma ronda (unique constraint `countRoundId + boxId`).
+- **Formulario en UI:** La página de escaneo V2 ahora tiene modo "Caja" con campos de importación, pallet y número de caja, resolución automática y registro de cantidades por producto.
+- **Compatibilidad:** El modo "Producto" legacy sigue disponible mediante toggle en la misma pantalla.
+
+### Changed
+
+- El conteo ahora puede identificar productos por `importación + pallet + caja` en lugar de código de barras.
+- Los errores de sesión, posición, ronda y caja se retornan con mensaje descriptivo y status 400.
+
 ## 0.32.1 (2026-07-22)
 
 ### Fixed
