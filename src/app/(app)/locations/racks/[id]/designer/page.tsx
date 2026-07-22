@@ -51,6 +51,7 @@ export default function RackDesignerPage() {
   const [compartments, setCompartments] = useState<DraftCompartment[]>([]);
   const [savedCompartments, setSavedCompartments] = useState<DraftCompartment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
   const [selectedComp, setSelectedComp] = useState<string | null>(null);
@@ -80,8 +81,9 @@ export default function RackDesignerPage() {
       setSavedCompartments(compData.compartments);
       setUndoStack([]);
       setRedoStack([]);
-    } catch {
-      setToast("No se pudo cargar el rack");
+      setLoadError("");
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "No se pudo cargar el rack");
     } finally {
       setLoading(false);
     }
@@ -302,6 +304,7 @@ export default function RackDesignerPage() {
   }
 
   if (loading) return <div className="flex items-center justify-center py-16 text-slate-500"><LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...</div>;
+  if (loadError) return <div className="mx-auto max-w-xl py-16 text-center"><p className="font-medium text-red-600">No se pudo cargar el diseñador</p><p className="mt-2 text-sm text-slate-500">{loadError}</p><Button className="mt-4" onClick={() => { setLoading(true); void load(); }}>Reintentar</Button></div>;
   if (!rack) return <div className="py-16 text-center text-slate-500">Rack no encontrado.</div>;
 
   return (

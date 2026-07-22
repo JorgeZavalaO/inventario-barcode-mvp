@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.32.1 (2026-07-22)
+
+### Fixed
+
+- **Diseñador:** Los errores de API o base de datos ya no se muestran incorrectamente como “Rack no encontrado”.
+- **Migración de reparación:** Recupera tablas de productos y stock por ubicación cuando la migración histórica fue marcada como aplicada sin crear las tablas.
+
 ## 0.32.0 (2026-07-22)
 
 ### Fixed
