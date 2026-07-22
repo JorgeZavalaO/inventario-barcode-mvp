@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { apiError } from "@/lib/http";
 import { requireRole } from "@/server/guards";
 import { prisma } from "@/lib/prisma";
-import { validateCompartmentSet, type Compartment } from "@/lib/rack-validation";
+import { compartmentHasProtectedUse, validateCompartmentSet, type Compartment } from "@/lib/rack-validation";
 
 const compartmentSchema = z.object({
   id: z.string().uuid().optional(),
@@ -58,9 +58,35 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       const existing = await tx.rackCompartment.findMany({
         where: { rackId },
         include: {
-          positions: { select: { id: true } },
+          positions: {
+            select: {
+              id: true,
+              locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } },
+              sessionPositions: {
+                where: {
+                  status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] },
+                  session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } },
+                },
+                select: { id: true },
+              },
+            },
+          },
           depthSlots: {
-            include: { positions: { select: { id: true } } },
+            include: {
+              positions: {
+                select: {
+                  id: true,
+                  locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } },
+                  sessionPositions: {
+                    where: {
+                      status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] },
+                      session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } },
+                    },
+                    select: { id: true },
+                  },
+                },
+              },
+            },
             orderBy: { depthIndex: "asc" },
           },
         },
@@ -103,12 +129,12 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       const removed = existing.filter((comp) => comp.active && !submittedIds.has(comp.id));
       const changedCodes = body.compartments.filter((comp) => comp.id && existingById.get(comp.id)?.code !== comp.code);
       const protectedIds = [...removed.map((comp) => comp.id), ...changedCodes.flatMap((comp) => comp.id ? [comp.id] : [])];
-      const protectedComp = existing.find((comp) => protectedIds.includes(comp.id) && comp.positions.length > 0);
+      const protectedComp = existing.find((comp) => protectedIds.includes(comp.id) && compartmentHasProtectedUse(comp));
       if (protectedComp) {
         const isCodeChange = changedCodes.some((comp) => comp.id === protectedComp.id);
         throw new DesignError(400, isCodeChange
-          ? `No se puede cambiar el código de ${protectedComp.code} porque tiene posiciones creadas`
-          : `No se puede eliminar ${protectedComp.code} porque tiene posiciones creadas`);
+          ? `No se puede cambiar el código de ${protectedComp.code} porque tiene stock o una sesión activa`
+          : `No se puede eliminar ${protectedComp.code} porque tiene stock o una sesión activa`);
       }
 
       for (const comp of body.compartments) {
@@ -119,13 +145,13 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
         const nextLevels = comp.stackLevels ?? current.stackLevels;
         const currentDepthCount = current.depthSlots.filter((slot) => slot.active).length || 1;
         const nextDepthCount = comp.depthCount ?? currentDepthCount;
-        if (current.positions.length > 0 && (nextColumns < current.columnCount || nextLevels < current.stackLevels)) {
-          throw new DesignError(400, `No se puede reducir la matriz de ${current.code} porque tiene posiciones creadas`);
+        if (compartmentHasProtectedUse(current) && (nextColumns < current.columnCount || nextLevels < current.stackLevels)) {
+          throw new DesignError(400, `No se puede reducir la matriz de ${current.code} porque tiene stock o una sesión activa`);
         }
         if (nextDepthCount < currentDepthCount) {
           const removedDepth = current.depthSlots.filter((slot) => slot.active && slot.depthIndex >= nextDepthCount);
-          if (removedDepth.some((slot) => slot.positions.length > 0)) {
-            throw new DesignError(400, `No se puede reducir la profundidad de ${current.code} porque tiene posiciones creadas`);
+          if (removedDepth.some((slot) => slot.positions.some((p) => (p.locationStocks?.length ?? 0) > 0 || (p.sessionPositions?.length ?? 0) > 0))) {
+            throw new DesignError(400, `No se puede reducir la profundidad de ${current.code} porque tiene stock o una sesión activa`);
           }
         }
       }
@@ -203,8 +229,8 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     const compartments = await prisma.rackCompartment.findMany({
       where: { rackId, active: true },
       include: {
-        positions: { where: { active: true }, select: { id: true, code: true, columnIndex: true, stackIndex: true } },
-        depthSlots: { where: { active: true }, include: { positions: { where: { active: true }, select: { id: true, code: true, columnIndex: true, stackIndex: true } } }, orderBy: { depthIndex: "asc" } },
+        positions: { where: { active: true }, select: { id: true, code: true, columnIndex: true, stackIndex: true, locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } }, sessionPositions: { where: { status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] }, session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } } }, select: { id: true } } } },
+        depthSlots: { where: { active: true }, include: { positions: { where: { active: true }, select: { id: true, code: true, columnIndex: true, stackIndex: true, locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } }, sessionPositions: { where: { status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] }, session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } } }, select: { id: true } } } } }, orderBy: { depthIndex: "asc" } },
       },
       orderBy: { orderIndex: "asc" },
     });

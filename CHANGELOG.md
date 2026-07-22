@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.32.0 (2026-07-22)
+
+### Fixed
+
+- **Edición de posiciones vacías:** Una posición sin stock positivo ya no bloquea cambios de matriz, código o geometría.
+- **Protección de sesiones activas:** Las posiciones usadas por sesiones de inventario abiertas siguen protegidas aunque no tengan stock.
+- **Desactivación segura:** El botón maestro solo desactiva posiciones vacías y la operación es transaccional.
+- **Stock inactivo:** Ya no se dejan posiciones con stock positivo archivadas silenciosamente durante la edición.
+- **Stock cero:** Las relaciones con `theoreticalStock = 0` no se consideran ocupación física.
+
 ## 0.31.0 (2026-07-22)
 
 ### Added (Matriz física de posiciones)

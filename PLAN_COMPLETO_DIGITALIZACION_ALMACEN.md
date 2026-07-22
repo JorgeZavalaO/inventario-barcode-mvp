@@ -890,8 +890,9 @@ No usar una cuadrícula rígida como fuente de verdad. El diseñador trabajará 
 - [x] Una posición con historial no se elimina físicamente (soft delete: active=false).
 - [x] Los cambios estructurales mayores crean una nueva versión (version auto-increment).
 - [x] Guardado con `expectedVersion` y respuesta `409` ante conflicto concurrente.
-- [x] No eliminar, dividir ni cambiar código de compartimientos con posiciones activas.
-- [x] No reducir columnas, niveles o profundidades con posiciones creadas.
+- [x] No eliminar, dividir ni cambiar código de compartimientos con stock positivo o sesiones activas.
+- [x] No reducir columnas, niveles o profundidades con stock positivo o sesiones activas.
+- [x] Desactivar posiciones vacías mediante operación transaccional; el stock positivo no se archiva silenciosamente.
 
 ### Pruebas
 

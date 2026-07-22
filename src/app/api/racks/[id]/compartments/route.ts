@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { apiError } from "@/lib/http";
 import { requireRole } from "@/server/guards";
 import { prisma } from "@/lib/prisma";
-import { validateCompartmentSet } from "@/lib/rack-validation";
+import { compartmentHasProtectedUse, validateCompartmentSet } from "@/lib/rack-validation";
 
 const createSchema = z.object({
   code: z.string().trim().min(1).max(20),
@@ -95,7 +95,43 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     const { id: rackId } = await context.params;
     const parsed = patchSchema.parse(await request.json());
     const { compartmentId, ...data } = parsed;
-    const comp = await prisma.rackCompartment.findFirst({ where: { id: compartmentId, rackId }, include: { positions: { select: { id: true } } } });
+    const comp = await prisma.rackCompartment.findFirst({
+      where: { id: compartmentId, rackId },
+      include: {
+        positions: {
+          where: { active: true },
+          select: {
+            id: true,
+            locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } },
+            sessionPositions: {
+              where: {
+                status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] },
+                session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } },
+              },
+              select: { id: true },
+            },
+          },
+        },
+        depthSlots: {
+          select: {
+            positions: {
+              where: { active: true },
+              select: {
+                id: true,
+                locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } },
+                sessionPositions: {
+                  where: {
+                    status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] },
+                    session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } },
+                  },
+                  select: { id: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
     if (!comp) return NextResponse.json({ error: "Compartimento no encontrado en este rack" }, { status: 404 });
     const rack = await prisma.rack.findUnique({ where: { id: rackId }, select: { widthMm: true, heightMm: true } });
     const rackWidth = rack?.widthMm ?? 10000;
@@ -107,14 +143,13 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
     if ((data.columnCount !== undefined && data.columnCount < comp.columnCount)
       || (data.stackLevels !== undefined && data.stackLevels < comp.stackLevels)) {
-      if (comp.positions.length > 0) return NextResponse.json({ error: "No se puede reducir la matriz porque tiene posiciones creadas" }, { status: 400 });
+      if (compartmentHasProtectedUse(comp)) return NextResponse.json({ error: "No se puede reducir la matriz porque tiene stock o una sesión activa" }, { status: 400 });
     }
 
     if (data.code && data.code !== comp.code) {
       const codeConflict = await prisma.rackCompartment.findFirst({ where: { rackId, code: data.code, NOT: { id: compartmentId } } });
       if (codeConflict) return NextResponse.json({ error: `El código ${data.code} ya está registrado en este rack` }, { status: 409 });
-      const positions = await prisma.storagePosition.count({ where: { compartmentId, active: true } });
-      if (positions > 0) return NextResponse.json({ error: "No se puede cambiar el código porque tiene posiciones activas" }, { status: 400 });
+      if (compartmentHasProtectedUse(comp)) return NextResponse.json({ error: "No se puede cambiar el código porque tiene stock o una sesión activa" }, { status: 400 });
     }
 
     const compartment = await prisma.rackCompartment.update({
@@ -143,9 +178,10 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
 
     if (!compartmentId) return NextResponse.json({ error: "compartmentId requerido" }, { status: 400 });
 
-    const activePositions = await prisma.storagePosition.count({ where: { compartmentId, active: true } });
-    if (activePositions > 0) {
-      return NextResponse.json({ error: "No se puede eliminar un compartimento con posiciones activas" }, { status: 400 });
+    const protectedCompartment = await prisma.rackCompartment.findFirst({ where: { id: compartmentId, rackId }, include: { positions: { where: { active: true }, select: { locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } }, sessionPositions: { where: { status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] }, session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } } }, select: { id: true } } } } } });
+    if (!protectedCompartment) return NextResponse.json({ error: "Compartimento no encontrado en este rack" }, { status: 404 });
+    if (compartmentHasProtectedUse(protectedCompartment)) {
+      return NextResponse.json({ error: "No se puede eliminar un compartimento con stock o una sesión activa" }, { status: 400 });
     }
 
     // Soft delete — just deactivate
@@ -170,8 +206,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     const compartments = await prisma.rackCompartment.findMany({
       where: { rackId, active: true },
       include: {
-        positions: { where: { active: true }, select: { id: true } },
-        depthSlots: { where: { active: true }, include: { positions: { where: { active: true }, select: { id: true } } }, orderBy: { depthIndex: "asc" } },
+        positions: { where: { active: true }, select: { id: true, locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } }, sessionPositions: { where: { status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] }, session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } } }, select: { id: true } } } },
+        depthSlots: { where: { active: true }, include: { positions: { where: { active: true }, select: { id: true, locationStocks: { where: { theoreticalStock: { gt: 0 } }, select: { id: true } }, sessionPositions: { where: { status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS", "RECOUNT_REQUIRED"] }, session: { status: { in: ["DRAFT", "OPEN", "PAUSED", "REVIEW"] } } }, select: { id: true } } } } }, orderBy: { depthIndex: "asc" } },
       },
       orderBy: { orderIndex: "asc" },
     });

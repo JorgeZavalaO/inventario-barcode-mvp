@@ -4,14 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { moveRect, rectsOverlap, splitHorizontal, splitVertical, type Compartment, type Rect } from "@/lib/rack-validation";
+import { compartmentHasProtectedUse, moveRect, rectsOverlap, splitHorizontal, splitVertical, type Compartment, type Rect } from "@/lib/rack-validation";
 import { ArrowLeft, Copy, Grid3X3, Layers, LoaderCircle, MousePointer2, Pencil, Plus, Redo2, Save, SplitSquareHorizontal, SplitSquareVertical, Trash2, Undo2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InteractiveRackDesigner, type DesignerCompartment } from "@/components/locations/interactive-rack-designer";
 
-type DraftCompartment = DesignerCompartment & { active?: boolean; positions?: { id: string }[] };
+type DraftCompartment = DesignerCompartment & { active?: boolean; positions?: { id: string; locationStocks?: { id: string }[]; sessionPositions?: { id: string }[] }[] };
 type RackData = { id: string; name: string; widthMm: number | null; heightMm: number | null; version: number };
 type RackResponse = { rack: RackData };
 type CompartmentsResponse = { compartments: DraftCompartment[] };
@@ -101,8 +101,12 @@ export default function RackDesignerPage() {
   const rackWidth = rack?.widthMm ?? 10000;
   const rackHeight = rack?.heightMm ?? 10000;
   const selected = compartments.find((compartment) => compartment.id === selectedComp);
-  const hasActivePositions = (compartment: DraftCompartment | undefined) => (compartment?.positions?.length ?? 0) > 0
-    || compartment?.depthSlots?.some((slot) => ((slot as { positions?: { id: string }[] }).positions?.length ?? 0) > 0) === true;
+  const hasProtectedUse = (compartment: DraftCompartment | undefined) => compartment ? compartmentHasProtectedUse(compartment as Parameters<typeof compartmentHasProtectedUse>[0]) : false;
+  const hasAnyPositions = (compartment: DraftCompartment | undefined) => {
+    if (!compartment) return false;
+    if ((compartment.positions?.length ?? 0) > 0) return true;
+    return (compartment.depthSlots as Array<{ positions?: unknown[] }> | undefined)?.some((slot) => (slot.positions?.length ?? 0) > 0) ?? false;
+  };
 
   function applyDraft(next: DraftCompartment[], message?: string) {
     setUndoStack((history) => [...history, compartments]);
@@ -136,7 +140,7 @@ export default function RackDesignerPage() {
 
   function deleteCompartment(compartmentId: string) {
     const compartment = compartments.find((item) => item.id === compartmentId);
-    if (hasActivePositions(compartment)) { setToast("No se puede eliminar porque tiene posiciones activas"); return; }
+    if (hasProtectedUse(compartment)) { setToast("No se puede eliminar porque tiene stock o una sesión activa"); return; }
     applyDraft(compartments.filter((item) => item.id !== compartmentId), "Compartimento eliminado del borrador");
     setSelectedComp(null);
     setSelectedCell(null);
@@ -146,7 +150,7 @@ export default function RackDesignerPage() {
   function splitCompartment(sourceId: string, direction: "horizontal" | "vertical") {
     const source = compartments.find((item) => item.id === sourceId);
     if (!source) return;
-    if (hasActivePositions(source)) { setToast("No se puede dividir porque tiene posiciones activas"); return; }
+    if (hasProtectedUse(source)) { setToast("No se puede dividir porque tiene stock o una sesión activa"); return; }
     const parts = direction === "horizontal" ? splitHorizontal(source as Compartment) : splitVertical(source as Compartment);
     if (parts.some((part) => part.width < 2 || part.height < 2)) { setToast("El compartimento es demasiado pequeño para dividir"); return; }
     const nextParts = parts.map((part) => ({ ...part, id: `new-${crypto.randomUUID()}`, code: uniqueCode(part.code, compartments.filter((item) => item.id !== sourceId)), columnCount: source.columnCount ?? 1, stackLevels: source.stackLevels ?? 1, depthSlots: [] }));
@@ -191,8 +195,8 @@ export default function RackDesignerPage() {
       setToast("La matriz no puede superar 1000 posiciones físicas");
       return;
     }
-    if (hasActivePositions(selected) && (columnCount < (selected.columnCount ?? 1) || stackLevels < (selected.stackLevels ?? 1) || depthCount < (selected.depthSlots?.length || 1))) {
-      setToast("No se puede reducir una matriz con posiciones creadas");
+    if (hasProtectedUse(selected) && (columnCount < (selected.columnCount ?? 1) || stackLevels < (selected.stackLevels ?? 1) || depthCount < (selected.depthSlots?.length || 1))) {
+      setToast("No se puede reducir una matriz con stock o una sesión activa");
       return;
     }
     const currentSlots = selected.depthSlots ?? [];
@@ -232,6 +236,33 @@ export default function RackDesignerPage() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   });
+
+  async function deactivatePositions(compartmentId: string) {
+    const compartment = compartments.find((item) => item.id === compartmentId);
+    if (!compartment) return;
+    const hasStock = hasProtectedUse(compartment);
+    if (hasStock) {
+      setToast("No se pueden desactivar posiciones con stock o una sesión activa");
+      return;
+    }
+    const confirmed = window.confirm(
+      "¿Desactivar todas las posiciones vacías de este compartimento?",
+    );
+    if (!confirmed) return;
+    setSaving(true);
+    try {
+      await apiFetch(`/api/racks/${id}/deactivate-positions`, {
+        method: "POST",
+        body: JSON.stringify({ compartmentIds: [compartmentId] }),
+      });
+      await load();
+      setToast("Posiciones desactivadas. Ya puedes editar el compartimento.");
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error al desactivar posiciones");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function saveDesign() {
     if (!hasChanges) { setToast("No hay cambios pendientes"); return; }
@@ -341,6 +372,12 @@ export default function RackDesignerPage() {
                   <div><p className="mb-1 text-xs text-slate-500">Cantidad de profundidades</p><div className="grid grid-cols-3 gap-1">{[1, 2, 3].map((count) => <Button key={count} size="sm" variant={(selected.depthSlots?.length || 1) === count ? "default" : "outline"} onClick={() => { updateMatrix({ depthCount: count }); setSelectedDepth(Math.min(selectedDepth, count - 1)); }}>{count}</Button>)}</div></div>
                   <div><p className="mb-1 text-xs text-slate-500">Profundidad activa</p><div className="grid grid-cols-3 gap-1">{(selected.depthSlots?.length ? selected.depthSlots : [{ id: "D01", code: "D01", name: "Frente" }]).map((slot, index) => <Button key={slot.id} size="sm" variant={selectedDepth === index ? "default" : "outline"} onClick={() => setSelectedDepth(index)}>{slot.name}</Button>)}</div></div>
                   <p className="text-xs font-medium text-teal-700">{(selected.columnCount ?? 1) * (selected.stackLevels ?? 1) * (selected.depthSlots?.length || 1)} posiciones físicas</p>
+                  {hasAnyPositions(selected) && !hasProtectedUse(selected) && (
+                    <Button size="sm" variant="destructive" className="w-full" onClick={() => void deactivatePositions(selected.id)}>
+                      <Trash2 size={14} /> Desactivar posiciones vacías
+                    </Button>
+                  )}
+                  {hasProtectedUse(selected) && <p className="rounded bg-amber-50 p-2 text-xs text-amber-700">Hay stock o una sesión activa. Transfiere el stock o finaliza la sesión para modificar esta matriz.</p>}
                   {selectedCell?.compartmentId === selected.id && <p className="text-xs text-slate-500">Celda seleccionada: columna {selectedCell.columnIndex}, nivel {selectedCell.stackIndex}, profundidad {selectedDepth + 1}</p>}
                 </CardContent>
               </Card>}

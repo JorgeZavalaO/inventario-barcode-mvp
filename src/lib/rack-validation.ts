@@ -235,3 +235,31 @@ export function generatePhysicalPositionCode(
 export function areCoordsValid(comp: { x: number; y: number; width: number; height: number }): boolean {
   return comp.x >= 0 && comp.x <= 10000 && comp.y >= 0 && comp.y <= 10000 && comp.width > 0 && comp.width <= 10000 && comp.height > 0 && comp.height <= 10000;
 }
+
+export function positionHasStock(position: { locationStocks?: Array<{ id: string; theoreticalStock?: number | string }> }): boolean {
+  return position.locationStocks?.some((stock) => stock.theoreticalStock === undefined || Number(stock.theoreticalStock) > 0) ?? false;
+}
+
+export function compartmentHasStock(compartment: {
+  positions?: Array<{ locationStocks?: Array<{ id: string; theoreticalStock?: number | string }> }>;
+  depthSlots?: Array<{ positions?: Array<{ locationStocks?: Array<{ id: string; theoreticalStock?: number | string }> }> }>;
+}): boolean {
+  if (compartment.positions?.some((p) => positionHasStock(p))) return true;
+  if (compartment.depthSlots?.some((s) => s.positions?.some((p) => positionHasStock(p)))) return true;
+  return false;
+}
+
+export function compartmentHasProtectedUse(compartment: {
+  positions?: Array<{
+    locationStocks?: Array<{ id: string; theoreticalStock?: number | string }>;
+    sessionPositions?: Array<{ id: string }>;
+  }>;
+  depthSlots?: Array<{ positions?: Array<{
+    locationStocks?: Array<{ id: string; theoreticalStock?: number | string }>;
+    sessionPositions?: Array<{ id: string }>;
+  }> }>;
+}): boolean {
+  if (compartmentHasStock(compartment)) return true;
+  if (compartment.positions?.some((p) => (p.sessionPositions?.length ?? 0) > 0)) return true;
+  return compartment.depthSlots?.some((slot) => slot.positions?.some((p) => (p.sessionPositions?.length ?? 0) > 0)) ?? false;
+}

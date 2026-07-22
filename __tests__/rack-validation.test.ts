@@ -8,6 +8,9 @@ import {
   duplicateCompartment,
   generatePositionCode,
   generatePhysicalPositionCode,
+  positionHasStock,
+  compartmentHasStock,
+  compartmentHasProtectedUse,
   areCoordsValid,
   clamp,
   moveRect,
@@ -214,6 +217,49 @@ describe("generatePositionCode", () => {
 describe("generatePhysicalPositionCode", () => {
   it("includes column and stack indexes", () => {
     expect(generatePhysicalPositionCode("AP", "P01", "R001", "C07", "D02", 3, 4)).toBe("AP-P01-R001-C07-D02-C03-N04");
+  });
+});
+
+describe("positionHasStock", () => {
+  it("detects stock when locationStocks exist", () => {
+    expect(positionHasStock({ locationStocks: [{ id: "s1" }] })).toBe(true);
+  });
+
+  it("considers empty array as no stock", () => {
+    expect(positionHasStock({ locationStocks: [] })).toBe(false);
+  });
+
+  it("considers undefined as no stock", () => {
+    expect(positionHasStock({})).toBe(false);
+  });
+
+  it("does not treat zero theoretical stock as occupied", () => {
+    expect(positionHasStock({ locationStocks: [{ id: "s0", theoreticalStock: 0 }] })).toBe(false);
+  });
+});
+
+describe("compartmentHasStock", () => {
+  it("returns true if a direct position has stock", () => {
+    expect(compartmentHasStock({ positions: [{ locationStocks: [{ id: "s1" }] }] })).toBe(true);
+  });
+
+  it("returns true if a depth slot position has stock", () => {
+    expect(compartmentHasStock({ depthSlots: [{ positions: [{ locationStocks: [{ id: "s1" }] }] }] })).toBe(true);
+  });
+
+  it("returns false when nothing has stock", () => {
+    expect(compartmentHasStock({ positions: [{ locationStocks: [] }], depthSlots: [] })).toBe(false);
+    expect(compartmentHasStock({})).toBe(false);
+  });
+});
+
+describe("compartmentHasProtectedUse", () => {
+  it("protects a position in an active inventory session", () => {
+    expect(compartmentHasProtectedUse({ positions: [{ sessionPositions: [{ id: "session-position" }] }] })).toBe(true);
+  });
+
+  it("allows a position with neither stock nor active session", () => {
+    expect(compartmentHasProtectedUse({ positions: [{ locationStocks: [], sessionPositions: [] }] })).toBe(false);
   });
 });
 
