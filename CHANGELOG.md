@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.40.0 (2026-07-23)
+
+### Changed (UX/UI del diseñador de racks)
+
+- **Flujo guiado:** El diseñador ahora organiza el trabajo en tres pasos visibles: configurar, revisar y crear posiciones físicas.
+- **Controles accesibles:** Campos con etiquetas asociadas, estados comunicados mediante `role=status`/`role=alert` y selección de compartimentos con mouse, `Tab`, `Enter` y `Espacio`.
+- **Edición más clara:** La lista de compartimentos, la edición de nombres/códigos y la matriz física están agrupadas en un panel de revisión.
+- **Vista previa mejorada:** La vista frontal y la vista lateral de profundidad tienen estados vacíos, instrucciones y una representación lateral interactiva de Frente/Centro/Fondo.
+- **Aplicación segura:** Reaplicar la configuración rápida reemplaza el borrador con confirmación, bloquea la operación si existe stock o una sesión activa y evita generar compartimentos superpuestos.
+- **Acciones diferenciadas:** Guardar el diseño y crear posiciones físicas son acciones separadas con mensajes claros sobre sus requisitos.
+
 ## 0.39.0 (2026-07-23)
 
 ### Changed (Vistas frontal y lateral lado a lado)
