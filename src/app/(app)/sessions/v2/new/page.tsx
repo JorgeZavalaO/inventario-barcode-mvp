@@ -12,9 +12,17 @@ import { Input } from "@/components/ui/input";
 type FloorData = {
   id: string; code: string; name: string; warehouseName: string;
   zones: { id: string; code: string; name: string;
-    racks: { id: string; code: string; name: string; positions?: { id: string }[]; compartments?: { depthSlots?: { positions?: { id: string }[] }[] }[] }[];
+    racks: { id: string; code: string; name: string; positionCount?: number }[];
   }[];
 };
+
+type ActivePosition = { id: string; rackId: string; code: string };
+type RawWarehouse = { id: string; name: string; floors?: RawFloor[] };
+type RawFloor = { id: string; code: string; name: string; zones?: RawZone[] };
+type RawZone = { id: string; code: string; name: string; racks?: RawRack[] };
+type RawRack = { id: string; code: string; name: string };
+type WarehouseResponse = { warehouses: RawWarehouse[] };
+type CreateSessionResponse = { session: { id: string } };
 
 export default function NewV2SessionPage() {
   const router = useRouter();
@@ -22,7 +30,7 @@ export default function NewV2SessionPage() {
   const [scopeType, setScopeType] = useState<"total" | "floor" | "rack" | "positions">("total");
   const [floors, setFloors] = useState<FloorData[]>([]);
   const [allRacks, setAllRacks] = useState<{ id: string; code: string; name: string; floorName: string; positionCount: number }[]>([]);
-  const [positions, setPositions] = useState<any[]>([]);
+  const [positions, setPositions] = useState<ActivePosition[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -31,21 +39,30 @@ export default function NewV2SessionPage() {
   useEffect(() => { (async () => {
     try {
       const [whData, posData] = await Promise.all([
-        apiFetch<{ warehouses: any[] }>("/api/warehouses"),
-        apiFetch<{ positions: any[] }>("/api/positions"),
+        apiFetch<WarehouseResponse>("/api/warehouses"),
+        apiFetch<{ positions: ActivePosition[] }>("/api/positions"),
       ]);
-      const allFloors = whData.warehouses.flatMap((w: any) =>
-        w.floors.map((f: any) => ({
+      const positionCountByRack = new Map<string, number>();
+      for (const position of posData.positions) {
+        positionCountByRack.set(position.rackId, (positionCountByRack.get(position.rackId) ?? 0) + 1);
+      }
+      const allFloors = whData.warehouses.flatMap((w) =>
+        (w.floors ?? []).map((f) => ({
           ...f, warehouseName: w.name,
-          zones: f.zones || [],
+          zones: (f.zones ?? []).map((z) => ({
+            ...z,
+            racks: (z.racks ?? []).map((r) => ({
+              ...r,
+              positionCount: positionCountByRack.get(r.id) ?? 0,
+            })),
+          })),
         }))
       ) as FloorData[];
       setFloors(allFloors);
       const racks = allFloors.flatMap((f) =>
         f.zones.flatMap((z) =>
           z.racks.map((r) => {
-            const posCount = r.positions?.length ?? r.compartments?.reduce((s, c) => s + (c.depthSlots?.reduce((s2, d) => s2 + (d.positions?.length ?? 0), 0) ?? 0), 0) ?? 0;
-            return { id: r.id, code: r.code, name: r.name, floorName: f.name, positionCount: posCount };
+            return { id: r.id, code: r.code, name: r.name, floorName: f.name, positionCount: r.positionCount ?? 0 };
           })
         )
       );
@@ -59,17 +76,19 @@ export default function NewV2SessionPage() {
     if (!name.trim()) { setToast("Ingresa un nombre"); return; }
     setCreating(true);
     try {
-      const result = await apiFetch<any>("/api/sessions/v2", {
+      // La vista "Por piso" selecciona racks dentro de cada piso; el API debe recibir esos IDs como rack.
+      const requestScopeType = scopeType === "floor" ? "rack" : scopeType;
+      const result = await apiFetch<CreateSessionResponse>("/api/sessions/v2", {
         method: "POST",
         body: JSON.stringify({
           name: name.trim(),
-          scopeType,
-          scopeIds: scopeType !== "total" ? selectedIds : undefined,
+          scopeType: requestScopeType,
+          scopeIds: requestScopeType !== "total" ? selectedIds : undefined,
         }),
       });
       router.push(`/sessions/v2/${result.session.id}/scan`);
-    } catch (e: any) {
-      setToast(e.message ?? "Error al crear");
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error al crear");
     } finally { setCreating(false); }
   }
 
@@ -141,7 +160,7 @@ export default function NewV2SessionPage() {
                       <div className="ml-6 mt-2 space-y-1">
                         {floorRacks.length === 0 && <p className="text-xs text-slate-400">Sin racks.</p>}
                         {floorRacks.map((rack) => {
-                          const hasPositions = rack.positions?.length ?? rack.compartments?.reduce((s, c) => s + (c.depthSlots?.reduce((s2, d) => s2 + (d.positions?.length ?? 0), 0) ?? 0), 0) ?? 0 > 0;
+                          const hasPositions = (rack.positionCount ?? 0) > 0;
                           return (
                             <label key={rack.id} className={`flex items-center gap-2 rounded px-2 py-1 text-sm cursor-pointer ${!hasPositions ? "opacity-40" : "hover:bg-slate-50"}`}>
                               <input type="checkbox" checked={selectedIds.includes(rack.id)} onChange={() => toggleId(rack.id)}

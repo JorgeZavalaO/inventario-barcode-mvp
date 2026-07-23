@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.41.0 (2026-07-23)
+
+### Changed (Vista previa del rack)
+
+- **Resumen operativo:** La vista de detalle ahora muestra compartimentos, posiciones activas, slots de profundidad y dimensiones del rack.
+- **Vistas frontal y lateral:** Se presentan juntas antes de entrar al diseñador, con una tabla lateral que resume Frente, Centro y Fondo por compartimento.
+- **Detalle desplegable:** Las posiciones se organizan por compartimento y profundidad mediante secciones expandibles, evitando saturar la pantalla.
+- **Estados claros:** Se distingue visualmente entre racks listos para conteo y racks sin posiciones generadas, con acceso directo al diseñador.
+- **Accesibilidad:** Se agregaron encabezados semánticos, tabla con `scope`, estados ARIA, foco visible y mensajes para estados vacíos y errores.
+
 ## 0.40.0 (2026-07-23)
 
 ### Changed (UX/UI del diseñador de racks)
