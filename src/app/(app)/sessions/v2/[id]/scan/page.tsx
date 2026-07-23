@@ -48,6 +48,16 @@ export default function V2ScanPage() {
   const [boxNumber, setBoxNumber] = useState("");
   const [resolvedBox, setResolvedBox] = useState<any>(null);
   const [boxProducts, setBoxProducts] = useState<{ productId: string; productCode: string; productDescription: string; productUnit: string; quantity: string }[]>([]);
+  const [imports, setImports] = useState<{ id: string; code: string; description: string | null }[]>([]);
+  const [pallets, setPallets] = useState<{ id: string; number: string }[]>([]);
+  const [boxes, setBoxes] = useState<{ id: string; number: string }[]>([]);
+  const [selectedBoxImportId, setSelectedBoxImportId] = useState("");
+  const [selectedBoxPalletId, setSelectedBoxPalletId] = useState("");
+  const [selectedBoxId, setSelectedBoxId] = useState("");
+  const [loadingImports, setLoadingImports] = useState(false);
+  const [loadingPallets, setLoadingPallets] = useState(false);
+  const [loadingBoxes, setLoadingBoxes] = useState(false);
+  const [showManualBoxInput, setShowManualBoxInput] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -58,6 +68,64 @@ export default function V2ScanPage() {
   }, [id]);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    async function loadImports() {
+      setLoadingImports(true);
+      try {
+        const data = await apiFetch<{ imports: { id: string; code: string; description: string | null }[] }>("/api/boxes/imports");
+        setImports(data.imports);
+      } catch { /* silent */ }
+      finally { setLoadingImports(false); }
+    }
+    void loadImports();
+  }, []);
+
+  async function handleImportSelect(importId: string) {
+    setSelectedBoxImportId(importId);
+    setSelectedBoxPalletId("");
+    setSelectedBoxId("");
+    setPallets([]);
+    setBoxes([]);
+    setResolvedBox(null);
+    setBoxProducts([]);
+    if (!importId) return;
+    const imp = imports.find(i => i.id === importId);
+    if (imp) setBoxImport(imp.code);
+    setLoadingPallets(true);
+    try {
+      const data = await apiFetch<{ pallets: { id: string; number: string }[] }>(`/api/boxes/pallets?importId=${importId}`);
+      setPallets(data.pallets);
+    } catch { /* silent */ }
+    finally { setLoadingPallets(false); }
+  }
+
+  async function handlePalletSelect(palletId: string) {
+    setSelectedBoxPalletId(palletId);
+    setSelectedBoxId("");
+    setBoxes([]);
+    setResolvedBox(null);
+    setBoxProducts([]);
+    if (!palletId) return;
+    const pal = pallets.find(p => p.id === palletId);
+    if (pal) setBoxPallet(pal.number);
+    setLoadingBoxes(true);
+    try {
+      const data = await apiFetch<{ boxes: { id: string; number: string }[] }>(`/api/boxes/boxes?palletId=${palletId}`);
+      setBoxes(data.boxes);
+    } catch { /* silent */ }
+    finally { setLoadingBoxes(false); }
+  }
+
+  function handleBoxSelect(boxId: string) {
+    setSelectedBoxId(boxId);
+    if (!boxId) { setResolvedBox(null); setBoxProducts([]); return; }
+    const bx = boxes.find(b => b.id === boxId);
+    if (bx) {
+      setBoxNumber(bx.number);
+      void resolveBox(boxImport, boxPallet, bx.number);
+    }
+  }
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2500); return () => clearTimeout(t); }, [toast]);
 
   async function startPosition(positionId: string) {
@@ -194,6 +262,8 @@ export default function V2ScanPage() {
         body: JSON.stringify({ roundId: activeRound.id, operationId: crypto.randomUUID(), emptyConfirmed: events.length === 0 }),
       });
       setActivePosition(null); setActiveRound(null); setEvents([]);
+      setSelectedBoxImportId(""); setSelectedBoxPalletId(""); setSelectedBoxId(""); setPallets([]); setBoxes([]);
+      setResolvedBox(null); setBoxProducts([]);
       setToast("Posición completada");
       await load();
     } catch { setToast("Error al completar"); }
@@ -282,11 +352,42 @@ export default function V2ScanPage() {
               <CardContent className="space-y-3">
                 {countMode === "box" ? (
                   <>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Input placeholder="Importación" value={boxImport} onChange={(e) => { setBoxImport(e.target.value); setResolvedBox(null); setBoxProducts([]); }} />
-                      <Input placeholder="Pallet" value={boxPallet} onChange={(e) => { setBoxPallet(e.target.value); setResolvedBox(null); setBoxProducts([]); }} />
-                      <Input placeholder="Caja" value={boxNumber} onChange={(e) => { setBoxNumber(e.target.value); if (boxImport.trim() && boxPallet.trim() && e.target.value.trim()) { void resolveBox(boxImport, boxPallet, e.target.value); } else { setResolvedBox(null); setBoxProducts([]); } }} />
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-400">
+                        {showManualBoxInput ? "Ingreso manual" : "Seleccionar caja"}
+                      </span>
+                      <Button variant="ghost" size="sm" className="text-xs text-slate-400" onClick={() => { setShowManualBoxInput(!showManualBoxInput); setResolvedBox(null); setBoxProducts([]); }}>
+                        {showManualBoxInput ? "Usar selects" : "Escribir manual"}
+                      </Button>
                     </div>
+                    {showManualBoxInput ? (
+                      <div className="grid grid-cols-3 gap-2">
+                        <Input placeholder="Importación" value={boxImport} onChange={(e) => { setBoxImport(e.target.value); setResolvedBox(null); setBoxProducts([]); }} />
+                        <Input placeholder="Pallet" value={boxPallet} onChange={(e) => { setBoxPallet(e.target.value); setResolvedBox(null); setBoxProducts([]); }} />
+                        <Input placeholder="Caja" value={boxNumber} onChange={(e) => { setBoxNumber(e.target.value); if (boxImport.trim() && boxPallet.trim() && e.target.value.trim()) { void resolveBox(boxImport, boxPallet, e.target.value); } else { setResolvedBox(null); setBoxProducts([]); } }} />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <select className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm" value={selectedBoxImportId} onChange={(e) => void handleImportSelect(e.target.value)} disabled={loadingImports}>
+                            <option value="">{loadingImports ? "Cargando..." : "Importación"}</option>
+                            {imports.map((imp) => <option key={imp.id} value={imp.id}>{imp.code}{imp.description ? ` - ${imp.description}` : ""}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <select className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm" value={selectedBoxPalletId} onChange={(e) => void handlePalletSelect(e.target.value)} disabled={!selectedBoxImportId || loadingPallets}>
+                            <option value="">{loadingPallets ? "Cargando..." : "Pallet"}</option>
+                            {pallets.map((p) => <option key={p.id} value={p.id}>{p.number}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <select className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-sm" value={selectedBoxId} onChange={(e) => handleBoxSelect(e.target.value)} disabled={!selectedBoxPalletId || loadingBoxes}>
+                            <option value="">{loadingBoxes ? "Cargando..." : "Caja"}</option>
+                            {boxes.map((b) => <option key={b.id} value={b.id}>{b.number}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    )}
                     {resolvedBox && (
                       <div className="rounded-lg border border-teal-200 bg-teal-50 p-3">
                         <p className="mb-2 text-xs font-medium text-teal-700">
@@ -381,7 +482,7 @@ export default function V2ScanPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="destructive" onClick={() => { setActivePosition(null); setActiveRound(null); setEvents([]); }}>
+            <Button variant="destructive" onClick={() => { setActivePosition(null); setActiveRound(null); setEvents([]); setSelectedBoxImportId(""); setSelectedBoxPalletId(""); setSelectedBoxId(""); setPallets([]); setBoxes([]); setResolvedBox(null); setBoxProducts([]); }}>
               Cancelar
             </Button>
             <Button className="ml-auto" onClick={() => void completePosition()} disabled={busy}>

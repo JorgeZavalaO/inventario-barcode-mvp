@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.36.0 (2026-07-23)
+
+### Added (Selects cascada para conteo por cajas)
+
+- **Selects cascada en modo caja:** Los tres campos de texto (Importación, Pallet, Caja) ahora se reemplazan por selects en cascada. Al seleccionar una importación se cargan sus pallets, al seleccionar un pallet se cargan sus cajas, y al seleccionar una caja se resuelve automáticamente.
+- **Fallback manual:** Botón para alternar entre selects y escritura manual por si el usuario prefiere tipear los códigos.
+- **Nuevos endpoints:** `GET /api/boxes/imports`, `GET /api/boxes/pallets?importId=X`, `GET /api/boxes/boxes?palletId=X` para alimentar los selects.
+- **Renombrar compartimentos:** El diseñador de racks ahora permite editar el código y nombre de cada compartimento inline cuando está seleccionado.
+- **Descripción de "Generar posiciones":** Se agregó una explicación debajo del botón indicando que crea ubicaciones físicas con código QR por cada celda de la matriz.
+
 ## 0.35.0 (2026-07-23)
 
 ### Added (Creación masiva de pisos, zonas y racks)

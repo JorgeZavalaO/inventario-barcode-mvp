@@ -362,9 +362,18 @@ export default function RackDesignerPage() {
                 <Button className="w-full" size="sm" variant="outline" onClick={() => duplicate(selectedComp)}><Copy size={14} /> Duplicar</Button>
                 <Button className="w-full" size="sm" variant="destructive" onClick={() => deleteCompartment(selectedComp)}><Trash2 size={14} /> Eliminar</Button>
               </>}
-              <Button className="w-full" size="sm" variant="outline" onClick={() => void generatePositions()} disabled={saving || hasChanges || compartments.length === 0}><Layers size={14} /> Generar posiciones</Button>
+              <div className="rounded-lg border border-slate-100 bg-slate-50 p-2">
+                <Button className="w-full" size="sm" variant="outline" onClick={() => void generatePositions()} disabled={saving || hasChanges || compartments.length === 0}><Layers size={14} /> Generar posiciones</Button>
+                <p className="mt-1 text-xs text-slate-400">Crea las ubicaciones físicas reales a partir de la matriz (columnas × niveles × profundidades). Cada celda genera un código tipo <code className="text-xs">R01-N01-C01-F01-P01</code> con su QR.</p>
+              </div>
               <Button className="w-full" size="sm" onClick={() => void saveDesign()} disabled={saving || !hasChanges}>{saving ? <LoaderCircle className="animate-spin" size={14} /> : <Save size={14} />} Guardar cambios</Button>
-              {selected && <p className="rounded bg-slate-50 p-2 text-xs text-slate-500">{selected.code} · {selected.x},{selected.y} · {selected.width}×{selected.height}</p>}
+              {selected && <div className="rounded-lg border border-slate-200 bg-white p-2 space-y-1">
+                <div className="grid grid-cols-2 gap-1">
+                  <label className="text-xs text-slate-500">Código<input className="mt-0.5 h-7 w-full rounded border border-slate-200 bg-white px-1.5 text-xs" value={selected.code} onChange={(e) => { const v = e.target.value.trim(); if (!v) return; applyDraft(compartments.map(c => c.id === selected.id ? { ...c, code: v } : c)); }} /></label>
+                  <label className="text-xs text-slate-500">Nombre<input className="mt-0.5 h-7 w-full rounded border border-slate-200 bg-white px-1.5 text-xs" value={selected.name} onChange={(e) => { const v = e.target.value.trim(); if (!v) return; applyDraft(compartments.map(c => c.id === selected.id ? { ...c, name: v } : c)); }} /></label>
+                </div>
+                <p className="text-xs text-slate-400">{selected.x},{selected.y} · {selected.width}×{selected.height}</p>
+              </div>}
               {selected && <Card className="border-teal-100 bg-teal-50/40">
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Matriz interna</CardTitle><CardDescription>Configura las ubicaciones físicas de este compartimiento.</CardDescription></CardHeader>
                 <CardContent className="space-y-2">
