@@ -51,7 +51,6 @@ export default function V2SessionsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/sessions" className="text-slate-400 hover:text-slate-600"><ArrowLeft size={20} /></Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">Sesiones V2</h1>
           <p className="text-sm text-slate-500">Inventario por posición física.</p>

@@ -204,29 +204,25 @@ export function duplicateCompartment(comp: Compartment, offset = 50, maxX = 1000
 }
 
 /**
- * Generate position code.
+ * Generate position code (logical: rack-compartment-depth).
+ * The full hierarchy (warehouse-floor-zone) is reconstructed at export time.
  */
 export function generatePositionCode(
-  warehouseCode: string,
-  floorCode: string,
   rackCode: string,
   compartmentCode: string,
-  depthCode: string,
 ): string {
-  return `${warehouseCode}-${floorCode}-${rackCode}-${compartmentCode}-${depthCode}`;
+  return `${rackCode}-${compartmentCode}`;
 }
 
 /** Generate the stable code for one physical matrix cell. */
 export function generatePhysicalPositionCode(
-  warehouseCode: string,
-  floorCode: string,
   rackCode: string,
   compartmentCode: string,
   depthCode: string,
   columnIndex: number,
   stackIndex: number,
 ): string {
-  return `${generatePositionCode(warehouseCode, floorCode, rackCode, compartmentCode, depthCode)}-C${String(columnIndex).padStart(2, "0")}-N${String(stackIndex).padStart(2, "0")}`;
+  return `${generatePositionCode(rackCode, compartmentCode)}-C${String(columnIndex).padStart(2, "0")}-F${String(stackIndex).padStart(2, "0")}-${depthCode}`;
 }
 
 /**

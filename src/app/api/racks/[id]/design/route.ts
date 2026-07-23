@@ -27,9 +27,9 @@ const saveSchema = z.object({
 }).strict();
 
 const depthDefinitions = [
-  { code: "D01", name: "Frente", kind: "FRONT" as const },
-  { code: "D02", name: "Centro", kind: "MIDDLE" as const },
-  { code: "D03", name: "Fondo", kind: "BACK" as const },
+  { code: "P01", name: "Frente", kind: "FRONT" as const },
+  { code: "P02", name: "Centro", kind: "MIDDLE" as const },
+  { code: "P03", name: "Fondo", kind: "BACK" as const },
 ];
 
 class DesignError extends Error {
@@ -192,7 +192,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
         savedConfig.set(compartmentId, { columnCount: data.columnCount, stackLevels: data.stackLevels, depthCount });
         for (let depthIndex = 0; depthIndex < depthCount; depthIndex += 1) {
           const definition = depthDefinitions[depthIndex] ?? {
-            code: `D${String(depthIndex + 1).padStart(2, "0")}`,
+            code: `P${String(depthIndex + 1).padStart(2, "0")}`,
             name: `Profundidad ${depthIndex + 1}`,
             kind: "CUSTOM" as const,
           };

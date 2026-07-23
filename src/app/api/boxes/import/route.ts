@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
             if (pallet) {
               let expectedPositionId: string | undefined;
               if (expectedPosition) {
-                const pos = await prisma.storagePosition.findUnique({ where: { code: expectedPosition.trim() } });
+                const pos = await prisma.storagePosition.findFirst({ where: { code: expectedPosition.trim() } });
                 if (!pos) {
                   errors.push(`Línea ${line}: posición esperada ${expectedPosition} no encontrada`);
                 } else {

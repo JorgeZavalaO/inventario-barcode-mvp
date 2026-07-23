@@ -80,13 +80,13 @@ describe("isWithinBounds", () => {
 
 describe("validateCompartment", () => {
   const existing: Compartment[] = [
-    { id: "c1", code: "C01", name: "Modulo Izq", x: 0, y: 0, width: 5000, height: 5000 },
-    { id: "c2", code: "C02", name: "Modulo Der", x: 5000, y: 0, width: 5000, height: 5000 },
+    { id: "c1", code: "N01", name: "Modulo Izq", x: 0, y: 0, width: 5000, height: 5000 },
+    { id: "c2", code: "N02", name: "Modulo Der", x: 5000, y: 0, width: 5000, height: 5000 },
   ];
 
   it("valid compartment has no issues", () => {
     const issues = validateCompartment(
-      { id: "new1", code: "C03", name: "Modulo Abajo", x: 0, y: 5000, width: 10000, height: 5000 },
+      { id: "new1", code: "N03", name: "Modulo Abajo", x: 0, y: 5000, width: 10000, height: 5000 },
       existing, 10000, 10000,
     );
     expect(issues).toHaveLength(0);
@@ -94,7 +94,7 @@ describe("validateCompartment", () => {
 
   it("detects overlap with existing compartment", () => {
     const issues = validateCompartment(
-      { id: "new1", code: "C03", name: "Overlap", x: 2500, y: 2500, width: 5000, height: 5000 },
+      { id: "new1", code: "N03", name: "Overlap", x: 2500, y: 2500, width: 5000, height: 5000 },
       existing, 10000, 10000,
     );
     expect(issues.some((i) => i.type === "overlap")).toBe(true);
@@ -102,7 +102,7 @@ describe("validateCompartment", () => {
 
   it("detects out of bounds", () => {
     const issues = validateCompartment(
-      { id: "new1", code: "C03", name: "Out", x: 9000, y: 9000, width: 2000, height: 2000 },
+      { id: "new1", code: "N03", name: "Out", x: 9000, y: 9000, width: 2000, height: 2000 },
       existing, 10000, 10000,
     );
     expect(issues.some((i) => i.type === "bounds")).toBe(true);
@@ -110,7 +110,7 @@ describe("validateCompartment", () => {
 
   it("detects duplicate code", () => {
     const issues = validateCompartment(
-      { id: "new1", code: "C01", name: "Duplicate", x: 0, y: 5000, width: 5000, height: 5000 },
+      { id: "new1", code: "N01", name: "Duplicate", x: 0, y: 5000, width: 5000, height: 5000 },
       existing, 10000, 10000,
     );
     expect(issues.some((i) => i.type === "duplicate_code")).toBe(true);
@@ -118,7 +118,7 @@ describe("validateCompartment", () => {
 
   it("ignores self when updating", () => {
     const issues = validateCompartment(
-      { id: "c1", code: "C01", name: "Same", x: 0, y: 0, width: 5000, height: 5000 },
+      { id: "c1", code: "N01", name: "Same", x: 0, y: 0, width: 5000, height: 5000 },
       existing, 10000, 10000,
     );
     expect(issues).toHaveLength(0);
@@ -127,27 +127,27 @@ describe("validateCompartment", () => {
 
 describe("splitHorizontal", () => {
   it("splits a compartment into top and bottom halves", () => {
-    const c = comp({ id: "c1", code: "C01", name: "Modulo", y: 1000, width: 8000, height: 5000 });
+    const c = comp({ id: "c1", code: "N01", name: "Modulo", y: 1000, width: 8000, height: 5000 });
     const [top, bottom] = splitHorizontal(c);
     expect(top.y).toBe(1000);
     expect(top.height).toBe(2500);
-    expect(top.code).toBe("C01A");
+    expect(top.code).toBe("N01A");
     expect(bottom.y).toBe(3500);
     expect(bottom.height).toBe(2500);
-    expect(bottom.code).toBe("C01B");
+    expect(bottom.code).toBe("N01B");
     expect(top.width).toBe(8000);
     expect(bottom.width).toBe(8000);
   });
 
   it("handles odd height by giving extra pixel to top", () => {
-    const c = comp({ id: "c1", code: "C01", name: "Mod", width: 5000, height: 5001 });
+    const c = comp({ id: "c1", code: "N01", name: "Mod", width: 5000, height: 5001 });
     const [top, bottom] = splitHorizontal(c);
     expect(top.height).toBe(2500);
     expect(bottom.height).toBe(2501);
   });
 
   it("preserves x coordinate for both halves", () => {
-    const c = comp({ id: "c1", code: "C01", name: "M", x: 2000, width: 4000, height: 6000 });
+    const c = comp({ id: "c1", code: "N01", name: "M", x: 2000, width: 4000, height: 6000 });
     const [top, bottom] = splitHorizontal(c);
     expect(top.x).toBe(2000);
     expect(bottom.x).toBe(2000);
@@ -156,27 +156,27 @@ describe("splitHorizontal", () => {
 
 describe("splitVertical", () => {
   it("splits a compartment into left and right halves", () => {
-    const c = comp({ id: "c1", code: "C01", name: "Modulo", x: 1000, height: 8000, width: 5000 });
+    const c = comp({ id: "c1", code: "N01", name: "Modulo", x: 1000, height: 8000, width: 5000 });
     const [left, right] = splitVertical(c);
     expect(left.x).toBe(1000);
     expect(left.width).toBe(2500);
-    expect(left.code).toBe("C01L");
+    expect(left.code).toBe("N01L");
     expect(right.x).toBe(3500);
     expect(right.width).toBe(2500);
-    expect(right.code).toBe("C01R");
+    expect(right.code).toBe("N01R");
     expect(left.height).toBe(8000);
     expect(right.height).toBe(8000);
   });
 
   it("handles odd width by giving extra pixel to left", () => {
-    const c = comp({ id: "c1", code: "C01", name: "M", width: 5001, height: 5000 });
+    const c = comp({ id: "c1", code: "N01", name: "M", width: 5001, height: 5000 });
     const [left, right] = splitVertical(c);
     expect(left.width).toBe(2500);
     expect(right.width).toBe(2501);
   });
 
   it("preserves y coordinate for both halves", () => {
-    const c = comp({ id: "c1", code: "C01", name: "M", y: 3000, width: 6000, height: 4000 });
+    const c = comp({ id: "c1", code: "N01", name: "M", y: 3000, width: 6000, height: 4000 });
     const [left, right] = splitVertical(c);
     expect(left.y).toBe(3000);
     expect(right.y).toBe(3000);
@@ -185,9 +185,9 @@ describe("splitVertical", () => {
 
 describe("duplicateCompartment", () => {
   it("creates copy with offset", () => {
-    const c = comp({ id: "c1", code: "C01", name: "Mod", x: 100, y: 200, width: 500, height: 300 });
+    const c = comp({ id: "c1", code: "N01", name: "Mod", x: 100, y: 200, width: 500, height: 300 });
     const dup = duplicateCompartment(c, 50);
-    expect(dup.code).toBe("C01-DUP");
+    expect(dup.code).toBe("N01-DUP");
     expect(dup.name).toBe("Mod (copia)");
     expect(dup.x).toBe(150);
     expect(dup.y).toBe(250);
@@ -196,7 +196,7 @@ describe("duplicateCompartment", () => {
   });
 
   it("clamps to max bounds", () => {
-    const c = comp({ id: "c1", code: "C01", name: "M", x: 9980, y: 9980, width: 200, height: 200 });
+    const c = comp({ id: "c1", code: "N01", name: "M", x: 9980, y: 9980, width: 200, height: 200 });
     const dup = duplicateCompartment(c, 50);
     // x + offset = 10030, maxX - width = 10000 - 200 = 9800 -> min(10030, 9800) = 9800
     expect(dup.x).toBe(9800);
@@ -206,17 +206,17 @@ describe("duplicateCompartment", () => {
 
 describe("generatePositionCode", () => {
   it("generates correct position code", () => {
-    expect(generatePositionCode("AP", "P01", "R003", "C07", "D01")).toBe("AP-P01-R003-C07-D01");
+    expect(generatePositionCode("R003", "N07")).toBe("R003-N07");
   });
 
   it("handles single-char codes", () => {
-    expect(generatePositionCode("W", "F", "R", "C", "D")).toBe("W-F-R-C-D");
+    expect(generatePositionCode("R", "N")).toBe("R-N");
   });
 });
 
 describe("generatePhysicalPositionCode", () => {
-  it("includes column and stack indexes", () => {
-    expect(generatePhysicalPositionCode("AP", "P01", "R001", "C07", "D02", 3, 4)).toBe("AP-P01-R001-C07-D02-C03-N04");
+  it("includes column, stack and depth indexes", () => {
+    expect(generatePhysicalPositionCode("R001", "N07", "P02", 3, 4)).toBe("R001-N07-C03-F04-P02");
   });
 });
 
@@ -366,30 +366,27 @@ describe("Fase 4 - Rack scenarios", () => {
   });
 
   it("Rack sin division de profundidad (solo frente)", () => {
-    const rackCode = "R001";
-    const compCode = "C01";
-    const depthCode = "D01";
-    const code = generatePositionCode("AP", "P01", rackCode, compCode, depthCode);
-    expect(code).toBe("AP-P01-R001-C01-D01");
+    const code = generatePhysicalPositionCode("R001", "N01", "P01", 1, 1);
+    expect(code).toBe("R001-N01-C01-F01-P01");
   });
 
   it("Rack con tres profundidades", () => {
     const rackCode = "R001";
-    const compCode = "C01";
-    const depths = ["D01", "D02", "D03"];
-    const codes = depths.map((d) => generatePositionCode("AP", "P01", rackCode, compCode, d));
-    expect(codes).toEqual(["AP-P01-R001-C01-D01", "AP-P01-R001-C01-D02", "AP-P01-R001-C01-D03"]);
+    const compCode = "N01";
+    const depths = ["P01", "P02", "P03"];
+    const codes = depths.map((d) => generatePhysicalPositionCode(rackCode, compCode, d, 1, 1));
+    expect(codes).toEqual(["R001-N01-C01-F01-P01", "R001-N01-C01-F01-P02", "R001-N01-C01-F01-P03"]);
     // All codes must be unique
     expect(new Set(codes).size).toBe(3);
   });
 
   it("Rack con una posicion deshabilitada", () => {
     const all: Compartment[] = [
-      comp({ id: "c1", code: "C01", name: "Activo", x: 0, y: 0, width: 5000, height: 5000, active: true }),
-      comp({ id: "c2", code: "C02", name: "Inactivo", x: 5000, y: 0, width: 5000, height: 5000, active: false }),
+      comp({ id: "c1", code: "N01", name: "Activo", x: 0, y: 0, width: 5000, height: 5000, active: true }),
+      comp({ id: "c2", code: "N02", name: "Inactivo", x: 5000, y: 0, width: 5000, height: 5000, active: false }),
     ];
     const active = all.filter((c) => c.active);
     expect(active).toHaveLength(1);
-    expect(active[0].code).toBe("C01");
+    expect(active[0].code).toBe("N01");
   });
 });

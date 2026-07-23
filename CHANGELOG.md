@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.34.0 (2026-07-22)
+
+### Changed (Simplificación de códigos de posición)
+
+- **Códigos más cortos y claros:** Se eliminó el prefijo `{almacén}-{piso}` del código de posición. El nuevo formato es `{rack}-{nivel}-{columna}-{fila}-{profundidad}`.
+- **Prefijos únicos:** Cada segmento tiene un prefijo distintivo: `R` (rack), `N` (nivel/compartimento, antes `C`), `C` (columna), `F` (fila, antes `N`), `P` (profundidad, antes `D`).
+- **Ejemplo:** `R003-N07-C03-F04-P01` (antes `AP-P01-R003-C07-D01-C03-N04`).
+- **Unique constraint:** `code` ya no es único global; se reemplazó por `@@unique([rackId, code])`.
+- **Migración automática:** Script que actualizó 12 depth slots, 6 compartimentos y 228 posiciones existentes al nuevo formato.
+- **Código completo en exportación:** El prefijo de almacén/piso/zona se reconstruye al exportar, no se almacena en el código.
+
 ## 0.33.0 (2026-07-22)
 
 ### Added (Identificación por caja)

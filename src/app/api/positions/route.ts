@@ -13,7 +13,7 @@ const generateSchema = z.object({
 }).strict();
 
 const depthDefinitions = [
-  { code: "D01", name: "Frente", kind: "FRONT" as const },
+  { code: "P01", name: "Frente", kind: "FRONT" as const },
 ];
 
 class GenerationError extends Error {
@@ -38,9 +38,6 @@ export async function POST(request: NextRequest) {
       });
       if (compartments.length !== new Set(compartmentIds).size) throw new GenerationError(400, "Uno o más compartimentos no pertenecen a este rack");
 
-      const zone = await tx.warehouseZone.findUnique({ where: { id: rack.zoneId }, include: { floor: { include: { warehouse: true } } } });
-      const warehouseCode = zone?.floor.warehouse.code ?? "WH";
-      const floorCode = zone?.floor.code ?? "FL";
       const created: Array<{ id: string; code: string }> = [];
 
       for (const compartment of compartments) {
@@ -62,8 +59,8 @@ export async function POST(request: NextRequest) {
           for (let columnIndex = 1; columnIndex <= compartment.columnCount; columnIndex += 1) {
             for (let stackIndex = 1; stackIndex <= compartment.stackLevels; stackIndex += 1) {
               if (existingByCell.has(`${columnIndex}:${stackIndex}`)) continue;
-              const code = generatePhysicalPositionCode(warehouseCode, floorCode, rack.code, compartment.code, depthSlot.code, columnIndex, stackIndex);
-              const codeConflict = await tx.storagePosition.findUnique({ where: { code }, select: { id: true } });
+              const code = generatePhysicalPositionCode(rack.code, compartment.code, depthSlot.code, columnIndex, stackIndex);
+              const codeConflict = await tx.storagePosition.findFirst({ where: { code, rackId }, select: { id: true } });
               if (codeConflict) continue;
               const position = await tx.storagePosition.create({ data: {
                 id: randomUUID(), rackId, compartmentId: compartment.id, depthSlotId: depthSlot.id,

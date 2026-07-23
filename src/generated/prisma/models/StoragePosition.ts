@@ -344,9 +344,9 @@ export type StoragePositionOrderByWithRelationInput = {
 
 export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  code?: string
   qrValue?: string
   depthSlotId_columnIndex_stackIndex?: Prisma.StoragePositionDepthSlotIdColumnIndexStackIndexCompoundUniqueInput
+  rackId_code?: Prisma.StoragePositionRackIdCodeCompoundUniqueInput
   AND?: Prisma.StoragePositionWhereInput | Prisma.StoragePositionWhereInput[]
   OR?: Prisma.StoragePositionWhereInput[]
   NOT?: Prisma.StoragePositionWhereInput | Prisma.StoragePositionWhereInput[]
@@ -355,6 +355,7 @@ export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
   depthSlotId?: Prisma.StringFilter<"StoragePosition"> | string
   columnIndex?: Prisma.IntFilter<"StoragePosition"> | number
   stackIndex?: Prisma.IntFilter<"StoragePosition"> | number
+  code?: Prisma.StringFilter<"StoragePosition"> | string
   capacityQty?: Prisma.DecimalNullableFilter<"StoragePosition"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   capacityUnit?: Prisma.StringNullableFilter<"StoragePosition"> | string | null
   active?: Prisma.BoolFilter<"StoragePosition"> | boolean
@@ -371,7 +372,7 @@ export type StoragePositionWhereUniqueInput = Prisma.AtLeast<{
   incidents?: Prisma.CountIncidentListRelationFilter
   expectedBoxes?: Prisma.BoxListRelationFilter
   boxCountEntries?: Prisma.BoxCountEntryListRelationFilter
-}, "id" | "code" | "qrValue" | "depthSlotId_columnIndex_stackIndex">
+}, "id" | "qrValue" | "depthSlotId_columnIndex_stackIndex" | "rackId_code">
 
 export type StoragePositionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -588,6 +589,11 @@ export type StoragePositionDepthSlotIdColumnIndexStackIndexCompoundUniqueInput =
   depthSlotId: string
   columnIndex: number
   stackIndex: number
+}
+
+export type StoragePositionRackIdCodeCompoundUniqueInput = {
+  rackId: string
+  code: string
 }
 
 export type StoragePositionCountOrderByAggregateInput = {

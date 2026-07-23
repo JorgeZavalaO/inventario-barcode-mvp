@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         const product = await prisma.product.findUnique({ where: { code: data.productCode } });
         if (!product) { results.push({ row: i + 1, status: "error", error: `Producto ${data.productCode} no encontrado` }); continue; }
 
-        const position = await prisma.storagePosition.findUnique({ where: { code: data.positionCode } });
+        const position = await prisma.storagePosition.findFirst({ where: { code: data.positionCode } });
         if (!position) { results.push({ row: i + 1, status: "error", error: `Posición ${data.positionCode} no encontrada` }); continue; }
 
         await prisma.productLocationStock.upsert({
