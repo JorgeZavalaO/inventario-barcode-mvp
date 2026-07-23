@@ -68,6 +68,23 @@ export async function updateWarehouse(id: string, data: { code?: string; name?: 
   return prisma.warehouse.update({ where: { id }, data });
 }
 
+export async function deleteWarehouse(id: string) {
+  return prisma.$transaction(async (tx) => {
+    const floors = await tx.floor.findMany({ where: { warehouseId: id }, select: { id: true } });
+    const floorIds = floors.map(f => f.id);
+    if (floorIds.length > 0) {
+      const zones = await tx.warehouseZone.findMany({ where: { floorId: { in: floorIds } }, select: { id: true } });
+      const zoneIds = zones.map(z => z.id);
+      if (zoneIds.length > 0) {
+        await tx.rack.updateMany({ where: { zoneId: { in: zoneIds } }, data: { active: false } });
+        await tx.warehouseZone.updateMany({ where: { floorId: { in: floorIds } }, data: { active: false } });
+      }
+      await tx.floor.updateMany({ where: { warehouseId: id }, data: { active: false } });
+    }
+    await tx.warehouse.update({ where: { id }, data: { active: false } });
+  });
+}
+
 // ── Floor ──
 
 export async function getFloor(id: string) {
@@ -114,6 +131,18 @@ export async function updateFloor(id: string, data: { code?: string; name?: stri
   return prisma.floor.update({ where: { id }, data });
 }
 
+export async function deleteFloor(id: string) {
+  return prisma.$transaction(async (tx) => {
+    const zones = await tx.warehouseZone.findMany({ where: { floorId: id }, select: { id: true } });
+    const zoneIds = zones.map(z => z.id);
+    if (zoneIds.length > 0) {
+      await tx.rack.updateMany({ where: { zoneId: { in: zoneIds } }, data: { active: false } });
+      await tx.warehouseZone.updateMany({ where: { floorId: id }, data: { active: false } });
+    }
+    await tx.floor.update({ where: { id }, data: { active: false } });
+  });
+}
+
 // ── Zone ──
 
 export async function getZone(id: string) {
@@ -154,6 +183,13 @@ export async function createZones(data: Array<{
 
 export async function updateZone(id: string, data: { code?: string; name?: string; type?: string; orderIndex?: number; active?: boolean }) {
   return prisma.warehouseZone.update({ where: { id }, data });
+}
+
+export async function deleteZone(id: string) {
+  return prisma.$transaction(async (tx) => {
+    await tx.rack.updateMany({ where: { zoneId: id }, data: { active: false } });
+    await tx.warehouseZone.update({ where: { id }, data: { active: false } });
+  });
 }
 
 // ── Rack ──
@@ -211,6 +247,10 @@ export async function updateRack(id: string, data: {
   depthMm?: number | null; orderIndex?: number; active?: boolean; design?: unknown;
 }) {
   return prisma.rack.update({ where: { id }, data: data as Parameters<typeof prisma.rack.update>[0]["data"] });
+}
+
+export async function deleteRack(id: string) {
+  return prisma.rack.update({ where: { id }, data: { active: false } });
 }
 
 // ── Compartments ──

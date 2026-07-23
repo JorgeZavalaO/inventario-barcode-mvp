@@ -7,6 +7,8 @@
 - **Campo "Cantidad" en formularios:** Al crear pisos, zonas o racks, ahora se puede especificar cuántos crear. Si la cantidad es mayor a 1, los campos "Código" y "Nombre" actúan como base y se generan elementos secuenciales (ej: "Rack 01", "Rack 02", "Rack 03" con códigos "R01", "R02", "R03").
 - **Previsualización:** Se muestra una vista previa de los nombres que se crearán antes de confirmar.
 - **Creación transaccional:** Las APIs `/api/floors`, `/api/zones` y `/api/racks` aceptan tanto un objeto individual como un array, creando todos los elementos en una sola transacción de base de datos.
+- **Botón eliminar:** Cada almacén, piso, zona y rack ahora tiene un botón de eliminar (icono de papelera) que realiza un borrado lógico en cascada (desactiva el elemento y todos sus hijos).
+- **APIs DELETE:** Nuevos endpoints `DELETE /api/warehouses/[id]`, `/api/floors/[id]`, `/api/zones/[id]` y `/api/racks/[id]` con confirmación y soft-delete transaccional.
 
 ## 0.34.0 (2026-07-22)
 

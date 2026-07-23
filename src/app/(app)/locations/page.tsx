@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { Building2, Layers, MapPin, Plus, LoaderCircle, Printer, Warehouse } from "lucide-react";
+import { Building2, Layers, MapPin, Plus, LoaderCircle, Printer, Trash2, Warehouse } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,8 @@ export default function LocationsPage() {
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
 
+  const [deleting, setDeleting] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     try {
       const data = await apiFetch<{ warehouses: WarehouseNode[] }>("/api/warehouses");
@@ -40,6 +42,16 @@ export default function LocationsPage() {
     } catch { /* silent */ }
     finally { setLoading(false); }
   }, []);
+
+  async function handleDeleteWarehouse(id: string, name: string) {
+    if (!window.confirm(`¿Eliminar el almacén "${name}"? Se desactivarán todos sus pisos, zonas y racks.`)) return;
+    setDeleting(id);
+    try {
+      await apiFetch(`/api/warehouses/${id}`, { method: "DELETE" });
+      await load();
+    } catch { /* silent */ }
+    finally { setDeleting(null); }
+  }
 
   useEffect(() => { void load(); }, [load]);
 
@@ -122,6 +134,9 @@ export default function LocationsPage() {
                     </Link>
                     <CardDescription>{wh.code} · {wh.floors.length} piso{wh.floors.length !== 1 ? "s" : ""}</CardDescription>
                   </div>
+                  <Button variant="ghost" size="icon" className="size-8 text-slate-400 hover:text-red-500" disabled={deleting === wh.id} onClick={() => void handleDeleteWarehouse(wh.id, wh.name)}>
+                    {deleting === wh.id ? <LoaderCircle className="animate-spin" size={14} /> : <Trash2 size={14} />}
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>

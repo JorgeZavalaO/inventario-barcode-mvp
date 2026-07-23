@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError } from "@/lib/http";
 import { requireRole } from "@/server/guards";
-import { getRack, updateRack } from "@/server/repositories/location-repository";
+import { getRack, updateRack, deleteRack } from "@/server/repositories/location-repository";
 
 const schema = z.object({
   code: z.string().trim().min(1).max(20).optional(),
@@ -37,6 +37,18 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ rack });
   } catch (error) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: error.issues[0]?.message }, { status: 400 });
+    return apiError(error);
+  }
+}
+
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  try {
+    const auth = await requireRole("ADMIN", "SUPERVISOR");
+    if (!auth.authorized) return auth.response;
+    const { id } = await context.params;
+    await deleteRack(id);
+    return NextResponse.json({ success: true });
+  } catch (error) {
     return apiError(error);
   }
 }

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { ArrowLeft, MapPin, Plus, LoaderCircle, Rows3, Package } from "lucide-react";
+import { ArrowLeft, MapPin, Plus, LoaderCircle, Rows3, Trash2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,8 @@ export default function FloorDetailPage() {
   const [rackName, setRackName] = useState("");
   const [rackCantidad, setRackCantidad] = useState(1);
   const [creatingRack, setCreatingRack] = useState(false);
+  const [deletingZone, setDeletingZone] = useState<string | null>(null);
+  const [deletingRack, setDeletingRack] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -95,6 +97,26 @@ export default function FloorDetailPage() {
     finally { setCreatingRack(false); }
   }
 
+  async function handleDeleteZone(id: string, name: string) {
+    if (!window.confirm(`¿Eliminar la zona "${name}"? Se desactivarán todos sus racks.`)) return;
+    setDeletingZone(id);
+    try {
+      await apiFetch(`/api/zones/${id}`, { method: "DELETE" });
+      await load();
+    } catch { /* silent */ }
+    finally { setDeletingZone(null); }
+  }
+
+  async function handleDeleteRack(id: string, name: string) {
+    if (!window.confirm(`¿Eliminar el rack "${name}"?`)) return;
+    setDeletingRack(id);
+    try {
+      await apiFetch(`/api/racks/${id}`, { method: "DELETE" });
+      await load();
+    } catch { /* silent */ }
+    finally { setDeletingRack(null); }
+  }
+
   const zonePreview = zoneCantidad > 1 && zoneCode.trim() && zoneName.trim()
     ? generateZoneItems().map(i => `${i.name} (${i.code})`).join(", ")
     : null;
@@ -131,9 +153,14 @@ export default function FloorDetailPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-base"><MapPin size={16} />{zone.name} <span className="text-xs font-normal text-slate-400">({zone.code})</span></CardTitle>
-                <Button size="sm" variant="outline" onClick={() => setShowRackForm(showRackForm === zone.id ? null : zone.id)}>
-                  <Plus size={14} /> Añadir rack
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" className="size-7 text-slate-400 hover:text-red-500" disabled={deletingZone === zone.id} onClick={() => void handleDeleteZone(zone.id, zone.name)}>
+                    {deletingZone === zone.id ? <LoaderCircle className="animate-spin" size={12} /> : <Trash2 size={12} />}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowRackForm(showRackForm === zone.id ? null : zone.id)}>
+                    <Plus size={14} /> Añadir rack
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -148,13 +175,18 @@ export default function FloorDetailPage() {
               {zone.racks?.length > 0 ? (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {zone.racks.map((rack: any) => (
-                    <Link key={rack.id} href={`/locations/racks/${rack.id}`}>
-                      <div className="flex items-center gap-2 rounded-lg border border-slate-200 p-3 text-sm transition hover:border-teal-300 hover:bg-teal-50">
-                        <Rows3 size={14} className="text-slate-400" />
-                        <span className="font-medium">{rack.name}</span>
-                        <span className="text-xs text-slate-400">({rack.code})</span>
-                      </div>
-                    </Link>
+                    <div key={rack.id} className="group relative">
+                      <Link href={`/locations/racks/${rack.id}`}>
+                        <div className="flex items-center gap-2 rounded-lg border border-slate-200 p-3 text-sm transition hover:border-teal-300 hover:bg-teal-50">
+                          <Rows3 size={14} className="text-slate-400" />
+                          <span className="font-medium">{rack.name}</span>
+                          <span className="text-xs text-slate-400">({rack.code})</span>
+                        </div>
+                      </Link>
+                      <Button variant="ghost" size="icon" className="absolute right-1 top-1 size-6 text-slate-300 opacity-0 transition group-hover:opacity-100 hover:text-red-500" disabled={deletingRack === rack.id} onClick={() => void handleDeleteRack(rack.id, rack.name)}>
+                        {deletingRack === rack.id ? <LoaderCircle className="animate-spin" size={10} /> : <Trash2 size={10} />}
+                      </Button>
+                    </div>
                   ))}
                 </div>
               ) : (

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { ArrowLeft, Layers, Plus, LoaderCircle, MapPin } from "lucide-react";
+import { ArrowLeft, Layers, Plus, LoaderCircle, MapPin, Trash2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ export default function WarehouseDetailPage() {
   const [floorName, setFloorName] = useState("");
   const [floorCantidad, setFloorCantidad] = useState(1);
   const [creating, setCreating] = useState(false);
+  const [deletingFloor, setDeletingFloor] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -59,6 +60,16 @@ export default function WarehouseDetailPage() {
     finally { setCreating(false); }
   }
 
+  async function handleDeleteFloor(id: string, name: string) {
+    if (!window.confirm(`¿Eliminar el piso "${name}"? Se desactivarán todas sus zonas y racks.`)) return;
+    setDeletingFloor(id);
+    try {
+      await apiFetch(`/api/floors/${id}`, { method: "DELETE" });
+      await load();
+    } catch { /* silent */ }
+    finally { setDeletingFloor(null); }
+  }
+
   const floorPreview = floorCantidad > 1 && floorCode.trim() && floorName.trim()
     ? generateFloorItems().map(i => `${i.name} (${i.code})`).join(", ")
     : null;
@@ -91,15 +102,18 @@ export default function WarehouseDetailPage() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         {(warehouse.floors ?? []).map((floor: any) => (
-          <Link key={floor.id} href={`/locations/floors/${floor.id}`}>
-            <Card className="cursor-pointer transition hover:shadow-md">
+          <Card key={floor.id} className="relative">
+            <Link href={`/locations/floors/${floor.id}`} className="block cursor-pointer transition hover:shadow-md">
               <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Layers size={16} />{floor.name}</CardTitle></CardHeader>
               <CardContent className="text-sm text-slate-500">
                 <p>{floor.code} · {floor.zones?.length ?? 0} zona{(floor.zones?.length ?? 0) !== 1 ? "s" : ""}</p>
                 {floor.zones?.map((z: any) => <span key={z.id} className="mr-2 inline-flex items-center gap-1 text-xs"><MapPin size={10} />{z.name}</span>)}
               </CardContent>
-            </Card>
-          </Link>
+            </Link>
+            <Button variant="ghost" size="icon" className="absolute right-2 top-2 size-7 text-slate-400 hover:text-red-500" disabled={deletingFloor === floor.id} onClick={() => void handleDeleteFloor(floor.id, floor.name)}>
+              {deletingFloor === floor.id ? <LoaderCircle className="animate-spin" size={12} /> : <Trash2 size={12} />}
+            </Button>
+          </Card>
         ))}
         {(!warehouse.floors || warehouse.floors.length === 0) && (
           <Card><CardContent className="py-8 text-center text-sm text-slate-400">Sin pisos. Crea el primer piso.</CardContent></Card>
