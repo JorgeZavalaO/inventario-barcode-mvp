@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.38.0 (2026-07-23)
+
+### Changed (Rediseño del diseñador de racks)
+
+- **Configuración rápida como método principal:** La creación de compartimentos ahora se realiza principalmente desde el formulario "Configuración rápida" (niveles, columnas, filas apilado, profundidades), en lugar del dibujo manual en canvas.
+- **Vista frontal simplificada:** El SVG frontal pasó de ser un editor interactivo (arrastrar, redimensionar, dibujar) a una vista representativa donde se seleccionan compartimentos con un clic para ver/editar sus propiedades.
+- **Vista lateral de profundidad:** Se agregó una representación visual de los slots de profundidad (Frente/Centro/Fondo) debajo de la vista frontal, con botones para cambiar la profundidad activa.
+- **Eliminadas herramientas complejas:** Se removieron los modos de dibujo, grid/snap, división, duplicación y redimensionamiento del canvas. La edición de geometría se hace exclusivamente desde la configuración rápida.
+- **Mantenido:** inline editing de código/nombre, configuración de matriz interna (columnas × niveles × profundidades), undo/redo, eliminar, guardar, generar posiciones.
+
 ## 0.37.0 (2026-07-23)
 
 ### Added (Configuración rápida de compartimentos)

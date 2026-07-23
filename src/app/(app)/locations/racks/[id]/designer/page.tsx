@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { compartmentHasProtectedUse, moveRect, rectsOverlap, splitHorizontal, splitVertical, type Compartment, type Rect } from "@/lib/rack-validation";
-import { ArrowLeft, Copy, Grid3X3, Layers, LoaderCircle, MousePointer2, Pencil, Plus, Redo2, Save, SplitSquareHorizontal, SplitSquareVertical, Trash2, Undo2 } from "lucide-react";
+import { compartmentHasProtectedUse, rectsOverlap } from "@/lib/rack-validation";
+import { ArrowLeft, Layers, LoaderCircle, Save, Trash2, Undo2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,17 +33,6 @@ function uniqueCode(base: string, compartments: DraftCompartment[]) {
   return candidate;
 }
 
-function firstFreeRect(compartments: DraftCompartment[], width: number, height: number, rackWidth: number, rackHeight: number): Rect | null {
-  const step = Math.max(1, Math.min(width, height, 100));
-  for (let y = 0; y + height <= rackHeight; y += step) {
-    for (let x = 0; x + width <= rackWidth; x += step) {
-      const candidate = { x, y, width, height };
-      if (!compartments.some((compartment) => rectsOverlap(candidate, compartment))) return candidate;
-    }
-  }
-  return null;
-}
-
 export default function RackDesignerPage() {
   const params = useParams();
   const id = params.id as string;
@@ -57,18 +46,8 @@ export default function RackDesignerPage() {
   const [selectedComp, setSelectedComp] = useState<string | null>(null);
   const [selectedCell, setSelectedCell] = useState<{ compartmentId: string; columnIndex: number; stackIndex: number } | null>(null);
   const [selectedDepth, setSelectedDepth] = useState(0);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [drawMode, setDrawMode] = useState(false);
-  const [snapEnabled, setSnapEnabled] = useState(true);
-  const [showGrid, setShowGrid] = useState(true);
   const [undoStack, setUndoStack] = useState<DraftCompartment[][]>([]);
   const [redoStack, setRedoStack] = useState<DraftCompartment[][]>([]);
-  const [newCode, setNewCode] = useState("");
-  const [newName, setNewName] = useState("");
-  const [newX, setNewX] = useState("0");
-  const [newY, setNewY] = useState("0");
-  const [newW, setNewW] = useState("1000");
-  const [newH, setNewH] = useState("1000");
   const [quickLevels, setQuickLevels] = useState(3);
   const [quickColumns, setQuickColumns] = useState(1);
   const [quickStack, setQuickStack] = useState(1);
@@ -123,29 +102,6 @@ export default function RackDesignerPage() {
     if (message) setToast(message);
   }
 
-  function updateRect(compartmentId: string, rect: Rect) {
-    applyDraft(compartments.map((compartment) => compartment.id === compartmentId ? { ...compartment, ...rect } : compartment));
-  }
-
-  function addCompartment(data?: { code?: string; name?: string; x?: number; y?: number; width?: number; height?: number }) {
-    const code = (data?.code ?? newCode).trim();
-    const name = (data?.name ?? newName).trim();
-    const rect = {
-      x: data?.x ?? Number(newX), y: data?.y ?? Number(newY),
-      width: data?.width ?? Number(newW), height: data?.height ?? Number(newH),
-    };
-    if (!code || !name) { setToast("Código y nombre requeridos"); return; }
-    if (!Number.isInteger(rect.x) || !Number.isInteger(rect.y) || !Number.isInteger(rect.width) || !Number.isInteger(rect.height)) { setToast("Las dimensiones deben ser enteros"); return; }
-    if (rect.x < 0 || rect.y < 0 || rect.x + rect.width > rackWidth || rect.y + rect.height > rackHeight) { setToast("El compartimento queda fuera del rack"); return; }
-    if (compartments.some((compartment) => rectsOverlap(rect, compartment))) { setToast("El compartimento solapa con otro"); return; }
-    const tempId = `new-${crypto.randomUUID()}`;
-    applyDraft([...compartments, { id: tempId, code: uniqueCode(code, compartments), name, ...rect, columnCount: 1, stackLevels: 1, depthSlots: [] }], "Compartimento agregado al borrador");
-    setSelectedComp(tempId);
-    setNewCode(""); setNewName(""); setNewX("0"); setNewY("0"); setNewW("1000"); setNewH("1000");
-    setShowAddForm(false);
-    setDrawMode(false);
-  }
-
   function generateQuickCompartments() {
     const levels = Math.max(1, Math.min(20, quickLevels));
     const cols = Math.max(1, Math.min(100, quickColumns));
@@ -183,29 +139,6 @@ export default function RackDesignerPage() {
     setSelectedComp(null);
     setSelectedCell(null);
     setSelectedDepth(0);
-  }
-
-  function splitCompartment(sourceId: string, direction: "horizontal" | "vertical") {
-    const source = compartments.find((item) => item.id === sourceId);
-    if (!source) return;
-    if (hasProtectedUse(source)) { setToast("No se puede dividir porque tiene stock o una sesión activa"); return; }
-    const parts = direction === "horizontal" ? splitHorizontal(source as Compartment) : splitVertical(source as Compartment);
-    if (parts.some((part) => part.width < 2 || part.height < 2)) { setToast("El compartimento es demasiado pequeño para dividir"); return; }
-    const nextParts = parts.map((part) => ({ ...part, id: `new-${crypto.randomUUID()}`, code: uniqueCode(part.code, compartments.filter((item) => item.id !== sourceId)), columnCount: source.columnCount ?? 1, stackLevels: source.stackLevels ?? 1, depthSlots: [] }));
-    applyDraft([...compartments.filter((item) => item.id !== sourceId), ...nextParts], "División agregada al borrador");
-    setSelectedComp(nextParts[0].id);
-  }
-
-  function duplicate(compartmentId: string) {
-    const source = compartments.find((item) => item.id === compartmentId);
-    if (!source) return;
-    const rect = firstFreeRect(compartments, source.width, source.height, rackWidth, rackHeight);
-    if (!rect) { setToast("No hay espacio libre para duplicar"); return; }
-    const copyId = `new-${crypto.randomUUID()}`;
-    const existingWithoutSource = compartments.filter((item) => item.id !== compartmentId);
-    const next = { ...source, ...rect, id: copyId, code: uniqueCode(`${source.code}-COPIA`, existingWithoutSource), name: `${source.name} (copia)`, columnCount: source.columnCount ?? 1, stackLevels: source.stackLevels ?? 1, depthSlots: [] };
-    applyDraft([...compartments, next], "Copia agregada al borrador");
-    setSelectedComp(copyId);
   }
 
   function undo() {
@@ -258,18 +191,8 @@ export default function RackDesignerPage() {
         return;
       }
       if (modifier && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); return; }
-      if (modifier && event.key.toLowerCase() === "d" && selectedComp) { event.preventDefault(); duplicate(selectedComp); return; }
       if (event.key === "Delete" && selectedComp) { event.preventDefault(); deleteCompartment(selectedComp); }
-      if (selected && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
-        event.preventDefault();
-        const step = event.shiftKey ? 500 : 100;
-        const delta = event.key === "ArrowLeft" ? { x: -step, y: 0 }
-          : event.key === "ArrowRight" ? { x: step, y: 0 }
-          : event.key === "ArrowUp" ? { x: 0, y: -step }
-          : { x: 0, y: step };
-        updateRect(selected.id, moveRect(selected, delta, rackWidth, rackHeight, 100));
-      }
-      if (event.key === "Escape") { setDrawMode(false); setSelectedComp(null); }
+      if (event.key === "Escape") { setSelectedComp(null); }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -356,34 +279,41 @@ export default function RackDesignerPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="mr-auto"><CardTitle className="text-base">Vista frontal interactiva</CardTitle><CardDescription>Arrastra, redimensiona o dibuja compartimentos.</CardDescription></div>
-              <Button size="sm" variant={drawMode ? "default" : "outline"} onClick={() => setDrawMode((value) => !value)}><Pencil size={14} /> Dibujar</Button>
-              <Button size="icon" variant={showGrid ? "default" : "outline"} title="Mostrar grid" aria-label="Mostrar grid" onClick={() => setShowGrid((value) => !value)}><Grid3X3 size={14} /></Button>
-              <Button size="icon" variant={snapEnabled ? "default" : "outline"} title="Ajustar al grid" aria-label="Ajustar al grid" onClick={() => setSnapEnabled((value) => !value)}><MousePointer2 size={14} /></Button>
-              <Button size="icon" variant="outline" title="Deshacer" aria-label="Deshacer" disabled={undoStack.length === 0} onClick={undo}><Undo2 size={14} /></Button>
-              <Button size="icon" variant="outline" title="Rehacer" aria-label="Rehacer" disabled={redoStack.length === 0} onClick={redo}><Redo2 size={14} /></Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <InteractiveRackDesigner
-              compartments={compartments}
-              rackWidth={rackWidth}
-              rackHeight={rackHeight}
-              selectedId={selectedComp}
-              selectedCell={selectedCell}
-              selectedDepthIndex={selectedDepth}
-              drawMode={drawMode}
-              snapEnabled={snapEnabled}
-              showGrid={showGrid}
-              onSelect={(compartmentId) => { setSelectedComp(compartmentId); setSelectedCell(null); setSelectedDepth(0); }}
-              onCellSelect={setSelectedCell}
-              onCommit={updateRect}
-              onCreateFromRect={(rect) => { setNewX(String(rect.x)); setNewY(String(rect.y)); setNewW(String(rect.width)); setNewH(String(rect.height)); setShowAddForm(true); setDrawMode(false); }}
-              onInvalid={setToast}
-            />
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="mr-auto"><CardTitle className="text-base">Vista frontal</CardTitle><CardDescription>Selecciona un compartimento para ver y editar sus propiedades.</CardDescription></div>
+                <Button size="icon" variant="outline" title="Deshacer" aria-label="Deshacer" disabled={undoStack.length === 0} onClick={undo}><Undo2 size={14} /></Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <InteractiveRackDesigner
+                compartments={compartments}
+                rackWidth={rackWidth}
+                rackHeight={rackHeight}
+                selectedId={selectedComp}
+                selectedCell={selectedCell}
+                selectedDepthIndex={selectedDepth}
+                onSelect={(compartmentId) => { setSelectedComp(compartmentId); setSelectedCell(null); setSelectedDepth(0); }}
+                onCellSelect={setSelectedCell}
+              />
+              {selected && (selected.depthSlots?.length ?? 0) > 1 && (
+                <div className="mt-4 border-t border-slate-200 pt-3">
+                  <p className="mb-2 text-xs font-medium text-slate-600">Vista lateral — profundidad</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {selected.depthSlots!.map((slot, index) => (
+                      <button
+                        key={slot.id}
+                        onClick={() => setSelectedDepth(index)}
+                        className={`rounded-md border p-2 text-center text-xs transition-all ${selectedDepth === index ? 'border-teal-500 bg-teal-50 ring-2 ring-teal-200' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
+                      >
+                        <span className="block font-medium text-slate-700">{slot.name}</span>
+                        <span className="block text-slate-400">{slot.code}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
           </CardContent>
         </Card>
 
@@ -412,11 +342,7 @@ export default function RackDesignerPage() {
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Herramientas</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full" size="sm" onClick={() => setShowAddForm((value) => !value)}><Plus size={14} /> {showAddForm ? "Cancelar" : "Nuevo compartimento"}</Button>
               {selectedComp && <>
-                <Button className="w-full" size="sm" variant="outline" onClick={() => splitCompartment(selectedComp, "horizontal")}><SplitSquareHorizontal size={14} /> Dividir H</Button>
-                <Button className="w-full" size="sm" variant="outline" onClick={() => splitCompartment(selectedComp, "vertical")}><SplitSquareVertical size={14} /> Dividir V</Button>
-                <Button className="w-full" size="sm" variant="outline" onClick={() => duplicate(selectedComp)}><Copy size={14} /> Duplicar</Button>
                 <Button className="w-full" size="sm" variant="destructive" onClick={() => deleteCompartment(selectedComp)}><Trash2 size={14} /> Eliminar</Button>
               </>}
               <div className="rounded-lg border border-slate-100 bg-slate-50 p-2">
@@ -453,29 +379,13 @@ export default function RackDesignerPage() {
             </CardContent>
           </Card>
 
-          {showAddForm && <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Nuevo compartimento</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <Input placeholder="Código (C01)" value={newCode} onChange={(event) => setNewCode(event.target.value)} />
-              <Input placeholder="Nombre" value={newName} onChange={(event) => setNewName(event.target.value)} />
-              <p className="text-xs text-slate-400">Coordenadas en mm, dentro de {rackWidth}×{rackHeight}.</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Input aria-label="X" placeholder="X" type="number" value={newX} onChange={(event) => setNewX(event.target.value)} />
-                <Input aria-label="Y" placeholder="Y" type="number" value={newY} onChange={(event) => setNewY(event.target.value)} />
-                <Input aria-label="Ancho" placeholder="Ancho" type="number" value={newW} onChange={(event) => setNewW(event.target.value)} />
-                <Input aria-label="Alto" placeholder="Alto" type="number" value={newH} onChange={(event) => setNewH(event.target.value)} />
-              </div>
-              <Button size="sm" className="w-full" onClick={() => addCompartment()}><Plus size={14} /> Agregar al borrador</Button>
-            </CardContent>
-          </Card>}
-
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Compartimentos ({compartments.length})</CardTitle></CardHeader>
             <CardContent className="max-h-72 space-y-1 overflow-y-auto">
               {compartments.map((compartment) => <button key={compartment.id} onClick={() => { const next = selectedComp === compartment.id ? null : compartment.id; setSelectedComp(next); setSelectedCell(null); setSelectedDepth(0); }} className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs ${selectedComp === compartment.id ? "bg-teal-50 ring-1 ring-teal-400" : "bg-slate-50 hover:bg-slate-100"}`}>
                 <span className="font-medium text-slate-600">{compartment.code}</span><span className="truncate text-slate-400">{compartment.name}</span><span className="ml-auto text-slate-400">{compartment.x},{compartment.y} {compartment.width}×{compartment.height}</span>
               </button>)}
-              {compartments.length === 0 && <p className="text-xs text-slate-400">Dibuja o agrega un compartimento para empezar.</p>}
+              {compartments.length === 0 && <p className="text-xs text-slate-400">Usa la configuración rápida para empezar.</p>}
             </CardContent>
           </Card>
         </div>
