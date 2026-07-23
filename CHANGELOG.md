@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.37.0 (2026-07-23)
+
+### Added (Configuración rápida de compartimentos)
+
+- **Configuración rápida en diseñador:** Nueva tarjeta "Configuración rápida" con campos Niveles, Columnas, Filas apilado y Profundidades. Al pulsar "Generar", crea compartimentos uniformes repartidos en todo el alto del rack sin necesidad de dibujar manualmente.
+- **Prefijos configurables:** El código y nombre de cada compartimento se genera con prefijos editables (default `N` para código, `Nivel` para nombre).
+- **Validación de límites:** Muestra el total de posiciones físicas antes de generar y rechaza matrices mayores a 1000 celdas.
+
 ## 0.36.0 (2026-07-23)
 
 ### Added (Selects cascada para conteo por cajas)

@@ -69,6 +69,12 @@ export default function RackDesignerPage() {
   const [newY, setNewY] = useState("0");
   const [newW, setNewW] = useState("1000");
   const [newH, setNewH] = useState("1000");
+  const [quickLevels, setQuickLevels] = useState(3);
+  const [quickColumns, setQuickColumns] = useState(1);
+  const [quickStack, setQuickStack] = useState(1);
+  const [quickDepths, setQuickDepths] = useState(1);
+  const [quickCodePrefix, setQuickCodePrefix] = useState("N");
+  const [quickNamePrefix, setQuickNamePrefix] = useState("Nivel");
 
   const load = useCallback(async () => {
     try {
@@ -138,6 +144,36 @@ export default function RackDesignerPage() {
     setNewCode(""); setNewName(""); setNewX("0"); setNewY("0"); setNewW("1000"); setNewH("1000");
     setShowAddForm(false);
     setDrawMode(false);
+  }
+
+  function generateQuickCompartments() {
+    const levels = Math.max(1, Math.min(20, quickLevels));
+    const cols = Math.max(1, Math.min(100, quickColumns));
+    const stack = Math.max(1, Math.min(100, quickStack));
+    const depths = Math.max(1, Math.min(3, quickDepths));
+    const totalCells = levels * cols * stack * depths;
+    if (totalCells > 1000) { setToast("La matriz no puede superar 1000 posiciones físicas"); return; }
+    const digits = Math.max(2, String(levels).length);
+    const compartmentHeight = Math.floor(rackHeight / levels);
+    const compartmentWidth = rackWidth;
+    const newCompartments: DraftCompartment[] = [];
+    const existing = [...compartments];
+    for (let i = 0; i < levels; i++) {
+      const num = String(i + 1).padStart(digits, "0");
+      const code = uniqueCode(`${quickCodePrefix}${num}`, [...existing, ...newCompartments]);
+      const name = `${quickNamePrefix} ${num}`;
+      const rect = { x: 0, y: i * compartmentHeight, width: compartmentWidth, height: compartmentHeight };
+      if (newCompartments.some(c => rectsOverlap(rect, c))) continue;
+      const depthSlots = Array.from({ length: depths }, (_, d) => ({
+        id: `draft-depth-${crypto.randomUUID()}`,
+        code: `D${String(d + 1).padStart(2, "0")}`,
+        name: ["Frente", "Centro", "Fondo"][d] ?? `Profundidad ${d + 1}`,
+      }));
+      newCompartments.push({ id: `new-${crypto.randomUUID()}`, code, name, ...rect, columnCount: cols, stackLevels: stack, depthSlots });
+    }
+    if (newCompartments.length === 0) { setToast("No se pudo generar ningún compartimento"); return; }
+    const next = [...compartments.filter(c => !c.id.startsWith("new-")), ...newCompartments];
+    applyDraft(next, `${newCompartments.length} compartimentos generados`);
   }
 
   function deleteCompartment(compartmentId: string) {
@@ -352,6 +388,27 @@ export default function RackDesignerPage() {
         </Card>
 
         <div className="space-y-4">
+          <Card className="border-teal-200 bg-teal-50/40">
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Configuración rápida</CardTitle><CardDescription>Genera compartimentos uniformes sin dibujar.</CardDescription></CardHeader>
+            <CardContent className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-xs text-slate-500">Niveles<input className="mt-1 h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs" type="number" min={1} max={20} value={quickLevels} onChange={(e) => setQuickLevels(Math.max(1, parseInt(e.target.value) || 1))} /></label>
+                <label className="text-xs text-slate-500">Columnas<input className="mt-1 h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs" type="number" min={1} max={100} value={quickColumns} onChange={(e) => setQuickColumns(Math.max(1, parseInt(e.target.value) || 1))} /></label>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-xs text-slate-500">Filas apilado<input className="mt-1 h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs" type="number" min={1} max={100} value={quickStack} onChange={(e) => setQuickStack(Math.max(1, parseInt(e.target.value) || 1))} /></label>
+                <label className="text-xs text-slate-500">Profundidades<input className="mt-1 h-8 w-full rounded-md border border-slate-200 bg-white px-2 text-xs" type="number" min={1} max={3} value={quickDepths} onChange={(e) => setQuickDepths(Math.max(1, parseInt(e.target.value) || 1))} /></label>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input className="h-8 text-xs" placeholder="Prefijo código" value={quickCodePrefix} onChange={(e) => setQuickCodePrefix(e.target.value || "N")} />
+                <Input className="h-8 text-xs" placeholder="Prefijo nombre" value={quickNamePrefix} onChange={(e) => setQuickNamePrefix(e.target.value || "Nivel")} />
+              </div>
+              <p className="text-xs text-teal-700">Total: {quickLevels * quickColumns * quickStack * quickDepths} posiciones físicas</p>
+              <Button className="w-full" size="sm" variant="default" onClick={generateQuickCompartments}>
+                <Layers size={14} /> Generar {quickLevels} compartimento{quickLevels !== 1 ? "s" : ""}
+              </Button>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Herramientas</CardTitle></CardHeader>
             <CardContent className="space-y-2">

@@ -29,7 +29,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Creación masiva de pisos, zonas y racks con nombre secuencial (ej: "Rack 01"…"Rack 10").
 - Eliminación individual de almacenes, pisos, zonas y racks con confirmación y borrado lógico en cascada.
 - Vista frontal de rack con compartimentos renderizados en SVG.
-- Diseñador visual de rack con canvas SVG: crear por dibujo, mover, redimensionar, duplicar, dividir y deshacer cambios.
+- Diseñador visual de rack con canvas SVG: crear por dibujo o configuración rápida, mover, redimensionar, duplicar, dividir y deshacer cambios.
 - Matriz física por compartimiento con columnas, niveles apilados y profundidades, generando una posición y QR por cada celda.
 - Códigos de posición únicos con formato `{RACK}-{NIVEL}-{COLUMNA}-{FILA}-{PROFUNDIDAD}` (ej: `R003-N07-C03-F04-P01`). El prefijo `{almacén}-{piso}` se reconstruye al exportar.
 - QR de ubicación con prefijo `LOC:v1:` para diferenciación de productos.
