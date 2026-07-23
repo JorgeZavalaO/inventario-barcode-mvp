@@ -46,7 +46,7 @@ export function InteractiveRackDesigner({
     <div className="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
       <svg
         viewBox={`0 0 ${rackWidth} ${rackHeight}`}
-        className="block h-auto min-h-[360px] w-full"
+        className="block h-auto min-h-[200px] w-full"
         preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label="Vista frontal del rack"

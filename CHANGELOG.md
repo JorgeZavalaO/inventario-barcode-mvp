@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.39.0 (2026-07-23)
+
+### Changed (Vistas frontal y lateral lado a lado)
+
+- **Canvas reducido:** El SVG frontal se redujo de 360px a 200px de alto mínimo.
+- **Layout lado a lado:** La vista frontal y la vista lateral de profundidad ahora se muestran en dos columnas dentro del mismo card, ocupando cada una el 50% del ancho.
+- **Vista lateral enriquecida:** Muestra barras verticales escalonadas por cada slot de profundidad (Frente/Centro/Fondo), botones para cambiar la profundidad activa, y datos del compartimento seleccionado (código, nombre, coordenadas, matriz y total de posiciones).
+- **Placeholder sin selección:** Si no hay compartimento seleccionado, la vista lateral muestra un mensaje indicando que seleccione uno en la vista frontal.
+
 ## 0.38.0 (2026-07-23)
 
 ### Changed (Rediseño del diseñador de racks)

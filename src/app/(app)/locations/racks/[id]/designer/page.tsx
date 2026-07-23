@@ -287,33 +287,47 @@ export default function RackDesignerPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <InteractiveRackDesigner
-                compartments={compartments}
-                rackWidth={rackWidth}
-                rackHeight={rackHeight}
-                selectedId={selectedComp}
-                selectedCell={selectedCell}
-                selectedDepthIndex={selectedDepth}
-                onSelect={(compartmentId) => { setSelectedComp(compartmentId); setSelectedCell(null); setSelectedDepth(0); }}
-                onCellSelect={setSelectedCell}
-              />
-              {selected && (selected.depthSlots?.length ?? 0) > 1 && (
-                <div className="mt-4 border-t border-slate-200 pt-3">
-                  <p className="mb-2 text-xs font-medium text-slate-600">Vista lateral — profundidad</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {selected.depthSlots!.map((slot, index) => (
-                      <button
-                        key={slot.id}
-                        onClick={() => setSelectedDepth(index)}
-                        className={`rounded-md border p-2 text-center text-xs transition-all ${selectedDepth === index ? 'border-teal-500 bg-teal-50 ring-2 ring-teal-200' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
-                      >
-                        <span className="block font-medium text-slate-700">{slot.name}</span>
-                        <span className="block text-slate-400">{slot.code}</span>
-                      </button>
-                    ))}
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <InteractiveRackDesigner
+                  compartments={compartments}
+                  rackWidth={rackWidth}
+                  rackHeight={rackHeight}
+                  selectedId={selectedComp}
+                  selectedCell={selectedCell}
+                  selectedDepthIndex={selectedDepth}
+                  onSelect={(compartmentId) => { setSelectedComp(compartmentId); setSelectedCell(null); setSelectedDepth(0); }}
+                  onCellSelect={setSelectedCell}
+                />
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  {selected ? <>
+                    <p className="mb-2 text-xs font-medium text-slate-600">Vista lateral — profundidad</p>
+                    <div className="mb-3 flex h-32 items-end gap-1">
+                      {(selected.depthSlots?.length ? selected.depthSlots : [{ id: "dummy", code: "P01", name: "Única" }]).map((slot, index) => {
+                        const max = (selected.depthSlots?.length || 1);
+                        const heights = [80, 60, 40];
+                        const height = heights[index] ?? 30;
+                        return (
+                          <button
+                            key={slot.id}
+                            onClick={() => setSelectedDepth(index)}
+                            className={`flex-1 rounded-t-md border p-1 text-center text-xs transition-all ${selectedDepth === index ? 'border-teal-500 bg-teal-100 ring-2 ring-teal-300' : 'border-slate-300 bg-white hover:bg-slate-100'}`}
+                            style={{ height: `${height}%` }}
+                          >
+                            <span className="block font-medium text-slate-700">{slot.name}</span>
+                            <span className="block text-[10px] text-slate-400">{slot.code}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="space-y-1 text-xs text-slate-500">
+                      <p><span className="font-medium text-slate-700">{selected.code}</span> — {selected.name}</p>
+                      <p>{selected.x},{selected.y} · {selected.width}×{selected.height}mm</p>
+                      <p>{selected.columnCount ?? 1} col × {selected.stackLevels ?? 1} filas × {selected.depthSlots?.length || 1} prof</p>
+                      <p className="font-medium text-teal-700">{(selected.columnCount ?? 1) * (selected.stackLevels ?? 1) * (selected.depthSlots?.length || 1)} posiciones</p>
+                    </div>
+                  </> : <div className="flex h-40 items-center justify-center text-xs text-slate-400">Selecciona un compartimento en la vista frontal</div>}
                 </div>
-              )}
+              </div>
           </CardContent>
         </Card>
 
