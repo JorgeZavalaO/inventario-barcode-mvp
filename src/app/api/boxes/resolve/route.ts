@@ -12,14 +12,26 @@ export async function GET(request: NextRequest) {
     const palletNumber = request.nextUrl.searchParams.get("pallet")?.trim();
     const boxNumber = request.nextUrl.searchParams.get("box")?.trim();
 
-    if (!importCode || !palletNumber || !boxNumber) {
-      return NextResponse.json({ error: "import, pallet y box son requeridos" }, { status: 400 });
+    if (!importCode || !boxNumber) {
+      return NextResponse.json({ error: "import y box son requeridos" }, { status: 400 });
     }
 
     const imp = await prisma.import.findUnique({ where: { code: importCode } });
     if (!imp) return NextResponse.json({ error: "Importación no encontrada" }, { status: 404 });
 
-    const pallet = await prisma.pallet.findUnique({ where: { importId_number: { importId: imp.id, number: palletNumber } } });
+    let pallet: { id: string; number: string } | null = null;
+
+    if (palletNumber) {
+      pallet = await prisma.pallet.findUnique({ where: { importId_number: { importId: imp.id, number: palletNumber } } });
+      if (!pallet) return NextResponse.json({ error: "Pallet no encontrado" }, { status: 404 });
+    } else {
+      const allPallets = await prisma.pallet.findMany({ where: { importId: imp.id, active: true } });
+      for (const p of allPallets) {
+        const foundBox = await prisma.box.findUnique({ where: { palletId_number: { palletId: p.id, number: boxNumber } } });
+        if (foundBox) { pallet = p; break; }
+      }
+    }
+
     if (!pallet) return NextResponse.json({ error: "Pallet no encontrado" }, { status: 404 });
 
     const box = await prisma.box.findUnique({

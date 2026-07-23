@@ -12,37 +12,68 @@ function generatePhysicalPositionCode(
 }
 
 async function main() {
-  // 1. Update depth slot codes: D01..Dnn → P01..Pnn
-  const depthSlots = await prisma.rackDepthSlot.findMany({
-    where: { code: { startsWith: "D" } },
-  });
+  // 1. Normalize depth slot codes
+  const depthSlots = await prisma.rackDepthSlot.findMany();
   let depthUpdated = 0;
   for (const slot of depthSlots) {
-    const newCode = `P${slot.code.slice(1)}`;
-    await prisma.rackDepthSlot.update({
-      where: { id: slot.id },
-      data: { code: newCode },
-    });
-    depthUpdated++;
+    let newCode = slot.code;
+    if (slot.code.startsWith("D")) {
+      newCode = `P${slot.code.slice(1)}`;
+    } else if (!slot.code.startsWith("P")) {
+      newCode = `P${String(slot.depthIndex + 1).padStart(2, "0")}`;
+    }
+    if (newCode !== slot.code) {
+      await prisma.rackDepthSlot.update({ where: { id: slot.id }, data: { code: newCode } });
+      depthUpdated++;
+    }
   }
-  console.log(`Depth slots actualizados: ${depthUpdated}`);
+  console.log(`Depth slots normalizados: ${depthUpdated}`);
 
-  // 2. Update compartment codes: C{nn} → N{nn}
-  const compartments = await prisma.rackCompartment.findMany({
-    where: { code: { startsWith: "C" } },
+  // 2. Rename compartments with hyphens in code (legacy -2 suffix)
+  const hyphenComps = await prisma.rackCompartment.findMany({
+    where: { code: { contains: "-" } },
+    include: { rack: { select: { id: true } } },
+    orderBy: [{ rackId: "asc" }, { code: "asc" }],
   });
-  let compUpdated = 0;
-  for (const comp of compartments) {
-    const newCode = `N${comp.code.slice(1)}`;
+  let compRenamed = 0;
+  for (const comp of hyphenComps) {
+    const numericCodes = await prisma.rackCompartment.findMany({
+      where: { rackId: comp.rackId },
+      select: { code: true },
+    });
+    const existingNumbers = new Set(
+      numericCodes
+        .map((c) => {
+          const m = c.code.match(/^N(\d+)$/);
+          return m ? parseInt(m[1], 10) : null;
+        })
+        .filter((n): n is number => n !== null),
+    );
+    let nextNum = 1;
+    while (existingNumbers.has(nextNum)) nextNum++;
+    const newCode = `N${String(nextNum).padStart(2, "0")}`;
     await prisma.rackCompartment.update({
       where: { id: comp.id },
       data: { code: newCode },
     });
+    compRenamed++;
+    console.log(`  ${comp.code} → ${newCode} (rack ${comp.rackId.slice(0, 8)})`);
+  }
+  console.log(`Compartimentos renombrados: ${compRenamed}`);
+
+  // 3. Update compartment codes: C{nn} → N{nn} (any remaining C prefix)
+  const cComps = await prisma.rackCompartment.findMany({
+    where: { code: { startsWith: "C" } },
+  });
+  let compUpdated = 0;
+  for (const comp of cComps) {
+    const newCode = `N${comp.code.slice(1)}`;
+    await prisma.rackCompartment.update({ where: { id: comp.id }, data: { code: newCode } });
     compUpdated++;
   }
-  console.log(`Compartimentos actualizados: ${compUpdated}`);
+  console.log(`Compartimentos C→N: ${compUpdated}`);
 
-  // 3. Update position codes to new format
+  // 4. Regenerate all position codes
   const positions = await prisma.storagePosition.findMany({
     where: { active: true },
     include: {
@@ -68,13 +99,10 @@ async function main() {
     );
 
     try {
-      await prisma.storagePosition.update({
-        where: { id: pos.id },
-        data: { code: newCode },
-      });
+      await prisma.storagePosition.update({ where: { id: pos.id }, data: { code: newCode } });
       updated++;
     } catch (e: any) {
-      console.error(`Error actualizando ${pos.id} (${pos.code} → ${newCode}):`, e?.meta?.cause || e.message);
+      console.error(`Error ${pos.id.slice(0, 8)} (${pos.code} → ${newCode}):`, e?.meta?.cause || e.message);
       errors++;
     }
   }

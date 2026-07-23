@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.42.0 (2026-07-23)
+
+### Added (Sesiones V2 — Zona, Persistencia, Flujo de Cajas)
+
+- **Filtro por zona:** La creación de sesiones ahora admite alcance "Por zona" con checkboxes por zona dentro de cada piso. El backend implementa `scopeType: "zone"`.
+- **Posiciones en progreso:** Las posiciones con status `IN_PROGRESS` ahora aparecen en una sección dedicada con botón "Reanudar". Al reanudar se reutiliza la ronda existente sin crear una nueva.
+- **Flujo de cajas con pallet opcional:** El pallet es ahora opcional en la resolución de cajas. Si una importación no tiene pallets, se salta directamente al selector de cajas.
+- **Filtro por importación:** La API de cajas ahora acepta `importId` sin `palletId` para devolver todas las cajas de una importación.
+- **Destacar caja por posición:** Al resolver una caja, se muestra un badge verde "Esta posición" si el `expectedPosition` coincide con la posición activa.
+- **UX móvil mejorada:** Botones con `min-h-[44px]`, selects más grandes, sticky header con nombre de sesión, barra inferior fija con acciones, `inputMode="decimal"`/`"numeric"` para teclado numérico.
+
+### Changed
+
+- La vista de escaneo V2 ahora muestra tres secciones: en progreso, pendientes y completadas.
+- El flujo de conteo por caja ahora muestra importación → pallet (si existe) → cascada de selección.
+- El backend de sesión V2 acepta `scopeType: "zone"` con handler completo.
+
 ## 0.41.0 (2026-07-23)
 
 ### Changed (Vista previa del rack)

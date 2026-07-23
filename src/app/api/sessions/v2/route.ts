@@ -56,6 +56,12 @@ export async function POST(request: NextRequest) {
           include: { zones: { include: { racks: { include: { positions: { where: { active: true }, select: { id: true } } } } } } },
         });
         for (const f of floors) for (const z of f.zones) for (const r of z.racks) positionIds.push(...r.positions.map((p) => p.id));
+      } else if (body.scopeType === "zone" && body.scopeIds?.length) {
+        const zones = await tx.warehouseZone.findMany({
+          where: { id: { in: body.scopeIds } },
+          include: { racks: { include: { positions: { where: { active: true }, select: { id: true } } } } },
+        });
+        for (const z of zones) for (const r of z.racks) positionIds.push(...r.positions.map((p) => p.id));
       } else if (body.scopeType === "rack" && body.scopeIds?.length) {
         const racks = await tx.rack.findMany({
           where: { id: { in: body.scopeIds } },

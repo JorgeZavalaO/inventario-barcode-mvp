@@ -26,23 +26,30 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         throw new Error(`La posición está en estado ${sessionPosition.status}`);
       }
 
-      const existingRounds = await tx.countRound.count({ where: { sessionPositionId: sessionPosition.id } });
-      const roundNumber = existingRounds + 1;
-
-      const round = await tx.countRound.create({
-        data: {
-          id: randomUUID(),
-          sessionPositionId: sessionPosition.id,
-          roundNumber,
-          operatorId: userId,
-          status: "OPEN",
-        },
-      });
-
-      await tx.sessionPosition.update({
-        where: { id: sessionPosition.id },
-        data: { status: "IN_PROGRESS", assignedToId: userId, startedAt: new Date() },
-      });
+      let round: { id: string; roundNumber: number; status: string };
+      if (sessionPosition.status === "IN_PROGRESS") {
+        const existingRound = await tx.countRound.findFirst({
+          where: { sessionPositionId: sessionPosition.id, status: "OPEN" },
+          orderBy: { roundNumber: "desc" },
+        });
+        if (existingRound) {
+          round = { id: existingRound.id, roundNumber: existingRound.roundNumber, status: existingRound.status };
+        } else {
+          const existingRounds = await tx.countRound.count({ where: { sessionPositionId: sessionPosition.id } });
+          round = await tx.countRound.create({
+            data: { id: randomUUID(), sessionPositionId: sessionPosition.id, roundNumber: existingRounds + 1, operatorId: userId, status: "OPEN" },
+          });
+        }
+      } else {
+        const existingRounds = await tx.countRound.count({ where: { sessionPositionId: sessionPosition.id } });
+        round = await tx.countRound.create({
+          data: { id: randomUUID(), sessionPositionId: sessionPosition.id, roundNumber: existingRounds + 1, operatorId: userId, status: "OPEN" },
+        });
+        await tx.sessionPosition.update({
+          where: { id: sessionPosition.id },
+          data: { status: "IN_PROGRESS", assignedToId: userId, startedAt: new Date() },
+        });
+      }
 
       const position = await tx.storagePosition.findUnique({
         where: { id: positionId },

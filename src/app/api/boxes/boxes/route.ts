@@ -8,9 +8,25 @@ export async function GET(request: NextRequest) {
     const auth = await requireRole("ADMIN", "SUPERVISOR", "COUNTER", "VIEWER");
     if (!auth.authorized) return auth.response;
     const palletId = request.nextUrl.searchParams.get("palletId")?.trim();
-    if (!palletId) return NextResponse.json({ error: "palletId requerido" }, { status: 400 });
+    const importId = request.nextUrl.searchParams.get("importId")?.trim();
+
+    if (!palletId && !importId) {
+      return NextResponse.json({ error: "palletId o importId requerido" }, { status: 400 });
+    }
+
+    let where: any = { active: true };
+    if (palletId) {
+      where.palletId = palletId;
+    } else if (importId) {
+      const pallets = await prisma.pallet.findMany({
+        where: { importId, active: true },
+        select: { id: true },
+      });
+      where.palletId = { in: pallets.map((p) => p.id) };
+    }
+
     const boxes = await prisma.box.findMany({
-      where: { palletId, active: true },
+      where,
       include: {
         boxProducts: {
           where: { active: true },
