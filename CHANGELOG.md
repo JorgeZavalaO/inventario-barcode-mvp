@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.35.0 (2026-07-23)
+
+### Added (Creación masiva de pisos, zonas y racks)
+
+- **Campo "Cantidad" en formularios:** Al crear pisos, zonas o racks, ahora se puede especificar cuántos crear. Si la cantidad es mayor a 1, los campos "Código" y "Nombre" actúan como base y se generan elementos secuenciales (ej: "Rack 01", "Rack 02", "Rack 03" con códigos "R01", "R02", "R03").
+- **Previsualización:** Se muestra una vista previa de los nombres que se crearán antes de confirmar.
+- **Creación transaccional:** Las APIs `/api/floors`, `/api/zones` y `/api/racks` aceptan tanto un objeto individual como un array, creando todos los elementos en una sola transacción de base de datos.
+
 ## 0.34.0 (2026-07-22)
 
 ### Changed (Simplificación de códigos de posición)

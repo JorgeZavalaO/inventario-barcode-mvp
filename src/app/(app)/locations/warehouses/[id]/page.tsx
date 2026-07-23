@@ -18,6 +18,7 @@ export default function WarehouseDetailPage() {
   const [showFloorForm, setShowFloorForm] = useState(false);
   const [floorCode, setFloorCode] = useState("");
   const [floorName, setFloorName] = useState("");
+  const [floorCantidad, setFloorCantidad] = useState(1);
   const [creating, setCreating] = useState(false);
 
   const load = useCallback(async () => {
@@ -30,18 +31,37 @@ export default function WarehouseDetailPage() {
 
   useEffect(() => { void load(); }, [load]);
 
+  function generateFloorItems() {
+    const count = Math.max(1, floorCantidad);
+    const digits = Math.max(2, String(count).length);
+    return Array.from({ length: count }, (_, i) => {
+      const num = String(i + 1).padStart(digits, "0");
+      return {
+        warehouseId: id,
+        code: `${floorCode}${num}`,
+        name: `${floorName} ${num}`,
+        orderIndex: (warehouse?.floors.length ?? 0) + i,
+      };
+    });
+  }
+
   async function addFloor() {
     if (!floorCode.trim() || !floorName.trim()) return;
     setCreating(true);
     try {
+      const items = generateFloorItems();
       await apiFetch("/api/floors", {
         method: "POST",
-        body: JSON.stringify({ warehouseId: id, code: floorCode, name: floorName, orderIndex: warehouse?.floors.length ?? 0 }),
+        body: JSON.stringify(items.length === 1 ? items[0] : items),
       });
-      setFloorCode(""); setFloorName(""); setShowFloorForm(false); await load();
+      setFloorCode(""); setFloorName(""); setFloorCantidad(1); setShowFloorForm(false); await load();
     } catch { /* silent */ }
     finally { setCreating(false); }
   }
+
+  const floorPreview = floorCantidad > 1 && floorCode.trim() && floorName.trim()
+    ? generateFloorItems().map(i => `${i.name} (${i.code})`).join(", ")
+    : null;
 
   if (loading) return <div className="flex items-center justify-center py-16 text-slate-500"><LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...</div>;
   if (!warehouse) return <div className="py-16 text-center text-slate-500">Almacén no encontrado.</div>;
@@ -61,9 +81,11 @@ export default function WarehouseDetailPage() {
 
       {showFloorForm && (
         <Card><CardContent className="flex items-end gap-3 pt-4">
-          <div><label className="mb-1 block text-xs font-medium text-slate-600">Código</label><Input value={floorCode} onChange={(e) => setFloorCode(e.target.value)} placeholder="P01" /></div>
-          <div className="flex-1"><label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label><Input value={floorName} onChange={(e) => setFloorName(e.target.value)} placeholder="Piso 1" /></div>
-          <Button onClick={() => void addFloor()} disabled={creating}>{creating ? <LoaderCircle className="animate-spin" size={14} /> : <Plus size={14} />} Crear</Button>
+          <div><label className="mb-1 block text-xs font-medium text-slate-600">{floorCantidad > 1 ? "Código base" : "Código"}</label><Input value={floorCode} onChange={(e) => setFloorCode(e.target.value)} placeholder={floorCantidad > 1 ? "P" : "P01"} /></div>
+          <div><label className="mb-1 block text-xs font-medium text-slate-600">{floorCantidad > 1 ? "Nombre base" : "Nombre"}</label><Input value={floorName} onChange={(e) => setFloorName(e.target.value)} placeholder={floorCantidad > 1 ? "Piso" : "Piso 1"} /></div>
+          <div><label className="mb-1 block text-xs font-medium text-slate-600">Cantidad</label><Input type="number" min={1} max={100} value={floorCantidad} onChange={(e) => setFloorCantidad(Math.max(1, parseInt(e.target.value) || 1))} className="w-20" /></div>
+          <Button onClick={() => void addFloor()} disabled={creating}>{creating ? <LoaderCircle className="animate-spin" size={14} /> : <Plus size={14} />} {floorCantidad > 1 ? `Crear ${floorCantidad}` : "Crear"}</Button>
+          {floorPreview && <p className="w-full pt-1 text-xs text-slate-400">Se crearán: {floorPreview}</p>}
         </CardContent></Card>
       )}
 

@@ -97,6 +97,19 @@ export async function createFloor(data: {
   return prisma.floor.create({ data: { id: randomUUID(), orderIndex: 0, ...data } });
 }
 
+export async function createFloors(data: Array<{
+  warehouseId: string;
+  code: string;
+  name: string;
+  orderIndex?: number;
+}>) {
+  return prisma.$transaction(
+    data.map(d => prisma.floor.create({
+      data: { id: randomUUID(), orderIndex: 0, ...d },
+    }))
+  );
+}
+
 export async function updateFloor(id: string, data: { code?: string; name?: string; orderIndex?: number; active?: boolean }) {
   return prisma.floor.update({ where: { id }, data });
 }
@@ -123,6 +136,20 @@ export async function createZone(data: {
   orderIndex?: number;
 }) {
   return prisma.warehouseZone.create({ data: { id: randomUUID(), orderIndex: 0, ...data } });
+}
+
+export async function createZones(data: Array<{
+  floorId: string;
+  code: string;
+  name: string;
+  type?: string;
+  orderIndex?: number;
+}>) {
+  return prisma.$transaction(
+    data.map(d => prisma.warehouseZone.create({
+      data: { id: randomUUID(), orderIndex: 0, ...d },
+    }))
+  );
 }
 
 export async function updateZone(id: string, data: { code?: string; name?: string; type?: string; orderIndex?: number; active?: boolean }) {
@@ -161,6 +188,22 @@ export async function createRack(data: {
   orderIndex?: number;
 }) {
   return prisma.rack.create({ data: { id: randomUUID(), orderIndex: 0, ...data } });
+}
+
+export async function createRacks(data: Array<{
+  zoneId: string;
+  code: string;
+  name: string;
+  widthMm?: number | null;
+  heightMm?: number | null;
+  depthMm?: number | null;
+  orderIndex?: number;
+}>) {
+  return prisma.$transaction(
+    data.map(d => prisma.rack.create({
+      data: { id: randomUUID(), orderIndex: 0, ...d },
+    }))
+  );
 }
 
 export async function updateRack(id: string, data: {

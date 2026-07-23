@@ -18,11 +18,13 @@ export default function FloorDetailPage() {
   const [showZoneForm, setShowZoneForm] = useState(false);
   const [zoneCode, setZoneCode] = useState("");
   const [zoneName, setZoneName] = useState("");
+  const [zoneCantidad, setZoneCantidad] = useState(1);
   const [creating, setCreating] = useState(false);
 
   const [showRackForm, setShowRackForm] = useState<string | null>(null);
   const [rackCode, setRackCode] = useState("");
   const [rackName, setRackName] = useState("");
+  const [rackCantidad, setRackCantidad] = useState(1);
   const [creatingRack, setCreatingRack] = useState(false);
 
   const load = useCallback(async () => {
@@ -35,31 +37,67 @@ export default function FloorDetailPage() {
 
   useEffect(() => { void load(); }, [load]);
 
+  function generateZoneItems() {
+    const count = Math.max(1, zoneCantidad);
+    const digits = Math.max(2, String(count).length);
+    return Array.from({ length: count }, (_, i) => {
+      const num = String(i + 1).padStart(digits, "0");
+      return {
+        floorId: id,
+        code: `${zoneCode}${num}`,
+        name: `${zoneName} ${num}`,
+        orderIndex: (floor?.zones.length ?? 0) + i,
+      };
+    });
+  }
+
   async function addZone() {
     if (!zoneCode.trim() || !zoneName.trim()) return;
     setCreating(true);
     try {
+      const items = generateZoneItems();
       await apiFetch("/api/zones", {
         method: "POST",
-        body: JSON.stringify({ floorId: id, code: zoneCode, name: zoneName, orderIndex: floor?.zones.length ?? 0 }),
+        body: JSON.stringify(items.length === 1 ? items[0] : items),
       });
-      setZoneCode(""); setZoneName(""); setShowZoneForm(false); await load();
+      setZoneCode(""); setZoneName(""); setZoneCantidad(1); setShowZoneForm(false); await load();
     } catch { /* silent */ }
     finally { setCreating(false); }
+  }
+
+  function generateRackItems(zoneId: string) {
+    const count = Math.max(1, rackCantidad);
+    const digits = Math.max(2, String(count).length);
+    const zoneIndex = (floor?.zones ?? []).findIndex((z: any) => z.id === zoneId);
+    const existingRacks = (floor?.zones ?? [])[zoneIndex]?.racks?.length ?? 0;
+    return Array.from({ length: count }, (_, i) => {
+      const num = String(i + 1).padStart(digits, "0");
+      return {
+        zoneId,
+        code: `${rackCode}${num}`,
+        name: `${rackName} ${num}`,
+        orderIndex: existingRacks + i,
+      };
+    });
   }
 
   async function addRack(zoneId: string) {
     if (!rackCode.trim() || !rackName.trim()) return;
     setCreatingRack(true);
     try {
+      const items = generateRackItems(zoneId);
       await apiFetch("/api/racks", {
         method: "POST",
-        body: JSON.stringify({ zoneId, code: rackCode, name: rackName }),
+        body: JSON.stringify(items.length === 1 ? items[0] : items),
       });
-      setRackCode(""); setRackName(""); setShowRackForm(null); await load();
+      setRackCode(""); setRackName(""); setRackCantidad(1); setShowRackForm(null); await load();
     } catch { /* silent */ }
     finally { setCreatingRack(false); }
   }
+
+  const zonePreview = zoneCantidad > 1 && zoneCode.trim() && zoneName.trim()
+    ? generateZoneItems().map(i => `${i.name} (${i.code})`).join(", ")
+    : null;
 
   if (loading) return <div className="flex items-center justify-center py-16 text-slate-500"><LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...</div>;
   if (!floor) return <div className="py-16 text-center text-slate-500">Piso no encontrado.</div>;
@@ -79,9 +117,11 @@ export default function FloorDetailPage() {
 
       {showZoneForm && (
         <Card><CardContent className="flex items-end gap-3 pt-4">
-          <div><label className="mb-1 block text-xs font-medium text-slate-600">Código</label><Input value={zoneCode} onChange={(e) => setZoneCode(e.target.value)} placeholder="ZA" /></div>
-          <div className="flex-1"><label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label><Input value={zoneName} onChange={(e) => setZoneName(e.target.value)} placeholder="Zona A" /></div>
-          <Button onClick={() => void addZone()} disabled={creating}>{creating ? <LoaderCircle className="animate-spin" size={14} /> : <Plus size={14} />} Crear</Button>
+          <div><label className="mb-1 block text-xs font-medium text-slate-600">{zoneCantidad > 1 ? "Código base" : "Código"}</label><Input value={zoneCode} onChange={(e) => setZoneCode(e.target.value)} placeholder={zoneCantidad > 1 ? "Z" : "ZA"} /></div>
+          <div><label className="mb-1 block text-xs font-medium text-slate-600">{zoneCantidad > 1 ? "Nombre base" : "Nombre"}</label><Input value={zoneName} onChange={(e) => setZoneName(e.target.value)} placeholder={zoneCantidad > 1 ? "Zona" : "Zona A"} /></div>
+          <div><label className="mb-1 block text-xs font-medium text-slate-600">Cantidad</label><Input type="number" min={1} max={100} value={zoneCantidad} onChange={(e) => setZoneCantidad(Math.max(1, parseInt(e.target.value) || 1))} className="w-20" /></div>
+          <Button onClick={() => void addZone()} disabled={creating}>{creating ? <LoaderCircle className="animate-spin" size={14} /> : <Plus size={14} />} {zoneCantidad > 1 ? `Crear ${zoneCantidad}` : "Crear"}</Button>
+          {zonePreview && <p className="w-full pt-1 text-xs text-slate-400">Se crearán: {zonePreview}</p>}
         </CardContent></Card>
       )}
 
@@ -99,9 +139,10 @@ export default function FloorDetailPage() {
             <CardContent>
               {showRackForm === zone.id && (
                 <div className="mb-4 flex items-end gap-3 rounded-lg border border-dashed border-teal-300 bg-teal-50 p-3">
-                  <div><label className="mb-1 block text-xs font-medium text-slate-600">Código</label><Input value={rackCode} onChange={(e) => setRackCode(e.target.value)} placeholder="R01" /></div>
-                  <div className="flex-1"><label className="mb-1 block text-xs font-medium text-slate-600">Nombre</label><Input value={rackName} onChange={(e) => setRackName(e.target.value)} placeholder="Rack 1" /></div>
-                  <Button onClick={() => void addRack(zone.id)} disabled={creatingRack}>{creatingRack ? <LoaderCircle className="animate-spin" size={14} /> : <Plus size={14} />} Crear</Button>
+                  <div><label className="mb-1 block text-xs font-medium text-slate-600">{rackCantidad > 1 ? "Código base" : "Código"}</label><Input value={rackCode} onChange={(e) => setRackCode(e.target.value)} placeholder={rackCantidad > 1 ? "R" : "R01"} /></div>
+                  <div><label className="mb-1 block text-xs font-medium text-slate-600">{rackCantidad > 1 ? "Nombre base" : "Nombre"}</label><Input value={rackName} onChange={(e) => setRackName(e.target.value)} placeholder={rackCantidad > 1 ? "Rack" : "Rack 1"} /></div>
+                  <div><label className="mb-1 block text-xs font-medium text-slate-600">Cantidad</label><Input type="number" min={1} max={100} value={rackCantidad} onChange={(e) => setRackCantidad(Math.max(1, parseInt(e.target.value) || 1))} className="w-20" /></div>
+                  <Button onClick={() => void addRack(zone.id)} disabled={creatingRack}>{creatingRack ? <LoaderCircle className="animate-spin" size={14} /> : <Plus size={14} />} {rackCantidad > 1 ? `Crear ${rackCantidad}` : "Crear"}</Button>
                 </div>
               )}
               {zone.racks?.length > 0 ? (
