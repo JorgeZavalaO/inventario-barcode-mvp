@@ -327,7 +327,8 @@ export const CountEventScalarFieldEnum = {
   looseQuantity: 'looseQuantity',
   reversedById: 'reversedById',
   reversalReason: 'reversalReason',
-  boxCountEntryId: 'boxCountEntryId'
+  boxCountEntryId: 'boxCountEntryId',
+  notes: 'notes'
 } as const
 
 export type CountEventScalarFieldEnum = (typeof CountEventScalarFieldEnum)[keyof typeof CountEventScalarFieldEnum]

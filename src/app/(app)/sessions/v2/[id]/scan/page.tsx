@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
-import { ArrowLeft, ScanBarcode, MapPin, Package, CheckCircle2, LoaderCircle, AlertTriangle, SquareStack, RotateCcw, Camera, Warehouse, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, LoaderCircle, MapPin, Package, CheckCircle2, XCircle, ScanBarcode } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,10 @@ type SessionData = {
   }[];
 };
 
-type BoxProduct = { productId: string; productCode: string; productDescription: string; productUnit: string; quantity: string };
+type BoxProduct = { productId: string; productCode: string; productDescription: string; productUnit: string; expectedQty: number | null };
+type ConfirmedProduct = { product: BoxProduct; correct: boolean; quantity: number; notes: string; locations: LocationAssignment[] };
+type LocationAssignment = { positionId: string; positionCode: string; quantity: number };
+type Step = "IDENTIFY" | "CONFIRM" | "ASSIGN" | "SUMMARY";
 
 export default function V2ScanPage() {
   const params = useParams();
@@ -26,36 +29,34 @@ export default function V2ScanPage() {
 
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activePosition, setActivePosition] = useState<any>(null);
-  const [activeRound, setActiveRound] = useState<any>(null);
-  const [scannedCode, setScannedCode] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [usePackage, setUsePackage] = useState(false);
-  const [packageCount, setPackageCount] = useState("");
-  const [unitsPerPackage, setUnitsPerPackage] = useState("");
-  const [looseQty, setLooseQty] = useState("");
-  const [events, setEvents] = useState<any[]>([]);
-  const [toast, setToast] = useState("");
   const [busy, setBusy] = useState(false);
-  const [undoReason, setUndoReason] = useState("");
-  const [showUndo, setShowUndo] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [countMode, setCountMode] = useState<"box" | "legacy">("box");
-  const [boxImport, setBoxImport] = useState("");
-  const [boxPallet, setBoxPallet] = useState("");
-  const [boxNumber, setBoxNumber] = useState("");
-  const [resolvedBox, setResolvedBox] = useState<any>(null);
-  const [boxProducts, setBoxProducts] = useState<BoxProduct[]>([]);
-  const [imports, setImports] = useState<{ id: string; code: string; description: string | null }[]>([]);
-  const [pallets, setPallets] = useState<{ id: string; number: string }[]>([]);
-  const [boxes, setBoxes] = useState<{ id: string; number: string }[]>([]);
+  const [toast, setToast] = useState("");
+  const [step, setStep] = useState<Step>("IDENTIFY");
+
   const [selectedBoxImportId, setSelectedBoxImportId] = useState("");
   const [selectedBoxPalletId, setSelectedBoxPalletId] = useState("");
   const [selectedBoxId, setSelectedBoxId] = useState("");
+  const [boxImport, setBoxImport] = useState("");
+  const [boxPallet, setBoxPallet] = useState("");
+  const [skipPallet, setSkipPallet] = useState(false);
+
+  const [imports, setImports] = useState<{ id: string; code: string; description: string | null }[]>([]);
+  const [pallets, setPallets] = useState<{ id: string; number: string }[]>([]);
+  const [boxes, setBoxes] = useState<{ id: string; number: string }[]>([]);
   const [loadingImports, setLoadingImports] = useState(false);
   const [loadingPallets, setLoadingPallets] = useState(false);
   const [loadingBoxes, setLoadingBoxes] = useState(false);
-  const [skipPallet, setSkipPallet] = useState(false);
+
+  const [resolvedBox, setResolvedBox] = useState<any>(null);
+  const [boxProducts, setBoxProducts] = useState<BoxProduct[]>([]);
+  const [currentProductIdx, setCurrentProductIdx] = useState(0);
+  const [productCorrect, setProductCorrect] = useState(true);
+  const [productQty, setProductQty] = useState("");
+  const [productNotes, setProductNotes] = useState("");
+  const [confirmedProducts, setConfirmedProducts] = useState<ConfirmedProduct[]>([]);
+
+  const [assignPositionCode, setAssignPositionCode] = useState("");
+  const [assignQty, setAssignQty] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -68,26 +69,22 @@ export default function V2ScanPage() {
   useEffect(() => { void load(); }, [load]);
 
   useEffect(() => {
-    async function loadImports() {
+    if (step !== "IDENTIFY") return;
+    (async () => {
       setLoadingImports(true);
       try {
         const data = await apiFetch<{ imports: { id: string; code: string; description: string | null }[] }>("/api/boxes/imports");
         setImports(data.imports);
       } catch { /* silent */ }
       finally { setLoadingImports(false); }
-    }
-    if (activePosition) void loadImports();
-  }, [activePosition]);
+    })();
+  }, [step]);
+
+  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2500); return () => clearTimeout(t); }, [toast]);
 
   async function handleImportSelect(importId: string) {
-    setSelectedBoxImportId(importId);
-    setSelectedBoxPalletId("");
-    setSelectedBoxId("");
-    setPallets([]);
-    setBoxes([]);
-    setResolvedBox(null);
-    setBoxProducts([]);
-    setSkipPallet(false);
+    setSelectedBoxImportId(importId); setSelectedBoxPalletId(""); setSelectedBoxId("");
+    setPallets([]); setBoxes([]); setResolvedBox(null); setBoxProducts([]); setSkipPallet(false);
     if (!importId) return;
     const imp = imports.find(i => i.id === importId);
     if (imp) setBoxImport(imp.code);
@@ -100,21 +97,8 @@ export default function V2ScanPage() {
     finally { setLoadingPallets(false); }
   }
 
-  async function loadBoxesForImport(importId: string) {
-    setLoadingBoxes(true);
-    try {
-      const data = await apiFetch<{ boxes: { id: string; number: string }[] }>(`/api/boxes/boxes?importId=${importId}`);
-      setBoxes(data.boxes);
-    } catch { /* silent */ }
-    finally { setLoadingBoxes(false); }
-  }
-
   async function handlePalletSelect(palletId: string) {
-    setSelectedBoxPalletId(palletId);
-    setSelectedBoxId("");
-    setBoxes([]);
-    setResolvedBox(null);
-    setBoxProducts([]);
+    setSelectedBoxPalletId(palletId); setSelectedBoxId(""); setBoxes([]); setResolvedBox(null); setBoxProducts([]);
     if (!palletId) { setSkipPallet(false); return; }
     const pal = pallets.find(p => p.id === palletId);
     if (pal) setBoxPallet(pal.number);
@@ -126,387 +110,315 @@ export default function V2ScanPage() {
     finally { setLoadingBoxes(false); }
   }
 
-  function handleBoxSelect(boxId: string) {
+  async function handleBoxSelect(boxId: string) {
     setSelectedBoxId(boxId);
     if (!boxId) { setResolvedBox(null); setBoxProducts([]); return; }
     const bx = boxes.find(b => b.id === boxId);
-    if (bx) {
-      setBoxNumber(bx.number);
-      void resolveBox(boxImport, boxPallet || "", bx.number);
+    if (!bx) return;
+    const p = new URLSearchParams({ import: boxImport.trim(), box: bx.number });
+    if (boxPallet.trim()) p.set("pallet", boxPallet.trim());
+    setBusy(true);
+    try {
+      const data = await apiFetch<any>(`/api/boxes/resolve?${p.toString()}`);
+      setResolvedBox(data.box);
+      setBoxProducts(data.box.products.map((pr: any) => ({
+        productId: pr.productId, productCode: pr.productCode, productDescription: pr.productDescription,
+        productUnit: pr.productUnit, expectedQty: pr.expectedQty,
+      })));
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Caja no encontrada");
+      setResolvedBox(null); setBoxProducts([]);
+    } finally { setBusy(false); }
+  }
+
+  function startConfirmProducts() {
+    if (boxProducts.length === 0) return;
+    setCurrentProductIdx(0); setProductCorrect(true);
+    setProductQty(boxProducts[0].expectedQty?.toString() ?? "");
+    setProductNotes(""); setConfirmedProducts([]); setStep("CONFIRM");
+  }
+
+  function confirmCurrentProduct() {
+    const product = boxProducts[currentProductIdx];
+    const confirmed: ConfirmedProduct = {
+      product, correct: productCorrect,
+      quantity: productCorrect ? parseFloat(productQty || "0") : 0,
+      notes: productNotes, locations: [],
+    };
+    const updated = [...confirmedProducts, confirmed];
+    setConfirmedProducts(updated);
+    if (currentProductIdx < boxProducts.length - 1) {
+      const nextIdx = currentProductIdx + 1;
+      setCurrentProductIdx(nextIdx); setProductCorrect(true);
+      setProductQty(boxProducts[nextIdx].expectedQty?.toString() ?? "");
+      setProductNotes("");
+    } else {
+      const correctProducts = updated.filter(p => p.correct && p.quantity > 0);
+      if (correctProducts.length > 0) {
+        setCurrentProductIdx(0); setAssignQty(correctProducts[0].quantity.toString()); setStep("ASSIGN");
+      } else { setStep("SUMMARY"); }
     }
   }
 
-  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2500); return () => clearTimeout(t); }, [toast]);
-
-  async function startPosition(positionId: string) {
-    setBusy(true);
-    try {
-      const result = await apiFetch<any>(`/api/sessions/v2/${id}/positions/${positionId}`, {
-        method: "POST",
-        body: JSON.stringify({ operationId: crypto.randomUUID() }),
-      });
-      setActivePosition(result.position);
-      setActiveRound(result.round);
-      setEvents([]);
-      setToast("Posición iniciada");
-    } catch { setToast("Error al iniciar posición"); }
-    finally { setBusy(false); }
+  function correctProducts() { return confirmedProducts.filter(p => p.correct && p.quantity > 0); }
+  function assignedQtyForProduct(idx: number) {
+    const cp = correctProducts()[idx];
+    return cp ? cp.locations.reduce((s, l) => s + l.quantity, 0) : 0;
   }
 
-  function handleScanInput(value: string) {
-    setScannedCode(value);
+  function resetIdentify() {
+    setSelectedBoxImportId(""); setSelectedBoxPalletId(""); setSelectedBoxId("");
+    setPallets([]); setBoxes([]); setResolvedBox(null); setBoxProducts([]);
+    setConfirmedProducts([]); setSkipPallet(false); setCurrentProductIdx(0);
+    setAssignPositionCode(""); setAssignQty("");
   }
 
-  async function resolveBox(importCode: string, palletNumber: string, boxNum: string) {
-    if (!importCode.trim() || !boxNum.trim()) return;
-    const params = new URLSearchParams({ import: importCode.trim(), box: boxNum.trim() });
-    if (palletNumber.trim()) params.set("pallet", palletNumber.trim());
-    setBusy(true);
-    try {
-      const data = await apiFetch<any>(`/api/boxes/resolve?${params.toString()}`);
-      setResolvedBox(data.box);
-      setBoxProducts(data.box.products.map((p: any) => ({ productId: p.productId, productCode: p.productCode, productDescription: p.productDescription, productUnit: p.productUnit, quantity: "" })));
-      setToast(`Caja encontrada: ${data.box.products.length} producto(s)`);
-    } catch (error) {
-      setResolvedBox(null);
-      setBoxProducts([]);
-      setToast(error instanceof Error ? error.message : "Caja no encontrada");
-    } finally { setBusy(false); }
-  }
-
-  async function registerBoxCount() {
-    if (!activeRound || !resolvedBox || boxProducts.length === 0) return;
-    if (boxProducts.some((p) => !p.quantity || parseFloat(p.quantity) <= 0)) { setToast("Todas las cantidades deben ser positivas"); return; }
-    setBusy(true);
-    const operationId = crypto.randomUUID();
-    try {
-      const result = await apiFetch<any>(`/api/sessions/v2/${id}/counts`, {
-        method: "POST",
-        body: JSON.stringify({
-          operationId,
-          positionId: activePosition.id,
-          countRoundId: activeRound.id,
-          inputMethod: "MANUAL",
-          boxIdentity: { importCode: boxImport.trim(), palletNumber: boxPallet.trim() || undefined, boxNumber: boxNumber.trim() },
-          items: boxProducts.map((p) => ({ productId: p.productId, quantity: parseFloat(p.quantity) })),
-        }),
-      });
-      setEvents((prev) => [...prev, ...result.eventIds.map((_: string, i: number) => ({ eventId: result.eventIds[i], productCode: boxProducts[i].productCode, quantity: parseFloat(boxProducts[i].quantity), productDescription: boxProducts[i].productDescription }))]);
-      setResolvedBox(null); setBoxProducts([]);
-      setBoxNumber(""); setSelectedBoxId("");
-      setToast("Caja registrada");
-      inputRef.current?.focus();
-    } catch (error) {
-      setToast(error instanceof Error ? error.message : "Error al registrar caja");
-    } finally { setBusy(false); }
-  }
-
-  async function registerCount() {
-    if (!activeRound || !scannedCode.trim()) return;
-    const qty = usePackage
-      ? (parseFloat(packageCount || "0") * parseFloat(unitsPerPackage || "0")) + parseFloat(looseQty || "0")
-      : parseFloat(quantity || "0");
+  function assignLocation() {
+    if (!assignPositionCode.trim()) return;
+    const pos = session?.sessionPositions.find(sp => sp.position.code === assignPositionCode.trim());
+    if (!pos) { setToast("Posición no encontrada en esta sesión"); return; }
+    const qty = parseFloat(assignQty || "0");
     if (qty <= 0) { setToast("Cantidad debe ser positiva"); return; }
-    setBusy(true);
-    try {
-      const result = await apiFetch<any>(`/api/sessions/v2/${id}/counts`, {
-        method: "POST",
-        body: JSON.stringify({
-          operationId: crypto.randomUUID(),
-          positionId: activePosition.id,
-          countRoundId: activeRound.id,
-          productCode: scannedCode,
-          packageCount: usePackage ? parseFloat(packageCount || "0") : undefined,
-          unitsPerPackage: usePackage ? parseFloat(unitsPerPackage || "0") : undefined,
-          looseQuantity: usePackage ? parseFloat(looseQty || "0") : undefined,
-          quantity: qty,
-          inputMethod: "MANUAL",
-        }),
-      });
-      setEvents((prev) => [...prev, { eventId: result.eventId, productCode: scannedCode, quantity: qty }]);
-      setScannedCode("");
-      setPackageCount(""); setUnitsPerPackage(""); setLooseQty(""); setQuantity("");
-      setToast("Conteo registrado");
-      inputRef.current?.focus();
-    } catch { setToast("Error al registrar"); }
-    finally { setBusy(false); }
+    const cp = correctProducts()[currentProductIdx];
+    if (!cp) return;
+    const updated = [...confirmedProducts];
+    const realIdx = confirmedProducts.findIndex(c => c.product.productId === cp.product.productId);
+    updated[realIdx] = { ...updated[realIdx], locations: [...updated[realIdx].locations, { positionId: pos.position.id, positionCode: pos.position.code, quantity: qty }] };
+    setConfirmedProducts(updated);
+    setAssignPositionCode("");
+    const remaining = cp.quantity - assignedQtyForProduct(currentProductIdx) - qty;
+    setAssignQty(remaining > 0 ? remaining.toString() : "");
+    setToast(`Asignado ${qty} en ${pos.position.code}`);
   }
 
-  async function undoLastEvent() {
-    if (events.length === 0 || !undoReason.trim()) return;
-    const last = events[events.length - 1];
-    setBusy(true);
-    try {
-      await apiFetch(`/api/counts/${last.eventId}/reverse`, {
-        method: "POST",
-        body: JSON.stringify({ reason: undoReason }),
-      });
-      setEvents((prev) => prev.filter((_, i) => i !== prev.length - 1));
-      setShowUndo(false); setUndoReason("");
-      setToast("Último conteo anulado");
-    } catch { setToast("Error al anular"); }
-    finally { setBusy(false); }
+  function nextProductAssign() {
+    if (currentProductIdx < correctProducts().length - 1) {
+      const nextIdx = currentProductIdx + 1;
+      setCurrentProductIdx(nextIdx);
+      setAssignQty(correctProducts()[nextIdx].quantity.toString());
+      setAssignPositionCode("");
+    } else { setStep("SUMMARY"); }
   }
 
-  async function completePosition() {
-    if (!activeRound) return;
+  async function registerAllCounts() {
+    if (!session || confirmedProducts.length === 0) return;
     setBusy(true);
     try {
-      await apiFetch(`/api/sessions/v2/${id}/positions/${activePosition.id}/complete`, {
-        method: "POST",
-        body: JSON.stringify({ roundId: activeRound.id, operationId: crypto.randomUUID(), emptyConfirmed: events.length === 0 }),
-      });
-      setActivePosition(null); setActiveRound(null); setEvents([]);
-      setSelectedBoxImportId(""); setSelectedBoxPalletId(""); setSelectedBoxId(""); setPallets([]); setBoxes([]);
-      setResolvedBox(null); setBoxProducts([]); setSkipPallet(false);
-      setToast("Posición completada");
+      for (const cp of correctProducts()) {
+        for (const loc of cp.locations) {
+          const roundRes = await apiFetch<any>(`/api/sessions/v2/${id}/positions/${loc.positionId}`, {
+            method: "POST", body: JSON.stringify({ operationId: crypto.randomUUID() }),
+          });
+          await apiFetch<any>(`/api/sessions/v2/${id}/counts`, {
+            method: "POST", body: JSON.stringify({
+              operationId: crypto.randomUUID(), positionId: loc.positionId, countRoundId: roundRes.round.id,
+              productCode: cp.product.productCode, quantity: loc.quantity, inputMethod: "MANUAL", notes: cp.notes || undefined,
+            }),
+          });
+        }
+      }
+      setToast("Conteos registrados");
       await load();
-    } catch { setToast("Error al completar"); }
-    finally { setBusy(false); }
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error al registrar");
+    } finally { setBusy(false); }
   }
 
-  function cancelPosition() {
-    setActivePosition(null); setActiveRound(null); setEvents([]);
-    setSelectedBoxImportId(""); setSelectedBoxPalletId(""); setSelectedBoxId(""); setPallets([]); setBoxes([]);
-    setResolvedBox(null); setBoxProducts([]); setSkipPallet(false);
+  async function completeSession() {
+    setBusy(true);
+    try {
+      await apiFetch(`/api/sessions/v2/${id}`, { method: "PATCH", body: JSON.stringify({ status: "REVIEW" }) });
+      setToast("Sesión enviada a revisión");
+      await load();
+    } catch (error) { setToast(error instanceof Error ? error.message : "Error"); }
+    finally { setBusy(false); }
   }
 
   if (loading) return <div className="flex items-center justify-center py-16 text-slate-500"><LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...</div>;
   if (!session) return <div className="py-16 text-center text-slate-500">Sesión no encontrada.</div>;
 
-  const pendingPositions = session.sessionPositions.filter((p) => p.status === "PENDING" || p.status === "ASSIGNED");
-  const inProgressPositions = session.sessionPositions.filter((p) => p.status === "IN_PROGRESS");
-  const completedPositions = session.sessionPositions.filter((p) => p.status === "COMPLETED");
+  const occupiedCount = session.sessionPositions.filter(sp => sp.rounds.length > 0).length;
+  const totalPos = session.sessionPositions.length;
+  const availablePositions = session.sessionPositions.filter(sp => sp.status !== "COMPLETED");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4">
-      <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3">
+    <div className="mx-auto max-w-2xl space-y-4 p-4 pb-24">
+      <div className="flex items-center gap-3">
         <Link href="/sessions/v2" className="text-slate-400 hover:text-slate-600"><ArrowLeft size={20} /></Link>
         <div className="flex-1 min-w-0">
           <h1 className="text-base font-bold tracking-tight truncate">{session.name}</h1>
-          <p className="text-xs text-slate-400">{session.code} · {completedPositions.length}/{session.sessionPositions.length}</p>
+          <p className="text-xs text-slate-400">{session.code} · {occupiedCount}/{totalPos} posiciones</p>
         </div>
         {toast && <span className="shrink-0 rounded bg-emerald-50 px-2 py-1 text-xs text-emerald-600">{toast}</span>}
       </div>
 
-      {!activePosition ? (
-        <div className="space-y-3 px-4 pb-4">
-          {inProgressPositions.length > 0 && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-              <p className="mb-2 text-xs font-medium text-amber-700">En progreso ({inProgressPositions.length})</p>
+      {step === "IDENTIFY" && (
+        <div className="space-y-3">
+          <Card><CardContent className="p-3 space-y-3">
+            <p className="text-sm font-medium text-slate-700">Identificar caja</p>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-500">Importación</label>
+              <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxImportId} onChange={(e) => void handleImportSelect(e.target.value)} disabled={loadingImports}>
+                <option value="">{loadingImports ? "Cargando..." : "Seleccionar importación..."}</option>
+                {imports.map((imp) => <option key={imp.id} value={imp.id}>{imp.code}{imp.description ? ` — ${imp.description}` : ""}</option>)}
+              </select>
+            </div>
+            {selectedBoxImportId && !skipPallet && pallets.length > 0 && (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Pallet</label>
+                <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxPalletId} onChange={(e) => void handlePalletSelect(e.target.value)} disabled={loadingPallets}>
+                  <option value="">{loadingPallets ? "Cargando..." : "Seleccionar pallet..."}</option>
+                  {pallets.map((p) => <option key={p.id} value={p.id}>{p.number}</option>)}
+                </select>
+              </div>
+            )}
+            {selectedBoxImportId && (skipPallet || pallets.length === 0 || selectedBoxPalletId) && (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">Caja</label>
+                {loadingBoxes ? <div className="flex items-center gap-2 py-3 text-sm text-slate-400"><LoaderCircle className="animate-spin" size={14} /> Cargando...</div> : (
+                  <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxId} onChange={(e) => void handleBoxSelect(e.target.value)}>
+                    <option value="">Seleccionar caja...</option>
+                    {boxes.map((b) => <option key={b.id} value={b.id}>Caja {b.number}</option>)}
+                  </select>
+                )}
+              </div>
+            )}
+          </CardContent></Card>
+          {resolvedBox && (
+            <Card className="border-teal-200"><CardContent className="p-3 space-y-3">
+              <div>
+                <p className="text-sm font-bold text-teal-800">{resolvedBox.import}{resolvedBox.pallet ? ` / ${resolvedBox.pallet}` : ""} / {resolvedBox.number}</p>
+                {resolvedBox.expectedPosition && <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs text-teal-700">Esperada: {resolvedBox.expectedPosition.code}</span>}
+              </div>
               <div className="space-y-2">
-                {inProgressPositions.map((sp) => (
-                  <div key={sp.id} className="flex items-center gap-2 rounded-lg bg-white border border-amber-200 p-3">
-                    <AlertTriangle size={14} className="shrink-0 text-amber-500" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate">{sp.position.code}</p>
-                      <p className="text-xs text-slate-400 truncate">{sp.position.rack.zone.floor.name} / {sp.position.rack.name}</p>
-                    </div>
-                    <Button size="sm" className="shrink-0 h-11 px-4" onClick={() => void startPosition(sp.position.id)} disabled={busy}>
-                      Reanudar
-                    </Button>
+                {boxProducts.map((bp) => (
+                  <div key={bp.productId} className="flex items-center justify-between rounded bg-slate-50 px-3 py-2">
+                    <div><p className="text-sm font-medium">{bp.productDescription}</p><p className="text-xs text-slate-400">{bp.productCode} · {bp.productUnit}</p></div>
+                    <span className="text-xs text-slate-500">{bp.expectedQty ?? "?"} unds</span>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {pendingPositions.length > 0 && (
-            <div className="rounded-lg border border-slate-200 p-3">
-              <p className="mb-2 text-xs font-medium text-slate-500">Pendientes ({pendingPositions.length})</p>
-              <div className="space-y-2">
-                {pendingPositions.map((sp) => (
-                  <div key={sp.id} className="flex items-center gap-2 rounded-lg border border-slate-200 p-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold truncate">{sp.position.code}</p>
-                      <p className="text-xs text-slate-400 truncate">{sp.position.rack.zone.floor.name} / {sp.position.rack.name}</p>
-                    </div>
-                    <Button size="sm" className="shrink-0 h-11 px-4" onClick={() => void startPosition(sp.position.id)} disabled={busy}>
-                      <ScanBarcode size={14} /> Iniciar
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {completedPositions.length > 0 && (
-            <div className="rounded-lg border border-slate-200 p-3">
-              <p className="mb-2 text-xs font-medium text-slate-500">Completadas ({completedPositions.length})</p>
-              <div className="space-y-1">
-                {completedPositions.map((sp) => (
-                  <div key={sp.id} className="flex items-center gap-2 rounded bg-slate-50 px-3 py-2 text-xs">
-                    <CheckCircle2 size={12} className="text-teal-500" />
-                    <span className="font-medium truncate">{sp.position.code}</span>
-                    <span className="text-slate-400 truncate">{sp.position.compartment.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {pendingPositions.length === 0 && inProgressPositions.length === 0 && (
-            <p className="py-8 text-center text-sm text-slate-400">Todas las posiciones están completadas.</p>
+              <Button className="h-12 w-full" onClick={startConfirmProducts}><CheckCircle2 size={16} className="mr-1" /> Confirmar productos</Button>
+            </CardContent></Card>
           )}
         </div>
-      ) : (
-        <div className="space-y-3 px-4 pb-24">
-          <div className="rounded-xl border-2 border-teal-300 bg-teal-50 p-3">
-            <div className="flex items-center gap-3">
-              <MapPin className="text-teal-600" size={20} />
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-teal-800 text-base">{activePosition.code}</p>
-                <p className="text-xs text-teal-600 truncate">{activePosition.path}</p>
-              </div>
-              <span className="shrink-0 rounded-full bg-teal-200 px-2 py-0.5 text-xs font-medium text-teal-800">
-                Ronda {activeRound.number}
-              </span>
+      )}
+
+      {step === "CONFIRM" && boxProducts[currentProductIdx] && (
+        <div className="space-y-3">
+          <div className="rounded-lg bg-slate-100 px-3 py-2 text-center text-xs text-slate-500">Producto {currentProductIdx + 1} de {boxProducts.length}</div>
+          <Card><CardContent className="p-3 space-y-3">
+            <div className="rounded-lg bg-blue-50 p-3">
+              <p className="text-base font-bold text-blue-800">{boxProducts[currentProductIdx].productDescription}</p>
+              <p className="text-sm text-blue-600">{boxProducts[currentProductIdx].productCode}</p>
+              <p className="text-xs text-slate-500 mt-1">Unidad: {boxProducts[currentProductIdx].productUnit} · Esperado: {boxProducts[currentProductIdx].expectedQty ?? "?"} unds</p>
             </div>
+            <div className="flex gap-2">
+              <button onClick={() => { setProductCorrect(true); setProductQty(boxProducts[currentProductIdx].expectedQty?.toString() ?? ""); }}
+                className={`flex-1 rounded-lg border-2 py-3 text-sm font-medium min-h-[48px] ${productCorrect ? "border-green-500 bg-green-50 text-green-700" : "border-slate-200 text-slate-500"}`}>
+                <CheckCircle2 size={16} className="inline mr-1" /> Correcto
+              </button>
+              <button onClick={() => { setProductCorrect(false); setProductQty("0"); }}
+                className={`flex-1 rounded-lg border-2 py-3 text-sm font-medium min-h-[48px] ${!productCorrect ? "border-red-500 bg-red-50 text-red-700" : "border-slate-200 text-slate-500"}`}>
+                <XCircle size={16} className="inline mr-1" /> Incorrecto
+              </button>
+            </div>
+            {productCorrect && (
+              <div><label className="mb-1 block text-xs font-medium text-slate-500">Cantidad</label>
+                <Input type="number" inputMode="decimal" className="h-11 text-lg" value={productQty} onChange={(e) => setProductQty(e.target.value)} min={0} /></div>
+            )}
+            <div><label className="mb-1 block text-xs font-medium text-slate-500">Observación (opcional)</label>
+              <textarea className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm h-16 resize-none"
+                placeholder={productCorrect ? "Ej: empaque dañado..." : "Ej: oxidado, producto equivocado..."} value={productNotes} onChange={(e) => setProductNotes(e.target.value)} /></div>
+            <Button className="h-12 w-full" onClick={confirmCurrentProduct}>
+              {currentProductIdx < boxProducts.length - 1 ? "Siguiente producto" : "Finalizar confirmación"}
+            </Button>
+          </CardContent></Card>
+        </div>
+      )}
+
+      {step === "ASSIGN" && correctProducts()[currentProductIdx] && (
+        <div className="space-y-3">
+          <div className="rounded-lg bg-slate-100 px-3 py-2 text-center text-xs text-slate-500">
+            Ubicando: {correctProducts()[currentProductIdx].product.productDescription} ({currentProductIdx + 1}/{correctProducts().length})
           </div>
-
-          <div className="flex gap-1 rounded-lg border border-slate-200 p-1">
-            <button onClick={() => setCountMode("box")} className={`flex-1 rounded-md py-2.5 text-sm font-medium min-h-[44px] ${countMode === "box" ? "bg-teal-600 text-white" : "text-slate-600"}`}>
-              <Package size={14} className="inline mr-1" /> Caja
-            </button>
-            <button onClick={() => setCountMode("legacy")} className={`flex-1 rounded-md py-2.5 text-sm font-medium min-h-[44px] ${countMode === "legacy" ? "bg-teal-600 text-white" : "text-slate-600"}`}>
-              <ScanBarcode size={14} className="inline mr-1" /> Producto
-            </button>
-          </div>
-
-          <Card>
-            <CardContent className="p-3">
-              {countMode === "box" ? (
-                <div className="space-y-3">
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Importación</label>
-                    <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxImportId} onChange={(e) => void handleImportSelect(e.target.value)} disabled={loadingImports}>
-                      <option value="">{loadingImports ? "Cargando..." : "Seleccionar importación..."}</option>
-                      {imports.map((imp) => <option key={imp.id} value={imp.id}>{imp.code}{imp.description ? ` — ${imp.description}` : ""}</option>)}
-                    </select>
-                  </div>
-
-                  {selectedBoxImportId && !skipPallet && pallets.length > 0 && (
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-500">Pallet</label>
-                      <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxPalletId} onChange={(e) => void handlePalletSelect(e.target.value)} disabled={loadingPallets}>
-                        <option value="">{loadingPallets ? "Cargando..." : "Seleccionar pallet..."}</option>
-                        {pallets.map((p) => <option key={p.id} value={p.id}>{p.number}</option>)}
-                      </select>
-                    </div>
-                  )}
-
-                  {selectedBoxImportId && (skipPallet || pallets.length === 0 || selectedBoxPalletId) && (
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-500">Caja</label>
-                      {loadingBoxes ? (
-                        <div className="flex items-center gap-2 py-3 text-sm text-slate-400"><LoaderCircle className="animate-spin" size={14} /> Cargando cajas...</div>
-                      ) : (
-                        <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxId} onChange={(e) => handleBoxSelect(e.target.value)}>
-                          <option value="">Seleccionar caja...</option>
-                          {boxes.map((b) => <option key={b.id} value={b.id}>Caja {b.number}</option>)}
-                        </select>
-                      )}
-                    </div>
-                  )}
-
-                  {resolvedBox && (
-                    <div className="rounded-lg border border-teal-200 bg-teal-50 p-3 space-y-3">
-                      <div>
-                        <p className="text-sm font-bold text-teal-800">
-                          {resolvedBox.import}{resolvedBox.pallet ? ` / ${resolvedBox.pallet}` : ""} / {resolvedBox.number}
-                        </p>
-                        {resolvedBox.expectedPosition && activePosition && resolvedBox.expectedPosition.code === activePosition.code && (
-                          <span className="inline-block mt-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">Esta posición</span>
-                        )}
-                        {resolvedBox.expectedPosition && activePosition && resolvedBox.expectedPosition.code !== activePosition.code && (
-                          <span className="inline-block mt-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Esperada: {resolvedBox.expectedPosition.code}</span>
-                        )}
+          <Card><CardContent className="p-3 space-y-3">
+            <p className="text-sm font-medium text-slate-700">Asignar ubicación</p>
+            <p className="text-xs text-slate-500">Cantidad total: {correctProducts()[currentProductIdx].quantity} · Asignada: {assignedQtyForProduct(currentProductIdx)} · Restante: {correctProducts()[currentProductIdx].quantity - assignedQtyForProduct(currentProductIdx)}</p>
+            <div className="flex gap-2">
+              <Input placeholder="Código posición" className="h-11 flex-1" value={assignPositionCode} onChange={(e) => setAssignPositionCode(e.target.value.toUpperCase())} />
+              <Input type="number" inputMode="decimal" placeholder="Cant." className="h-11 w-24" value={assignQty} onChange={(e) => setAssignQty(e.target.value)} min={0} />
+            </div>
+            <Button className="h-12 w-full" onClick={assignLocation} disabled={!assignPositionCode.trim() || parseFloat(assignQty || "0") <= 0}>
+              <MapPin size={16} className="mr-1" /> Asignar aquí
+            </Button>
+            {availablePositions.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-slate-500 mb-1">Posiciones disponibles</p>
+                <div className="max-h-48 space-y-1 overflow-y-auto">
+                  {availablePositions.map((sp) => (
+                    <button key={sp.id} onClick={() => { setAssignPositionCode(sp.position.code); }}
+                      className={`w-full flex items-center justify-between rounded-lg border px-3 py-2 text-sm text-left min-h-[44px] ${assignPositionCode === sp.position.code ? "border-teal-500 bg-teal-50" : "border-slate-200 hover:bg-slate-50"}`}>
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{sp.position.code}</p>
+                        <p className="text-xs text-slate-400 truncate">{sp.position.rack.zone.floor.name} / {sp.position.rack.name}</p>
                       </div>
-                      <div className="space-y-2">
-                        {boxProducts.map((bp, i) => (
-                          <div key={bp.productId} className="flex items-center gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{bp.productDescription}</p>
-                              <p className="text-xs text-slate-500">{bp.productCode} · {bp.productUnit}</p>
-                            </div>
-                            <Input className="w-24 text-right h-11" placeholder="Cant." type="number" inputMode="decimal" value={bp.quantity} onChange={(e) => setBoxProducts((prev) => prev.map((p, j) => j === i ? { ...p, quantity: e.target.value } : p))} min={0} />
-                          </div>
-                        ))}
-                      </div>
-                      <Button className="h-12 w-full text-base" onClick={() => void registerBoxCount()} disabled={busy || boxProducts.some((p) => !p.quantity || parseFloat(p.quantity) <= 0)}>
-                        {busy ? <LoaderCircle className="animate-spin" size={16} /> : <Package size={16} />} Registrar caja
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <Input ref={inputRef} placeholder="Código de producto" value={scannedCode} onChange={(e) => handleScanInput(e.target.value)} className="h-11" />
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setUsePackage(!usePackage)} className={`min-h-[44px] ${usePackage ? "bg-teal-50" : ""}`}>
-                      <SquareStack size={14} /> {usePackage ? "Cajas + sueltos" : "Cantidad directa"}
-                    </Button>
-                  </div>
-                  {usePackage ? (
-                    <>
-                      <div className="grid grid-cols-3 gap-2">
-                        <Input placeholder="Cajas" type="number" inputMode="numeric" value={packageCount} onChange={(e) => setPackageCount(e.target.value)} min={0} className="h-11" />
-                        <Input placeholder="Unds/caja" type="number" inputMode="numeric" value={unitsPerPackage} onChange={(e) => setUnitsPerPackage(e.target.value)} min={0} className="h-11" />
-                        <Input placeholder="Sueltas" type="number" inputMode="numeric" value={looseQty} onChange={(e) => setLooseQty(e.target.value)} min={0} className="h-11" />
-                      </div>
-                      {packageCount && unitsPerPackage && (
-                        <p className="text-xs text-slate-500">Total: {parseFloat(packageCount || "0") * parseFloat(unitsPerPackage || "0") + parseFloat(looseQty || "0")} unidades</p>
-                      )}
-                    </>
-                  ) : (
-                    <Input placeholder="Cantidad" type="number" inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} min={0} className="h-11" />
-                  )}
-                  <Button className="h-12 w-full text-base" onClick={() => void registerCount()} disabled={busy || !scannedCode.trim()}>
-                    {busy ? <LoaderCircle className="animate-spin" size={16} /> : <Package size={16} />} Registrar
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {events.length > 0 && (
-            <Card>
-              <CardContent className="p-3">
-                <p className="mb-2 text-xs font-medium text-slate-500">Conteos ({events.length})</p>
-                <div className="max-h-40 space-y-1 overflow-y-auto">
-                  {events.map((ev, i) => (
-                    <div key={i} className="flex items-center justify-between rounded bg-slate-50 px-3 py-2 text-sm">
-                      <span className="font-medium truncate">{ev.productCode}</span>
-                      <span className="text-slate-600 shrink-0">{ev.quantity} unds</span>
-                    </div>
+                      <ScanBarcode size={14} className="shrink-0 text-slate-400" />
+                    </button>
                   ))}
                 </div>
-                <p className="border-t mt-2 pt-2 text-right text-xs font-medium text-slate-600">
-                  Total: {events.reduce((s, e) => s + e.quantity, 0)} unidades
-                </p>
-                {!showUndo ? (
-                  <Button size="sm" variant="outline" className="mt-2 w-full min-h-[44px]" onClick={() => setShowUndo(true)}>
-                    <RotateCcw size={12} /> Deshacer último
-                  </Button>
-                ) : (
-                  <div className="mt-2 space-y-2">
-                    <Input placeholder="Motivo de anulación" value={undoReason} onChange={(e) => setUndoReason(e.target.value)} className="h-11" />
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="destructive" className="min-h-[44px]" onClick={() => void undoLastEvent()} disabled={busy || !undoReason.trim()}>Confirmar</Button>
-                      <Button size="sm" variant="outline" className="min-h-[44px]" onClick={() => { setShowUndo(false); setUndoReason(""); }}>Cancelar</Button>
-                    </div>
+              </div>
+            )}
+          </CardContent></Card>
+          {correctProducts()[currentProductIdx].locations.length > 0 && (
+            <Card><CardContent className="p-3 space-y-2">
+              <p className="text-xs font-medium text-slate-500">Ubicaciones asignadas</p>
+              {correctProducts()[currentProductIdx].locations.map((loc, i) => (
+                <div key={i} className="flex items-center justify-between rounded bg-green-50 px-3 py-2 text-sm">
+                  <span className="font-medium">{loc.positionCode}</span><span className="text-green-700">{loc.quantity} unds</span>
+                </div>
+              ))}
+            </CardContent></Card>
+          )}
+          {correctProducts()[currentProductIdx].quantity - assignedQtyForProduct(currentProductIdx) <= 0 && (
+            <Button className="h-12 w-full" variant="outline" onClick={nextProductAssign}>
+              {currentProductIdx < correctProducts().length - 1 ? "Siguiente producto" : "Ver resumen"}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {step === "SUMMARY" && (
+        <div className="space-y-3">
+          <Card><CardContent className="p-3 space-y-3">
+            <p className="text-sm font-medium text-slate-700">Resumen</p>
+            {confirmedProducts.map((cp, i) => (
+              <div key={i} className={`rounded-lg border p-3 ${cp.correct ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold">{cp.product.productDescription}</p>
+                  {cp.correct ? <CheckCircle2 size={14} className="text-green-500" /> : <XCircle size={14} className="text-red-500" />}
+                </div>
+                <p className="text-xs text-slate-500">{cp.product.productCode} · {cp.quantity} unds</p>
+                {cp.notes && <p className="text-xs text-slate-500 italic mt-1">Obs: {cp.notes}</p>}
+                {cp.correct && cp.locations.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {cp.locations.map((loc, j) => (
+                      <div key={j} className="flex items-center justify-between rounded bg-white px-2 py-1 text-xs">
+                        <span className="font-medium">{loc.positionCode}</span><span>{loc.quantity} unds</span>
+                      </div>
+                    ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="fixed bottom-0 left-0 right-0 z-20 flex gap-2 border-t border-slate-200 bg-white p-3">
-            <Button variant="destructive" className="min-h-[48px] px-4" onClick={cancelPosition}>Cancelar</Button>
-            <Button className="ml-auto min-h-[48px] px-6 text-base" onClick={() => void completePosition()} disabled={busy}>
-              <CheckCircle2 size={16} className="mr-1" /> {events.length === 0 ? "Vacío" : "Completar"}
+              </div>
+            ))}
+          </CardContent></Card>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1 h-12" onClick={() => { resetIdentify(); setStep("IDENTIFY"); }}>Siguiente caja</Button>
+            <Button className="flex-1 h-12" onClick={() => void registerAllCounts()} disabled={busy}>
+              {busy ? <LoaderCircle className="animate-spin" size={16} /> : <Package size={16} />} Registrar todo
             </Button>
           </div>
+          <Button className="w-full h-12" variant="destructive" onClick={() => void completeSession()} disabled={busy}>Finalizar sesión</Button>
         </div>
       )}
     </div>

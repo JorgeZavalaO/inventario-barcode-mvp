@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.43.0 (2026-07-23)
+
+### Changed (Flujo producto → ubicación)
+
+- **Nuevo flujo de sesión:** La vista de escaneo V2 ahora es product-centric en vez de position-centric. Al entrar a la sesión, se va directo al formulario de importación/caja sin lista de posiciones.
+- **Confirmación de producto:** Por cada producto de la caja, se muestra código, descripción, unidad y cantidad esperada. El usuario confirma si es correcto o incorrecto con observación opcional.
+- **Asignación de ubicación:** Después de confirmar productos, se asignan a posiciones de la sesión. Se puede seleccionar de la lista o escribir/escanear código de posición. Cada producto puede ubicarse en varias posiciones con cantidades distintas.
+- **Resumen por caja:** Muestra todos los productos confirmados con sus ubicaciones asignadas. Opción de siguiente caja o finalizar sesión.
+- **Campo notes en CountEvent:** Los conteos ahora aceptan una observación opcional (producto dañado, oxidado, equivocado, etc.).
+- **Round automático:** Al registrar un conteo sin `countRoundId`, se crea automáticamente una ronda OPEN para la posición.
+- **Pallet opcional:** El pallet no es requerido para resolver cajas. Si una importación no tiene pallets, se salta directamente al selector de cajas.
+
 ## 0.42.0 (2026-07-23)
 
 ### Added (Sesiones V2 — Zona, Persistencia, Flujo de Cajas)
