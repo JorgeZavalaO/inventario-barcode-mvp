@@ -22,7 +22,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         },
         rounds: {
           include: {
-            events: { where: { reversedAt: null } },
+            events: {
+              where: { reversedAt: null },
+              include: { product: { select: { code: true } } },
+            },
           },
           orderBy: { roundNumber: "asc" },
         },
@@ -59,7 +62,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
 
       const productsInPosition = roundTotals.length > 0
         ? sp.rounds[sp.rounds.length - 1].events.map((e: any) => ({
-            code: e.productId,
+            code: e.product.code,
             quantity: Number(e.quantity),
           }))
         : [];

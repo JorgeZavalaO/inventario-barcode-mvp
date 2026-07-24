@@ -29,6 +29,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
           include: { product: true },
           orderBy: { createdAt: "desc" },
         },
+        sessionParticipants: {
+          include: { operator: { select: { id: true, name: true } } },
+          orderBy: { joinedAt: "asc" },
+        },
         _count: { select: { countEvents: true, boxCountEntries: true } },
       },
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
@@ -10,12 +10,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type CreateSessionResponse = { session: { id: string } };
+type Operator = { id: string; name: string };
 
 export default function NewV3SessionPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState("");
+  const [operators, setOperators] = useState<Operator[]>([]);
+  const [operatorId, setOperatorId] = useState("");
+  const [secondOperatorId, setSecondOperatorId] = useState("");
+
+  useEffect(() => {
+    void apiFetch<{ operators: Operator[] }>("/api/operators")
+      .then((data) => setOperators(data.operators))
+      .catch(() => undefined);
+  }, []);
 
   const create = useCallback(async () => {
     if (!name.trim()) {
@@ -27,7 +37,11 @@ export default function NewV3SessionPage() {
     try {
       const result = await apiFetch<CreateSessionResponse>("/api/sessions/v3", {
         method: "POST",
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({
+          name: name.trim(),
+          operatorId: operatorId || undefined,
+          secondOperatorId: secondOperatorId || undefined,
+        }),
       });
       router.push(`/sessions/v3/${result.session.id}/scan`);
     } catch (error) {
@@ -35,7 +49,7 @@ export default function NewV3SessionPage() {
     } finally {
       setCreating(false);
     }
-  }, [name, router]);
+  }, [name, operatorId, secondOperatorId, router]);
 
   return (
     <div className="mx-auto max-w-xl space-y-4 p-4">
@@ -73,6 +87,34 @@ export default function NewV3SessionPage() {
               }}
               autoFocus
             />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Operario 1</label>
+              <select
+                value={operatorId}
+                onChange={(e) => {
+                  setOperatorId(e.target.value);
+                  if (secondOperatorId === e.target.value) setSecondOperatorId("");
+                }}
+                className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              >
+                <option value="">Seleccionar operario...</option>
+                {operators.map((operator) => <option key={operator.id} value={operator.id}>{operator.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Operario 2 (opcional)</label>
+              <select
+                value={secondOperatorId}
+                onChange={(e) => setSecondOperatorId(e.target.value)}
+                className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              >
+                <option value="">Seleccionar operario...</option>
+                {operators.filter((operator) => operator.id !== operatorId).map((operator) => <option key={operator.id} value={operator.id}>{operator.name}</option>)}
+              </select>
+            </div>
           </div>
 
           <div className="rounded-lg bg-slate-50 p-4 space-y-2">

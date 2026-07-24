@@ -40,16 +40,29 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
 
     const snapshots = await prisma.sessionStockSnapshot.findMany({
       where: { sessionId: id },
-      include: { product: { select: { code: true, description: true } } },
+      include: { product: { select: { code: true, description: true, unit: true } } },
     });
 
     const rows: any[] = [];
     const summaryRows: any[] = [];
+    const productSummary = new Map<string, { code: string; description: string; unit: string; expected: number; counted: number }>();
 
     for (const sp of positions) {
       const pos = sp.position;
       const path = pos ? `${pos.rack.zone.floor.warehouse.code}-${pos.rack.zone.floor.code}-${pos.rack.code}` : "";
       const posSnapshots = snapshots.filter((s) => s.positionId === sp.positionId);
+
+      for (const snapshot of posSnapshots) {
+        const consolidated = productSummary.get(snapshot.product.code) ?? {
+          code: snapshot.product.code,
+          description: snapshot.product.description,
+          unit: snapshot.product.unit,
+          expected: 0,
+          counted: 0,
+        };
+        consolidated.expected += Number(snapshot.theoreticalStock);
+        productSummary.set(snapshot.product.code, consolidated);
+      }
 
       for (const round of sp.rounds) {
         const operatorName = "—";
@@ -71,6 +84,15 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
             "Fecha conteo": formatDateLima(event.createdAt),
             "Hora conteo": formatTimeLima(event.createdAt),
           });
+          const consolidated = productSummary.get(event.product.code) ?? {
+            code: event.product.code,
+            description: event.product.description,
+            unit: event.product.unit,
+            expected: 0,
+            counted: 0,
+          };
+          consolidated.counted += Number(event.quantity);
+          productSummary.set(event.product.code, consolidated);
         }
 
         if (round.events.length === 0) {
@@ -117,6 +139,23 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
 
     const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
     XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen por posición");
+
+    const wsProductSummary = XLSX.utils.json_to_sheet(
+      Array.from(productSummary.values()).map((product) => ({
+        "Código producto": product.code,
+        "Descripción producto": product.description,
+        Unidad: product.unit,
+        "Total esperado": product.expected,
+        "Total contado": product.counted,
+        Diferencia: product.counted - product.expected,
+        Resultado: product.counted - product.expected > 0
+          ? "SOBRANTE"
+          : product.counted - product.expected < 0
+            ? "FALTANTE"
+            : "COINCIDE",
+      })),
+    );
+    XLSX.utils.book_append_sheet(wb, wsProductSummary, "Resumen por producto");
 
     const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 

@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 function statusBadge(status: InventorySession["status"]) {
   if (status === "OPEN")
@@ -49,9 +50,12 @@ export function AppSessions() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [operators, setOperators] = useState<{ id: string; name: string }[]>([]);
   const [form, setForm] = useState({
     name: `Inventario ${new Intl.DateTimeFormat("es-PE", { month: "long", year: "numeric", timeZone: "America/Lima" }).format(new Date())}`,
     warehouse: "Almacén principal",
+    operatorId: "",
+    secondOperatorId: "",
   });
 
   const load = useCallback(async () => {
@@ -76,6 +80,12 @@ export function AppSessions() {
   useEffect(() => {
     window.setTimeout(() => void load(), 0);
   }, [load]);
+
+  useEffect(() => {
+    void apiFetch<{ operators: { id: string; name: string }[] }>("/api/operators")
+      .then((data) => setOperators(data.operators))
+      .catch(() => undefined);
+  }, []);
 
   async function createSession(event: FormEvent) {
     event.preventDefault();
@@ -166,6 +176,28 @@ export function AppSessions() {
                   }
                   required
                 />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Operario 1</Label>
+                  <SearchableSelect
+                    options={operators.map((operator) => ({ value: operator.id, label: operator.name }))}
+                    value={form.operatorId}
+                    onChange={(value) => setForm({ ...form, operatorId: value, secondOperatorId: form.secondOperatorId === value ? "" : form.secondOperatorId })}
+                    placeholder="Seleccionar operario..."
+                    searchPlaceholder="Filtrar operarios..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Operario 2 (opcional)</Label>
+                  <SearchableSelect
+                    options={operators.filter((operator) => operator.id !== form.operatorId).map((operator) => ({ value: operator.id, label: operator.name }))}
+                    value={form.secondOperatorId}
+                    onChange={(value) => setForm({ ...form, secondOperatorId: value })}
+                    placeholder="Seleccionar operario..."
+                    searchPlaceholder="Filtrar operarios..."
+                  />
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={busy}>
                 {busy ? (

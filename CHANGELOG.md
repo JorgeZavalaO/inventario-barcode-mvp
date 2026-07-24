@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.50.0 (2026-07-24)
+
+### Added
+
+- **Operarios de sesión:** Los formularios de sesiones V1, V2 y V3 permiten seleccionar un operario principal y un segundo operario opcional desde el catálogo existente.
+- **Catálogo de operarios:** Nuevo endpoint `GET /api/operators` para cargar la lista seleccionable.
+- **Consolidación de reportes:** Las exportaciones V2 y V3 incluyen una hoja `Resumen por producto`, agrupada por código de producto.
+
+### Changed
+
+- **Trazabilidad por ubicación:** El detalle de reportes conserva la posición física en V2 y la ruta Importación / Pallet / Caja en V3, aunque un mismo código aparezca en varias ubicaciones.
+- **Revisión V2:** El código mostrado para cada evento ahora usa el código real del producto.
+
 ## 0.49.1 (2026-07-24)
 
 ### Changed

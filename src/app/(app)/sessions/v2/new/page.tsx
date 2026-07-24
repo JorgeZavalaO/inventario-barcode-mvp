@@ -23,6 +23,7 @@ type RawFloor = { id: string; code: string; name: string; zones?: RawZone[] };
 type RawZone = { id: string; code: string; name: string; racks?: RawRack[] };
 type RawRack = { id: string; code: string; name: string };
 type WarehouseResponse = { warehouses: RawWarehouse[] };
+type Operator = { id: string; name: string };
 type CreateSessionResponse = { session: { id: string } };
 
 export default function NewV2SessionPage() {
@@ -33,15 +34,19 @@ export default function NewV2SessionPage() {
   const [allRacks, setAllRacks] = useState<{ id: string; code: string; name: string; floorName: string; positionCount: number }[]>([]);
   const [positions, setPositions] = useState<ActivePosition[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [operators, setOperators] = useState<Operator[]>([]);
+  const [operatorId, setOperatorId] = useState("");
+  const [secondOperatorId, setSecondOperatorId] = useState("");
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState("");
 
   useEffect(() => { (async () => {
     try {
-      const [whData, posData] = await Promise.all([
+      const [whData, posData, operatorData] = await Promise.all([
         apiFetch<WarehouseResponse>("/api/warehouses"),
         apiFetch<{ positions: ActivePosition[] }>("/api/positions"),
+        apiFetch<{ operators: Operator[] }>("/api/operators"),
       ]);
       const positionCountByRack = new Map<string, number>();
       for (const position of posData.positions) {
@@ -68,6 +73,7 @@ export default function NewV2SessionPage() {
       );
       setAllRacks(racks);
       setPositions(posData.positions);
+      setOperators(operatorData.operators);
     } catch { /* silent */ }
     finally { setLoading(false); }
   })(); }, []);
@@ -82,15 +88,17 @@ export default function NewV2SessionPage() {
         method: "POST",
         body: JSON.stringify({
           name: name.trim(),
-          scopeType: requestScopeType,
-          scopeIds: requestScopeType !== "total" ? selectedIds : undefined,
-        }),
+           scopeType: requestScopeType,
+           scopeIds: requestScopeType !== "total" ? selectedIds : undefined,
+           operatorId: operatorId || undefined,
+           secondOperatorId: secondOperatorId || undefined,
+         }),
       });
       router.push(`/sessions/v2/${result.session.id}/scan`);
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Error al crear");
     } finally { setCreating(false); }
-  }, [name, scopeType, selectedIds, router]);
+  }, [name, scopeType, selectedIds, operatorId, secondOperatorId, router]);
 
   function toggleId(id: string) {
     setSelectedIds((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]);
@@ -134,7 +142,35 @@ export default function NewV2SessionPage() {
         <CardContent className="space-y-4 pt-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Nombre de la sesión</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Inventario mensual Piso 1" className="h-11" />
+           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Inventario mensual Piso 1" className="h-11" />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Operario 1</label>
+              <select
+                value={operatorId}
+                onChange={(e) => {
+                  setOperatorId(e.target.value);
+                  if (secondOperatorId === e.target.value) setSecondOperatorId("");
+                }}
+                className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              >
+                <option value="">Seleccionar operario...</option>
+                {operators.map((operator) => <option key={operator.id} value={operator.id}>{operator.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Operario 2 (opcional)</label>
+              <select
+                value={secondOperatorId}
+                onChange={(e) => setSecondOperatorId(e.target.value)}
+                className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              >
+                <option value="">Seleccionar operario...</option>
+                {operators.filter((operator) => operator.id !== operatorId).map((operator) => <option key={operator.id} value={operator.id}>{operator.name}</option>)}
+              </select>
+            </div>
           </div>
 
           <div>

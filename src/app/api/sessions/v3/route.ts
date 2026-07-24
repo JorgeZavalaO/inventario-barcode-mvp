@@ -7,7 +7,12 @@ import { prisma } from "@/lib/prisma";
 
 const createSchema = z.object({
   name: z.string().trim().min(3).max(120),
-});
+  operatorId: z.string().uuid().optional(),
+  secondOperatorId: z.string().uuid().optional(),
+}).refine(
+  (data) => !data.operatorId || !data.secondOperatorId || data.operatorId !== data.secondOperatorId,
+  { message: "Los dos operarios deben ser diferentes" },
+);
 
 function sessionCode() {
   return `V3-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
@@ -20,6 +25,9 @@ export async function POST(request: NextRequest) {
 
     const body = createSchema.parse(await request.json());
     const sessionId = randomUUID();
+    const operatorIds = [body.operatorId, body.secondOperatorId].filter(
+      (value): value is string => Boolean(value),
+    );
     let code = sessionCode();
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -28,20 +36,40 @@ export async function POST(request: NextRequest) {
       code = sessionCode();
     }
 
-    const session = await prisma.inventorySession.create({
-      data: {
-        id: sessionId,
-        code,
-        name: body.name,
-        warehouse: "Almacén principal",
-        status: "OPEN",
-        schemaVersion: 3,
-      },
+    const session = await prisma.$transaction(async (tx) => {
+      const created = await tx.inventorySession.create({
+        data: {
+          id: sessionId,
+          code,
+          name: body.name,
+          warehouse: "Almacén principal",
+          status: "OPEN",
+          schemaVersion: 3,
+        },
+      });
+
+      if (operatorIds.length > 0) {
+        const operators = await tx.operator.findMany({
+          where: { id: { in: operatorIds } },
+          select: { id: true },
+        });
+        if (operators.length !== operatorIds.length) {
+          throw new Error("Uno de los operarios seleccionados no existe");
+        }
+        await tx.sessionParticipant.createMany({
+          data: operatorIds.map((operatorId) => ({ sessionId: created.id, operatorId })),
+        });
+      }
+
+      return created;
     });
 
     return NextResponse.json({ session }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: error.issues[0]?.message }, { status: 400 });
+    if (error instanceof Error && error.message.includes("operarios")) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     return apiError(error);
   }
 }

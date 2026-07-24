@@ -36,6 +36,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
 
     const rows: any[] = [];
     const summaryRows: any[] = [];
+    const productSummary = new Map<string, { code: string; description: string; unit: string; expected: number; counted: number }>();
 
     const boxMap = new Map<string, typeof boxEntries>();
     for (const entry of boxEntries) {
@@ -78,6 +79,15 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
           counted: 0,
           product: bp.product,
         });
+        const consolidated = productSummary.get(bp.productId) ?? {
+          code: bp.product.code,
+          description: bp.product.description,
+          unit: bp.product.unit,
+          expected: 0,
+          counted: 0,
+        };
+        consolidated.expected += Number(bp.expectedQty ?? 0);
+        productSummary.set(bp.productId, consolidated);
       }
       for (const entry of entries) {
         for (const event of entry.countEvents) {
@@ -85,6 +95,15 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
           if (existing) {
             existing.counted += Number(event.quantity);
           }
+          const consolidated = productSummary.get(event.productId) ?? {
+            code: event.product.code,
+            description: event.product.description,
+            unit: event.product.unit,
+            expected: 0,
+            counted: 0,
+          };
+          consolidated.counted += Number(event.quantity);
+          productSummary.set(event.productId, consolidated);
         }
       }
 
@@ -112,6 +131,23 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
 
     const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
     XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen por caja");
+
+    const wsProductSummary = XLSX.utils.json_to_sheet(
+      Array.from(productSummary.values()).map((product) => ({
+        "Código producto": product.code,
+        "Descripción producto": product.description,
+        Unidad: product.unit,
+        "Total esperado": product.expected,
+        "Total contado": product.counted,
+        Diferencia: product.counted - product.expected,
+        Resultado: product.counted - product.expected > 0
+          ? "SOBRANTE"
+          : product.counted - product.expected < 0
+            ? "FALTANTE"
+            : "COINCIDE",
+      })),
+    );
+    XLSX.utils.book_append_sheet(wb, wsProductSummary, "Resumen por producto");
 
     const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
 

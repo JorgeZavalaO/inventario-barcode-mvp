@@ -7,7 +7,12 @@ import { apiError } from "@/lib/http";
 const sessionSchema = z.object({
   name: z.string().trim().min(3, "El nombre debe tener al menos 3 caracteres").max(120),
   warehouse: z.string().trim().min(2).max(120).default("Almacén principal"),
-});
+  operatorId: z.string().uuid().optional(),
+  secondOperatorId: z.string().uuid().optional(),
+}).refine(
+  (data) => !data.operatorId || !data.secondOperatorId || data.operatorId !== data.secondOperatorId,
+  { message: "Los dos operarios deben ser diferentes" },
+);
 
 function sessionCode() {
   return `INV-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
@@ -52,6 +57,9 @@ export async function POST(request: NextRequest) {
     await ensureDatabase();
     const body = sessionSchema.parse(await request.json());
     const sql = getDb();
+    const operatorIds = [body.operatorId, body.secondOperatorId].filter(
+      (value): value is string => Boolean(value),
+    );
     const id = randomUUID();
     let code = sessionCode();
 
@@ -68,6 +76,19 @@ export async function POST(request: NextRequest) {
         RETURNING id, code, name, warehouse, status, created_at, closed_at
       `;
 
+      for (const operatorId of operatorIds) {
+        const [operator] = await transaction`
+          SELECT id FROM operators WHERE id = ${operatorId}
+        `;
+        if (!operator) throw new Error("Uno de los operarios seleccionados no existe");
+
+        await transaction`
+          INSERT INTO session_participants (session_id, operator_id)
+          VALUES (${id}, ${operatorId})
+          ON CONFLICT (session_id, operator_id) DO NOTHING
+        `;
+      }
+
       await transaction`
         INSERT INTO session_products (session_id, product_id, theoretical_stock)
         SELECT ${id}, id, theoretical_stock
@@ -83,6 +104,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues[0]?.message }, { status: 400 });
+    }
+    if (error instanceof Error && error.message.includes("operarios")) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return apiError(error);
   }
