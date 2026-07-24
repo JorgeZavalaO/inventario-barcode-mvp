@@ -4,31 +4,18 @@ import { z } from "zod";
 import { apiError } from "@/lib/http";
 import { requireRole } from "@/server/guards";
 import { prisma } from "@/lib/prisma";
-
-const importSchema = z.object({
-  products: z.array(
-    z.object({
-      code: z.string().trim().min(1),
-      barcode: z.string().trim().optional(),
-      description: z.string().trim().min(1),
-      unit: z.string().trim().optional(),
-      category: z.string().trim().optional(),
-      supplierCode: z.string().trim().optional(),
-      theoreticalStock: z.coerce.number().min(0).optional(),
-      importCode: z.string().trim().optional(),
-      palletNumber: z.string().trim().optional(),
-      boxNumber: z.string().trim().optional(),
-      expectedQty: z.coerce.number().min(0).optional(),
-    }),
-  ).min(1).max(6500),
-});
+import { productImportSchema, validateProductImport } from "@/server/product-import-validation";
 
 export async function POST(request: NextRequest) {
   try {
     const auth = await requireRole("ADMIN", "SUPERVISOR");
     if (!auth.authorized) return auth.response;
 
-    const { products } = importSchema.parse(await request.json());
+    const { products } = productImportSchema.parse(await request.json());
+    const validation = await validateProductImport(products);
+    if (!validation.valid) {
+      return NextResponse.json({ error: "La carga contiene conflictos", validation }, { status: 400 });
+    }
     let imported = 0;
     const errors: string[] = [];
     const createdBoxes = { imports: 0, pallets: 0, boxes: 0, links: 0 };
@@ -112,8 +99,11 @@ export async function POST(request: NextRequest) {
               });
               const productRecord = await prisma.product.findUnique({ where: { code: product.code } });
               if (box && productRecord) {
+                const existingLink = await prisma.boxProduct.findUnique({
+                  where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
+                });
                 const existingLinks = await prisma.boxProduct.count({ where: { boxId: box.id } });
-                if (existingLinks < 3) {
+                if (existingLink || existingLinks < 3) {
                   await prisma.boxProduct.upsert({
                     where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
                     update: { expectedQty: product.expectedQty ?? null },

@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.55.0 (2026-07-24)
+
+### Changed
+
+- **Carga masiva de productos:** El procesamiento aumentó de 200 a 1,000 filas por lote para reducir solicitudes y overhead de red en archivos grandes.
+
+## 0.54.0 (2026-07-24)
+
+### Added
+
+- **Validación previa de productos:** La carga CSV/Excel ahora muestra conflictos y advertencias antes de escribir en la base de datos.
+- **Carga incremental:** El mismo código de producto puede aparecer en distintas cajas; se valida por ubicación y se conserva como un único producto de catálogo.
+
+### Changed
+
+- **Importación segura:** Se bloquean duplicados en la misma caja, barcodes asignados a otro producto, filas incompletas y cajas con más de 3 productos.
+- **Relaciones existentes:** Las relaciones producto-caja ya existentes se actualizan correctamente después de confirmar la carga.
+
 ## 0.53.0 (2026-07-24)
 
 ### Changed

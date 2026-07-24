@@ -27,6 +27,7 @@ import {
 import { apiFetch } from "@/lib/client";
 import type { Product } from "@/lib/types";
 import { ImportProgress } from "@/components/import-progress";
+import { ImportPreview, type ProductImportRow, type ProductImportValidation } from "@/components/import-preview";
 import {
   Pagination,
   PaginationContent,
@@ -73,10 +74,9 @@ export function AppProducts() {
   const [error, setError] = useState("");
   const [productForm, setProductForm] = useState(initialProduct);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [importProducts, setImportProducts] = useState<
-    | { code: string; barcode?: string; description: string; unit?: string; category?: string; theoreticalStock?: number }[]
-    | null
-  >(null);
+  const [importProducts, setImportProducts] = useState<ProductImportRow[] | null>(null);
+  const [importPreview, setImportPreview] = useState<{ products: ProductImportRow[]; validation: ProductImportValidation } | null>(null);
+  const [validatingImport, setValidatingImport] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -289,7 +289,19 @@ export function AppProducts() {
       return;
     }
 
-    setImportProducts(normalized);
+    setValidatingImport(true);
+    setError("");
+    try {
+      const validation = await apiFetch<ProductImportValidation>("/api/products/import/validate", {
+        method: "POST",
+        body: JSON.stringify({ products: normalized }),
+      });
+      setImportPreview({ products: normalized, validation });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudo validar el archivo");
+    } finally {
+      setValidatingImport(false);
+    }
   }
   async function seedDemo() {
     setBusy(true);
@@ -358,8 +370,8 @@ export function AppProducts() {
             <Button variant="outline" size="sm" onClick={downloadTemplate}>
               <FileSpreadsheet size={16} /> Plantilla
             </Button>
-            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-              <Upload size={16} /> Importar CSV / Excel
+             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={validatingImport}>
+               {validatingImport ? <LoaderCircle size={16} className="animate-spin" /> : <Upload size={16} />} {validatingImport ? "Validando..." : "Importar CSV / Excel"}
             </Button>
             <input
               ref={fileInputRef}
@@ -674,6 +686,16 @@ export function AppProducts() {
           products={importProducts}
           onClose={() => setImportProducts(null)}
           onComplete={() => { void load(); }}
+        />
+      )}
+      {importPreview && !importProducts && (
+        <ImportPreview
+          validation={importPreview.validation}
+          onCancel={() => setImportPreview(null)}
+          onConfirm={() => {
+            setImportProducts(importPreview.products);
+            setImportPreview(null);
+          }}
         />
       )}
     </div>

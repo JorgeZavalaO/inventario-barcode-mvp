@@ -10,7 +10,7 @@ type ImportResult = {
   errors: string[];
 };
 
-const BATCH_SIZE = 200;
+const BATCH_SIZE = 1000;
 
 export function ImportProgress({
   products,
