@@ -34,9 +34,10 @@ function openDB(): Promise<IDBDatabase> {
 
 export function useOfflineQueue() {
   const [items, setItems] = useState<QueueItem[]>([]);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
   const syncRef = useRef(false);
-  const syncFnRef = useRef<(retryErrors?: boolean) => Promise<void>>(() => Promise.resolve());
 
   const loadItems = useCallback(async () => {
     try {
@@ -115,11 +116,8 @@ export function useOfflineQueue() {
     finally { syncRef.current = false; }
   }, []);
 
-  syncFnRef.current = sync;
-
   useEffect(() => {
-    setIsOnline(navigator.onLine);
-    const onOnline = () => { setIsOnline(true); void syncFnRef.current(); };
+    const onOnline = () => { setIsOnline(true); void sync(); };
     const onOffline = () => setIsOnline(false);
     const onQueueChanged = () => void loadItems();
     window.addEventListener("online", onOnline);
@@ -131,7 +129,7 @@ export function useOfflineQueue() {
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("offline-queue-changed", onQueueChanged);
     };
-  }, [loadItems]);
+  }, [loadItems, sync]);
 
   const add = useCallback(async (endpoint: string, method: string, body: object) => {
     const item: QueueItem = {
