@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.48.2 (2026-07-24)
+
+### Fixed
+
+- **Selectores completos:** Los textos largos de importaciones, pallets y cajas ya no se truncan. El valor seleccionado y las opciones ahora se muestran con ajuste de línea.
+
 ## 0.48.1 (2026-07-24)
 
 ### Fixed

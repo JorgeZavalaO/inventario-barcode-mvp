@@ -213,9 +213,9 @@ export default function V3ScanPage() {
   }, [load]);
 
   useEffect(() => {
-    if (step !== "IDENTIFY") return;
+    if (step !== "IDENTIFY" || (!hasOfflineData && !offlineData.isOnline)) return;
     void loadImports();
-  }, [step]);
+  }, [step, hasOfflineData, offlineData.isOnline]);
 
   useEffect(() => {
     if (!toast) return;

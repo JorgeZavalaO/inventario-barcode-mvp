@@ -60,6 +60,10 @@ export function SearchableSelect({
     }
   }, [open]);
 
+  function handleInputFocus() {
+    if (!open) setOpen(true);
+  }
+
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <button
@@ -67,28 +71,31 @@ export function SearchableSelect({
         disabled={disabled}
         onClick={() => { if (!disabled) { setOpen(!open); setSearch(""); } }}
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 text-sm transition-colors",
+          "flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-sm transition-colors",
           "hover:border-slate-300 focus:border-teal-500 focus:outline-none",
           disabled && "cursor-not-allowed opacity-50",
           !selectedLabel && "text-slate-400"
         )}
       >
-        <span className="truncate">{selectedLabel || placeholder}</span>
+        <span className="min-w-0 whitespace-normal break-words leading-5">{selectedLabel || placeholder}</span>
         <ChevronDown size={14} className={cn("shrink-0 text-slate-400 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div className="absolute z-50 mt-1 w-full max-w-[calc(100vw-2rem)] rounded-lg border border-slate-200 bg-white shadow-lg">
           <div className="flex items-center border-b border-slate-100 px-2">
             <Search size={14} className="shrink-0 text-slate-400" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="h-9 w-full bg-transparent px-2 text-sm outline-none placeholder:text-slate-400"
-            />
+             <input
+               ref={inputRef}
+               type="text"
+               value={search}
+               onChange={(e) => setSearch(e.target.value)}
+               onFocus={handleInputFocus}
+               placeholder={searchPlaceholder}
+               aria-label={searchPlaceholder}
+               autoComplete="off"
+               className="h-9 w-full bg-transparent px-2 text-sm outline-none placeholder:text-slate-400"
+             />
           </div>
           <ul className="max-h-60 overflow-y-auto py-1">
             {filtered.length === 0 ? (
@@ -100,7 +107,7 @@ export function SearchableSelect({
                     type="button"
                     onClick={() => { onChange(opt.value); setOpen(false); setSearch(""); }}
                     className={cn(
-                      "w-full px-3 py-2 text-left text-sm transition-colors hover:bg-slate-50",
+                      "w-full whitespace-normal break-words px-3 py-2 text-left text-sm leading-5 transition-colors hover:bg-slate-50",
                       opt.value === value && "bg-teal-50 font-medium text-teal-700"
                     )}
                   >
