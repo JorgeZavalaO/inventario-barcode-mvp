@@ -38,8 +38,16 @@ export default function V3SessionsPage() {
         "/api/sessions/v3",
       );
       setSessions(data.sessions);
+      localStorage.setItem("stockscan_sessions_v3", JSON.stringify(data.sessions));
     } catch {
-      /* silent */
+      const cached = localStorage.getItem("stockscan_sessions_v3");
+      if (cached) {
+        try {
+          setSessions(JSON.parse(cached) as V3Session[]);
+        } catch {
+          localStorage.removeItem("stockscan_sessions_v3");
+        }
+      }
     } finally {
       setLoading(false);
     }

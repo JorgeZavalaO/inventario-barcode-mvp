@@ -59,6 +59,8 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
       if (!resp.ok) throw new Error("Error al descargar datos");
       const data = await resp.json();
       const operators = data.operators ?? [];
+      const sessions = data.sessions ?? [];
+      localStorage.setItem("stockscan_sessions_v3", JSON.stringify(sessions));
 
       setProgress(10);
       setCurrentStage(`Procesando ${data.products.length} productos...`);

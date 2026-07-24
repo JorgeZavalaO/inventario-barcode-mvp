@@ -266,11 +266,24 @@ export default function V3ScanPage() {
       localStorage.setItem(`stockscan_session_v3_${id}`, JSON.stringify(data.session));
     } catch {
       const cached = localStorage.getItem(`stockscan_session_v3_${id}`);
+      let restored = false;
       if (cached) {
         try {
           setSession(JSON.parse(cached) as SessionData);
+          restored = true;
         } catch {
           localStorage.removeItem(`stockscan_session_v3_${id}`);
+        }
+      }
+      if (!restored) {
+        const cachedSessions = localStorage.getItem("stockscan_sessions_v3");
+        if (cachedSessions) {
+          try {
+            const summary = (JSON.parse(cachedSessions) as SessionData[]).find((item) => item.id === id);
+            if (summary) setSession(summary);
+          } catch {
+            localStorage.removeItem("stockscan_sessions_v3");
+          }
         }
       }
     } finally {

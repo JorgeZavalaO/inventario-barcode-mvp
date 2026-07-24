@@ -96,6 +96,8 @@ export function useOfflineData() {
       if (!resp.ok) throw new Error("Error al sincronizar");
       const data = await resp.json();
       const operators = data.operators ?? [];
+      const sessions = data.sessions ?? [];
+      localStorage.setItem("stockscan_sessions_v3", JSON.stringify(sessions));
 
       await Promise.all([
         offlineStore.replaceAll("products", data.products),

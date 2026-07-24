@@ -8,7 +8,7 @@ export async function GET() {
     const auth = await requireRole("ADMIN", "SUPERVISOR", "COUNTER", "VIEWER");
     if (!auth.authorized) return auth.response;
 
-    const [products, imports, pallets, boxes, boxProducts, operators] = await Promise.all([
+    const [products, imports, pallets, boxes, boxProducts, operators, sessions] = await Promise.all([
       prisma.product.findMany({
         where: { active: true },
         select: {
@@ -61,6 +61,20 @@ export async function GET() {
         select: { id: true, name: true },
         orderBy: { name: "asc" },
       }),
+      prisma.inventorySession.findMany({
+        where: { schemaVersion: 3, status: { not: "CANCELLED" } },
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          status: true,
+          createdAt: true,
+          closedAt: true,
+          _count: { select: { countEvents: true, boxCountEntries: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      }),
     ]);
 
     return NextResponse.json({
@@ -76,6 +90,7 @@ export async function GET() {
         expectedQty: bp.expectedQty ? Number(bp.expectedQty) : null,
       })),
       operators,
+      sessions,
       syncedAt: new Date().toISOString(),
     });
   } catch (error) {

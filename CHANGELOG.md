@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.63.0 (2026-07-24)
+
+### Fixed
+
+- **Entrada offline V3:** La lista de sesiones V3 se incluye en la sincronización inicial y se puede abrir una sesión previamente sincronizada sin consultar la red.
+
 ## 0.62.0 (2026-07-24)
 
 ### Changed
