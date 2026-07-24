@@ -193,7 +193,7 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
     const existingCount = box?.boxProducts.length ?? 0;
     const incomingCount = Array.from(newLinkKeys).filter((key) => key.startsWith(`${boxKey}::`)).length;
     if (existingCount + incomingCount > 3) {
-      errors.push(`La caja ${importKey}/${palletNumber}/${boxNumber} superaría el máximo de 5 productos.`);
+      errors.push(`La caja ${importKey}/${palletNumber}/${boxNumber} superaría el máximo de 10 productos.`);
     }
   }
 

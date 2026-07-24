@@ -103,8 +103,8 @@ export async function POST(request: NextRequest) {
 
         const existingLink = await prisma.boxProduct.findUnique({ where: { boxId_productId: { boxId: box.id, productId: product.id } } });
         const existingLinks = await prisma.boxProduct.count({ where: { boxId: box.id } });
-        if (!existingLink && existingLinks >= 5) {
-          errors.push(`Línea ${line}: la caja ${importCode}/${palletNumber}/${boxNumber} ya tiene 5 productos`);
+        if (!existingLink && existingLinks >= 10) {
+          errors.push(`Línea ${line}: la caja ${importCode}/${palletNumber}/${boxNumber} ya tiene 10 productos`);
           continue;
         }
 
