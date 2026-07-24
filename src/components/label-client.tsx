@@ -95,7 +95,7 @@ export function LabelClient({ productId }: { productId: string }) {
       <CardContent className="print:border-0 print:shadow-none">
         <div className="mx-auto max-w-xl">
           <BarcodeLabel
-            value={product.barcode || product.code}
+            value={product.barcode || ""}
             description={product.description}
             code={product.code}
             format={format}

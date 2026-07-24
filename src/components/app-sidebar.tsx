@@ -11,6 +11,7 @@ import {
   Building2,
   History,
   Layers,
+  GitBranch,
 } from "lucide-react";
 import {
   Sidebar,
@@ -47,6 +48,7 @@ export function AppSidebar({
     { title: "Ubicaciones", url: "/locations", icon: Building2 },
     { title: "Sesiones V1", url: "/sessions/v1", icon: History },
     { title: "Sesiones V2", url: "/sessions/v2", icon: Layers },
+    { title: "Sesiones V3", url: "/sessions/v3", icon: GitBranch },
     { title: "Configuración", url: "/settings", icon: Settings },
   ];
 
@@ -54,6 +56,7 @@ export function AppSidebar({
     if (item.title === "Dashboard") return pathname === "/";
     if (item.title === "Sesiones V1") return pathname.startsWith("/sessions/v1");
     if (item.title === "Sesiones V2") return pathname.startsWith("/sessions/v2");
+    if (item.title === "Sesiones V3") return pathname.startsWith("/sessions/v3");
     if (item.title === "Escanear") return pathname.includes("/scan");
     if (item.url) return pathname.startsWith(item.url);
     return false;

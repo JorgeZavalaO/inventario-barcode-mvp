@@ -1,5 +1,62 @@
 # Changelog
 
+## 0.48.0 (2026-07-24)
+
+### Added (Auto-descarga de datos al ingresar)
+
+- **Carga automática de datos offline:** Nuevo componente `OfflineDataLoader` que se muestra al ingresar al sistema por primera vez. Descarga automáticamente todos los productos, importaciones, pallets, cajas y productos de caja a IndexedDB.
+- **Pantalla de carga con progreso:** Interfaz oscura con barra de progreso animada del 0% al 100%, mostrando el stage actual (productos, importaciones, pallets, cajas, productos de caja).
+- **Detección de datos existentes:** Si los datos ya fueron descargados anteriormente, la pantalla de carga se salta automáticamente.
+- **Manejo offline en carga inicial:** Si no hay internet y no hay datos cacheados, muestra error con opción de reintentar. Si hay datos cacheados, permite usar el sistema normalmente.
+- **Evento `offline-data-synced`:** Se dispara cuando la descarga inicial completa, permitiendo que otros componentes se actualicen.
+
+### Changed (Etiquetas sin generación automática de barcode/QR)
+
+- **Sin fallback en etiquetas:** Las etiquetas de productos ya no usan el código interno del producto como fallback para generar barcode/QR. Si un producto no tiene `barcode` asignado, la etiqueta muestra "Sin código de barras" en lugar de generar uno a partir del código.
+- **BarcodeLabel sin generación:** El componente `BarcodeLabel` ahora renderiza un placeholder cuando el valor es null o vacío, en vez de intentar generar el código.
+
+## 0.47.0 (2026-07-24)
+
+### Added (Offline completo — datos y conteos)
+
+- **Descarga de datos offline:** Nuevo endpoint `GET /api/offline/sync` que descarga todos los productos, importaciones, pallets, cajas y productos de caja en una sola petición.
+- **IndexedDB para datos:** Nuevo módulo `offline-store.ts` con stores dedicados para productos, imports, pallets, boxes y boxProducts. Soporta búsqueda por código y filtros por relación.
+- **Hook `useOfflineData`:** Nuevo hook que gestiona la descarga, almacenamiento y acceso a datos offline. Proporciona funciones como `resolveBox()`, `getImports()`, `getPalletsByImport()`, `getBoxesByPallet()` que funcionan 100% desde IndexedDB.
+- **Flujo V3 completamente offline:** La página de escaneo V3 ahora usa datos cacheados cuando están disponibles. Selección de importación, pallet, caja y resolución de productos funciona sin internet.
+- **Botón de sincronización de datos:** El botón flotante ahora incluye panel para descargar/actualizar datos offline con contadores de productos y cajas descargados.
+- **Indicadores de estado:** Badge "Offline" cuando no hay conexión, badge "Datos locales" cuando se usan datos cacheados. Banner informativo cuando no hay datos descargados.
+- **Resolución offline de cajas:** `resolveBox()` en `useOfflineData` busca la caja por importación + número (con o sin pallet) y devuelve productos con cantidades esperadas desde IndexedDB.
+
+### Changed
+
+- `OfflineBanner` rediseñado con dos secciones: datos offline (descarga/actualización) y cola de sincronización (conteos pendientes).
+- V3 scan page prioriza datos offline sobre API cuando están disponibles.
+- Versión 0.47.0.
+
+## 0.46.0 (2026-07-24)
+
+### Added (Sesiones V3 + Modo Offline)
+
+- **Sesiones V3 — Inventario por cajas sin posiciones físicas:** Nuevo módulo de sesiones con `schemaVersion=3` que permite contar productos por caja (Importación → Pallet → Caja) sin necesidad de asignar posiciones físicas.
+- **Flujo simplificado de 3 pasos:** IDENTIFY (seleccionar importación/pallet/caja) → CONFIRM (corroborar cantidades con división de líneas) → SUMMARY (registrar y enviar a revisión).
+- **División de líneas de cantidad:** Cada producto puede tener múltiples líneas de cantidad (ej: 10 und = 5 + 3 + 2) para control de calidad o distribución.
+- **API V3 completa:** CRUD sesiones (`/api/sessions/v3`), conteos por caja, revisión con aprobación/rechazo, y exportación a Excel.
+- **Páginas V3:** Listado, creación, escaneo y revisión en `/sessions/v3`.
+- **Service Worker registrado:** Componente `ServiceWorkerRegister` que registra el SW en el layout raíz. El SW ahora precachea páginas principales y usa estrategia network-first para páginas de sesión.
+- **Modo offline para V3:** Los conteos se encolan automáticamente en IndexedDB cuando no hay conexión. Al recuperar internet, se sincronizan automáticamente.
+- **`apiFetchOffline`:** Nueva función en `lib/client.ts` que detecta estado de conexión y encola operaciones en IndexedDB cuando está offline.
+- **Botón flotante de sincronización:** `OfflineBanner` rediseñado como botón flotante (esquina inferior derecha) con badge numérico de items pendientes, panel desplegable con detalle de la cola, y botón "Sincronizar ahora".
+- **Banner de sin conexión:** Barra inferior roja visible cuando no hay internet.
+- **Evento `offline-queue-changed`:** Custom event para sincronizar el estado de la cola entre el módulo `client.ts` y el hook `useOfflineQueue`.
+- **BoxCountEntry.positionId nullable:** Campo `positionId` en `BoxCountEntry` ahora es opcional para soportar sesiones V3 sin posiciones físicas.
+
+### Changed
+
+- `OfflineBanner` migrado de banner inline a botón flotante con panel desplegable.
+- `useOfflineQueue` ahora escucha el evento `offline-queue-changed` para actualizaciones en tiempo real.
+- `public/sw.js` actualizado a v2 con precache de páginas V3, limpieza de caches antiguos y fallback offline para páginas.
+- Página principal de sesiones ahora muestra botón "Nueva sesión V3" además del existente V2.
+
 ## 0.45.0 (2026-07-24)
 
 ### Added (Selects con búsqueda/filtrado)

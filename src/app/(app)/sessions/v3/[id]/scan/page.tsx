@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import * as XLSX from "xlsx";
-import { apiFetch } from "@/lib/client";
+import { apiFetch, apiFetchOffline } from "@/lib/client";
+import { useOfflineData } from "@/hooks/use-offline-data";
 import {
   ArrowLeft,
   LoaderCircle,
@@ -13,6 +14,8 @@ import {
   XCircle,
   Upload,
   FileSpreadsheet,
+  WifiOff,
+  Database,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,6 +89,9 @@ export default function V3ScanPage() {
   const [operator, setOperator] = useState<{ id: string; name: string } | null>(null);
   const [operatorName, setOperatorName] = useState("");
   const [joining, setJoining] = useState(false);
+
+  const offlineData = useOfflineData();
+  const hasOfflineData = offlineData.counts.products > 0;
 
   useEffect(() => {
     const stored = localStorage.getItem("stockscan_operator_v3");
@@ -175,8 +181,13 @@ export default function V3ScanPage() {
   async function loadImports() {
     setLoadingImports(true);
     try {
-      const data = await apiFetch<{ imports: { id: string; code: string; description: string | null }[] }>("/api/boxes/imports");
-      setImports(data.imports);
+      if (hasOfflineData) {
+        const offlineImports = await offlineData.getImports();
+        setImports(offlineImports);
+      } else {
+        const data = await apiFetch<{ imports: { id: string; code: string; description: string | null }[] }>("/api/boxes/imports");
+        setImports(data.imports);
+      }
     } catch {
       /* silent */
     } finally {
@@ -224,11 +235,17 @@ export default function V3ScanPage() {
     if (imp) setBoxImport(imp.code);
     setLoadingPallets(true);
     try {
-      const data = await apiFetch<{ pallets: { id: string; number: string }[] }>(
-        `/api/boxes/pallets?importId=${importId}`,
-      );
-      setPallets(data.pallets);
-      if (data.pallets.length === 0) setSkipPallet(true);
+      if (hasOfflineData) {
+        const offlinePallets = await offlineData.getPalletsByImport(importId);
+        setPallets(offlinePallets);
+        if (offlinePallets.length === 0) setSkipPallet(true);
+      } else {
+        const data = await apiFetch<{ pallets: { id: string; number: string }[] }>(
+          `/api/boxes/pallets?importId=${importId}`,
+        );
+        setPallets(data.pallets);
+        if (data.pallets.length === 0) setSkipPallet(true);
+      }
     } catch {
       /* silent */
     } finally {
@@ -250,10 +267,15 @@ export default function V3ScanPage() {
     if (pal) setBoxPallet(pal.number);
     setLoadingBoxes(true);
     try {
-      const data = await apiFetch<{ boxes: { id: string; number: string }[] }>(
-        `/api/boxes/boxes?palletId=${palletId}`,
-      );
-      setBoxes(data.boxes);
+      if (hasOfflineData) {
+        const offlineBoxes = await offlineData.getBoxesByPallet(palletId);
+        setBoxes(offlineBoxes);
+      } else {
+        const data = await apiFetch<{ boxes: { id: string; number: string }[] }>(
+          `/api/boxes/boxes?palletId=${palletId}`,
+        );
+        setBoxes(data.boxes);
+      }
     } catch {
       /* silent */
     } finally {
@@ -270,22 +292,43 @@ export default function V3ScanPage() {
     }
     const bx = boxes.find((b) => b.id === boxId);
     if (!bx) return;
-    const p = new URLSearchParams({ import: boxImport.trim(), box: bx.number });
-    if (boxPallet.trim()) p.set("pallet", boxPallet.trim());
     setBusy(true);
     try {
-      const data = await apiFetch<any>(`/api/boxes/resolve?${p.toString()}`);
-      setResolvedBox(data.box);
-      setBoxProducts(
-        data.box.products.map((pr: any) => ({
-          productId: pr.productId,
-          productCode: pr.productCode,
-          productDescription: pr.productDescription,
-          productUnit: pr.productUnit,
-          supplierCode: pr.supplierCode || undefined,
-          expectedQty: pr.expectedQty,
-        })),
-      );
+      if (hasOfflineData) {
+        const resolved = await offlineData.resolveBox(boxImport.trim(), bx.number, boxPallet.trim() || undefined);
+        if (resolved) {
+          setResolvedBox(resolved);
+          setBoxProducts(
+            resolved.products.map((pr: any) => ({
+              productId: pr.productId,
+              productCode: pr.productCode,
+              productDescription: pr.productDescription,
+              productUnit: pr.productUnit,
+              supplierCode: pr.supplierCode || undefined,
+              expectedQty: pr.expectedQty,
+            })),
+          );
+        } else {
+          setToast("Caja no encontrada en datos offline");
+          setResolvedBox(null);
+          setBoxProducts([]);
+        }
+      } else {
+        const p = new URLSearchParams({ import: boxImport.trim(), box: bx.number });
+        if (boxPallet.trim()) p.set("pallet", boxPallet.trim());
+        const data = await apiFetch<any>(`/api/boxes/resolve?${p.toString()}`);
+        setResolvedBox(data.box);
+        setBoxProducts(
+          data.box.products.map((pr: any) => ({
+            productId: pr.productId,
+            productCode: pr.productCode,
+            productDescription: pr.productDescription,
+            productUnit: pr.productUnit,
+            supplierCode: pr.supplierCode || undefined,
+            expectedQty: pr.expectedQty,
+          })),
+        );
+      }
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Caja no encontrada");
       setResolvedBox(null);
@@ -380,22 +423,38 @@ export default function V3ScanPage() {
       );
 
       if (items.length > 0) {
-        await apiFetch<any>(`/api/sessions/v3/${id}/counts`, {
-          method: "POST",
-          body: JSON.stringify({
-            operationId: crypto.randomUUID(),
-            inputMethod: "MANUAL",
-            boxIdentity: {
-              importCode: boxImport.trim(),
-              palletNumber: boxPallet.trim() || undefined,
-              boxNumber: resolvedBox?.number || "",
-            },
-            items,
-          }),
-        });
-      }
+        const payload = {
+          operationId: crypto.randomUUID(),
+          inputMethod: "MANUAL" as const,
+          boxIdentity: {
+            importCode: boxImport.trim(),
+            palletNumber: boxPallet.trim() || undefined,
+            boxNumber: resolvedBox?.number || "",
+          },
+          items,
+        };
 
-      setToast("Conteos registrados");
+        const result = await apiFetchOffline<any>(
+          `/api/sessions/v3/${id}/counts`,
+          {
+            method: "POST",
+            body: JSON.stringify(payload),
+          },
+          {
+            endpoint: `/api/sessions/v3/${id}/counts`,
+            method: "POST",
+            body: payload,
+          },
+        );
+
+        if (result.queued) {
+          setToast("Guardado offline — se sincronizará cuando haya conexión");
+        } else {
+          setToast("Conteos registrados");
+        }
+      } else {
+        setToast("Conteos registrados");
+      }
       await load();
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Error al registrar");
@@ -475,6 +534,16 @@ export default function V3ScanPage() {
           <h1 className="text-base font-bold tracking-tight truncate">{session.name}</h1>
           <p className="text-xs text-slate-400">{session.code}</p>
         </div>
+        {!offlineData.isOnline && (
+          <span className="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600">
+            <WifiOff size={12} /> Offline
+          </span>
+        )}
+        {hasOfflineData && offlineData.isOnline && (
+          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-600">
+            <Database size={12} /> Datos locales
+          </span>
+        )}
         {toast && (
           <span className="shrink-0 rounded bg-emerald-50 px-2 py-1 text-xs text-emerald-600">
             {toast}
@@ -484,6 +553,19 @@ export default function V3ScanPage() {
 
       {step === "IDENTIFY" && (
         <div className="space-y-3">
+          {!hasOfflineData && !offlineData.isOnline && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 text-amber-700">
+                  <WifiOff size={16} />
+                  <div>
+                    <p className="text-sm font-medium">Sin datos offline</p>
+                    <p className="text-xs text-amber-600">No hay datos descargados. Conéctese a internet y sincronice datos desde el botón de abajo a la derecha.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardContent className="p-3 space-y-3">
               <div className="flex items-center justify-between">

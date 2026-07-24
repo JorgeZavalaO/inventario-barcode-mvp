@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SessionProvider } from "@/components/session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { OfflineDataLoader } from "@/components/offline-data-loader";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
@@ -37,8 +39,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es" className={cn("font-sans", geist.variable)}>
       <body>
+        <ServiceWorkerRegister />
         <SessionProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <OfflineDataLoader>{children}</OfflineDataLoader>
+          </TooltipProvider>
         </SessionProvider>
       </body>
     </html>

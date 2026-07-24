@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { OfflineBanner } from "@/components/offline-banner";
 import { Shield, LogOut, UserRound } from "lucide-react";
 
 const roleLabels: Record<string, string> = {
@@ -45,6 +46,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
+      <OfflineBanner />
     </SidebarProvider>
   );
 }

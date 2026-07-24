@@ -36,6 +36,7 @@ export function useOfflineQueue() {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [isOnline, setIsOnline] = useState(true);
   const syncRef = useRef(false);
+  const syncFnRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   const loadItems = useCallback(async () => {
     try {
@@ -51,16 +52,71 @@ export function useOfflineQueue() {
     } catch { /* silent */ }
   }, []);
 
+  const sync = useCallback(async () => {
+    if (syncRef.current) return;
+    syncRef.current = true;
+
+    try {
+      const db = await openDB();
+      const pending: QueueItem[] = await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readonly");
+        const index = tx.objectStore(STORE_NAME).index("status");
+        const req = index.getAll("PENDING");
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+
+      for (const item of pending) {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        tx.objectStore(STORE_NAME).put({ ...item, status: "SYNCING" });
+        await new Promise<void>((resolve) => { tx.oncomplete = () => resolve(); });
+        setItems((prev) => prev.map((i) => i.id === item.id ? { ...i, status: "SYNCING" } : i));
+
+        try {
+          const resp = await fetch(item.endpoint, {
+            method: item.method,
+            headers: { "Content-Type": "application/json" },
+            body: item.body,
+          });
+
+          if (resp.ok) {
+            const tx2 = db.transaction(STORE_NAME, "readwrite");
+            tx2.objectStore(STORE_NAME).put({ ...item, status: "SYNCED" });
+            await new Promise<void>((resolve) => { tx2.oncomplete = () => resolve(); });
+            setItems((prev) => prev.map((i) => i.id === item.id ? { ...i, status: "SYNCED" } : i));
+          } else {
+            const errorText = await resp.text();
+            const tx2 = db.transaction(STORE_NAME, "readwrite");
+            tx2.objectStore(STORE_NAME).put({ ...item, status: "ERROR", error: errorText });
+            await new Promise<void>((resolve) => { tx2.oncomplete = () => resolve(); });
+            setItems((prev) => prev.map((i) => i.id === item.id ? { ...i, status: "ERROR", error: errorText } : i));
+          }
+        } catch {
+          const tx2 = db.transaction(STORE_NAME, "readwrite");
+          tx2.objectStore(STORE_NAME).put({ ...item, status: "PENDING" });
+          await new Promise<void>((resolve) => { tx2.oncomplete = () => resolve(); });
+          setItems((prev) => prev.map((i) => i.id === item.id ? { ...i, status: "PENDING" } : i));
+        }
+      }
+    } catch { /* silent */ }
+    finally { syncRef.current = false; }
+  }, []);
+
+  syncFnRef.current = sync;
+
   useEffect(() => {
     setIsOnline(navigator.onLine);
-    const onOnline = () => { setIsOnline(true); sync(); };
+    const onOnline = () => { setIsOnline(true); void syncFnRef.current(); };
     const onOffline = () => setIsOnline(false);
+    const onQueueChanged = () => void loadItems();
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
+    window.addEventListener("offline-queue-changed", onQueueChanged);
     void loadItems();
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener("offline-queue-changed", onQueueChanged);
     };
   }, [loadItems]);
 
@@ -84,56 +140,9 @@ export function useOfflineQueue() {
         tx.onerror = () => reject(tx.error);
       });
       setItems((prev) => [...prev, item]);
-      if (navigator.onLine) sync();
+      if (navigator.onLine) void syncFnRef.current();
     } catch { /* silent */ }
   }, []);
-
-  const sync = useCallback(async () => {
-    if (syncRef.current) return;
-    syncRef.current = true;
-
-    try {
-      const db = await openDB();
-      const pending: QueueItem[] = await new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readonly");
-        const index = tx.objectStore(STORE_NAME).index("status");
-        const req = index.getAll("PENDING");
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-
-      for (const item of pending) {
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        tx.objectStore(STORE_NAME).put({ ...item, status: "SYNCING" });
-        await new Promise<void>((resolve) => { tx.oncomplete = () => resolve(); });
-
-        try {
-          const resp = await fetch(item.endpoint, {
-            method: item.method,
-            headers: { "Content-Type": "application/json" },
-            body: item.body,
-          });
-
-          if (resp.ok) {
-            const tx2 = db.transaction(STORE_NAME, "readwrite");
-            tx2.objectStore(STORE_NAME).put({ ...item, status: "SYNCED" });
-            await new Promise<void>((resolve) => { tx2.oncomplete = () => resolve(); });
-          } else {
-            const tx2 = db.transaction(STORE_NAME, "readwrite");
-            tx2.objectStore(STORE_NAME).put({ ...item, status: "ERROR", error: await resp.text() });
-            await new Promise<void>((resolve) => { tx2.oncomplete = () => resolve(); });
-          }
-        } catch {
-          const tx2 = db.transaction(STORE_NAME, "readwrite");
-          tx2.objectStore(STORE_NAME).put({ ...item, status: "PENDING" });
-          await new Promise<void>((resolve) => { tx2.oncomplete = () => resolve(); });
-        }
-      }
-
-      await loadItems();
-    } catch { /* silent */ }
-    finally { syncRef.current = false; }
-  }, [loadItems]);
 
   const clearSynced = useCallback(async () => {
     try {
@@ -155,5 +164,12 @@ export function useOfflineQueue() {
     } catch { /* silent */ }
   }, [loadItems]);
 
-  return { items, isOnline, add, sync, clearSynced, pendingCount: items.filter((i) => i.status === "PENDING" || i.status === "ERROR").length };
+  return {
+    items,
+    isOnline,
+    add,
+    sync,
+    clearSynced,
+    pendingCount: items.filter((i) => i.status === "PENDING" || i.status === "ERROR").length,
+  };
 }

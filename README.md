@@ -51,6 +51,8 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
 - Escáner inteligente: acceso directo con selector de sesión activa.
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
+- **Sesiones V3 — Inventario por cajas sin posiciones físicas:** Flujo simplificado de 3 pasos (Identificar caja → Confirmar cantidades → Registrar) sin necesidad de asignar posiciones físicas. Soporta división de líneas de cantidad por producto.
+- **Modo offline completo:** Descarga productos, importaciones, pallets, cajas a IndexedDB. El flujo V3 funciona 100% offline: selección de importación → pallet → caja → confirmar cantidades → registrar (se encola para sincronizar). Botón flotante para sincronizar datos y ver estado de la cola.
 
 ## Stack
 
@@ -199,14 +201,14 @@ Esto permite que varias personas registren cantidades al mismo tiempo sin sobres
 
 - La identificación de operadores dentro de una sesión V1 es por nombre (independiente de la autenticación del sistema).
 - La sincronización utiliza polling cada 2 segundos, no WebSockets.
-- Requiere conexión a Internet; todavía no almacena lecturas offline en IndexedDB.
+- El modo offline completo está disponible solo para sesiones V3. V1 y V2 requieren conexión.
+- Para usar offline, primero debe sincronizar datos desde el botón flotante (requiere internet la primera vez).
 - No actualiza automáticamente el stock de un ERP después de cerrar el conteo.
 - La impresión está orientada a etiquetas del navegador; no incluye integración directa con Zebra/ZPL.
-- La funcionalidad offline (IndexedDB) y exportación a Excel están pendientes.
 
 ## Siguiente etapa recomendada
 
-Estructura física del almacén (almacenes, pisos, zonas y racks); modo offline con IndexedDB; reconteos independientes; WebSockets o Supabase Realtime; exportación a Excel y conexión con el ERP.
+WebSockets o Supabase Realtime para sincronización en tiempo real; modo offline para V2; reconteos independientes; conexión con el ERP.
 
 ## Validación realizada
 

@@ -200,7 +200,7 @@ function LabelsContent() {
           {products.map((product) => (
             <div key={product.id} className="label-item w-full max-w-xs">
               <BarcodeLabel
-                value={product.barcode || product.code}
+                value={product.barcode || ""}
                 description={product.description}
                 code={product.code}
                 compact={size.height < 40}

@@ -56,13 +56,17 @@ export function BarcodeLabel({
       <p className="mb-1 font-mono text-xs text-slate-500">
         {code}
       </p>
-      <div className="flex justify-center overflow-hidden">
-        {format === "QR" ? (
-          <canvas ref={canvasRef} aria-label={`Código QR ${value}`} />
-        ) : (
-          <svg ref={svgRef} aria-label={`Código de barras ${value}`} />
-        )}
-      </div>
+      {value ? (
+        <div className="flex justify-center overflow-hidden">
+          {format === "QR" ? (
+            <canvas ref={canvasRef} aria-label={`Código QR ${value}`} />
+          ) : (
+            <svg ref={svgRef} aria-label={`Código de barras ${value}`} />
+          )}
+        </div>
+      ) : (
+        <p className="text-xs text-slate-400 italic">Sin código de barras</p>
+      )}
     </div>
   );
 }

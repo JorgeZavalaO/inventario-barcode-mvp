@@ -1,12 +1,29 @@
-const CACHE = "stockscan-v1";
-const API_CACHE = "stockscan-api-v1";
+const CACHE = "stockscan-v2";
+const API_CACHE = "stockscan-api-v2";
+const STATIC_CACHE = "stockscan-static-v2";
+
+const PRECACHE_URLS = [
+  "/",
+  "/sessions",
+  "/sessions/v3",
+  "/sessions/v3/new",
+  "/manifest.webmanifest",
+];
 
 self.addEventListener("install", (event) => {
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(
+        names.filter((n) => n !== CACHE && n !== API_CACHE && n !== STATIC_CACHE).map((n) => caches.delete(n))
+      )
+    ).then(() => clients.claim())
+  );
 });
 
 self.addEventListener("fetch", (event) => {
@@ -17,8 +34,18 @@ self.addEventListener("fetch", (event) => {
 
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(networkFirst(request, API_CACHE));
-  } else {
+  } else if (
+    url.pathname.startsWith("/_next/") ||
+    url.pathname.startsWith("/icons/") ||
+    url.pathname.endsWith(".js") ||
+    url.pathname.endsWith(".css") ||
+    url.pathname.endsWith(".svg") ||
+    url.pathname.endsWith(".png") ||
+    url.pathname.endsWith(".woff2")
+  ) {
     event.respondWith(cacheFirst(request, CACHE));
+  } else {
+    event.respondWith(networkFirst(request, STATIC_CACHE));
   }
 });
 
@@ -33,7 +60,7 @@ async function cacheFirst(request, cacheName) {
     }
     return response;
   } catch {
-    return new Response(JSON.stringify({ error: "offline" }), { status: 503, headers: { "Content-Type": "application/json" } });
+    return offlineFallback(request);
   }
 }
 
@@ -48,6 +75,17 @@ async function networkFirst(request, cacheName) {
   } catch {
     const cached = await caches.match(request);
     if (cached) return cached;
-    return new Response(JSON.stringify({ error: "offline" }), { status: 503, headers: { "Content-Type": "application/json" } });
+    return offlineFallback(request);
   }
+}
+
+function offlineFallback(request) {
+  const url = new URL(request.url);
+  if (request.destination === "document" || url.pathname.startsWith("/sessions")) {
+    return caches.match("/");
+  }
+  return new Response(JSON.stringify({ error: "offline", queued: true }), {
+    status: 503,
+    headers: { "Content-Type": "application/json" },
+  });
 }
