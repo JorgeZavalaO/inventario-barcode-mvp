@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       productCode: bp.product.code,
       productDescription: bp.product.description,
       productUnit: bp.product.unit,
-      supplierCode: bp.product.supplierCode,
+      supplierCode: bp.supplierCode ?? bp.product.supplierCode,
       orderIndex: bp.orderIndex,
       expectedQty: bp.expectedQty ? Number(bp.expectedQty) : null,
     }));

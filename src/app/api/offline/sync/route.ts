@@ -50,10 +50,11 @@ export async function GET() {
         select: {
           id: true,
           boxId: true,
-          productId: true,
-          orderIndex: true,
-          expectedQty: true,
-          active: true,
+           productId: true,
+           orderIndex: true,
+           expectedQty: true,
+           supplierCode: true,
+           active: true,
         },
       }),
       prisma.operator.findMany({

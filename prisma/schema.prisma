@@ -228,6 +228,7 @@ model BoxProduct {
   productId   String   @map("product_id")
   orderIndex  Int      @map("order_index")
   expectedQty Decimal? @map("expected_qty") @db.Decimal(14, 3)
+  supplierCode String?  @map("supplier_code")
   active      Boolean  @default(true)
 
   box     Box     @relation(fields: [boxId], references: [id])

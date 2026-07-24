@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.57.0 (2026-07-24)
+
+### Changed
+
+- **Código de proveedor por ubicación:** El mismo producto puede conservar códigos de proveedor distintos por importación, pallet y caja mediante la relación `caja-producto`.
+- **Carga de productos:** La validación ya no bloquea una SKU repetida en distintas ubicaciones por diferencias de proveedor.
+
 ## 0.56.0 (2026-07-24)
 
 ### Changed

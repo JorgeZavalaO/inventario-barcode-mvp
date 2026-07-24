@@ -63,7 +63,6 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
       const sameCatalogData = previousCode.product.description === product.description
         && (previousCode.product.unit || "UND") === (product.unit || "UND")
         && (previousCode.product.category || "") === (product.category || "")
-        && (previousCode.product.supplierCode || "") === (product.supplierCode || "")
         && normalized(previousCode.product.barcode) === barcode
         && (previousCode.product.theoreticalStock ?? 0) === (product.theoreticalStock ?? 0);
       if (!previousCode.locationKey || !locationKey || previousCode.locationKey === locationKey) {
@@ -113,7 +112,7 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
       include: {
         pallets: {
           include: {
-            boxes: { include: { boxProducts: { select: { productId: true, expectedQty: true } } } },
+            boxes: { include: { boxProducts: { select: { productId: true, expectedQty: true, supplierCode: true } } } },
           },
         },
       },
@@ -130,7 +129,6 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
       existing.description !== entry.product.description && "descripción",
       existing.unit !== (entry.product.unit || "UND") && "unidad",
       (existing.category ?? "") !== (entry.product.category || "") && "categoría",
-      (existing.supplierCode ?? "") !== (entry.product.supplierCode || "") && "código de proveedor",
       Number(existing.theoreticalStock) !== (entry.product.theoreticalStock ?? 0) && "stock teórico",
     ].filter(Boolean);
     const existingBarcode = normalized(existing.barcode);
@@ -177,6 +175,9 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
       existingLinks += 1;
       if (product.expectedQty !== undefined && Number(existingLink.expectedQty ?? 0) !== product.expectedQty) {
         warnings.push(`Fila ${row}: la cantidad esperada de ${product.code} en ${product.importCode}/${product.palletNumber || "SIN_PALLET"}/${product.boxNumber} cambiará de ${existingLink.expectedQty ?? 0} a ${product.expectedQty}.`);
+      }
+      if (product.supplierCode !== undefined && (existingLink.supplierCode ?? "") !== product.supplierCode) {
+        warnings.push(`Fila ${row}: el código de proveedor de ${product.code} en ${product.importCode}/${product.palletNumber || "SIN_PALLET"}/${product.boxNumber} cambiará a ${product.supplierCode}.`);
       }
     } else {
       newLinkKeys.add(`${importKey}::${palletNumber}::${boxNumber}::${normalized(product.code)}`);

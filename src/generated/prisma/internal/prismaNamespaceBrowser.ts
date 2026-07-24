@@ -249,6 +249,7 @@ export const BoxProductScalarFieldEnum = {
   productId: 'productId',
   orderIndex: 'orderIndex',
   expectedQty: 'expectedQty',
+  supplierCode: 'supplierCode',
   active: 'active'
 } as const
 

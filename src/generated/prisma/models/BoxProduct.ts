@@ -42,6 +42,7 @@ export type BoxProductMinAggregateOutputType = {
   productId: string | null
   orderIndex: number | null
   expectedQty: runtime.Decimal | null
+  supplierCode: string | null
   active: boolean | null
 }
 
@@ -51,6 +52,7 @@ export type BoxProductMaxAggregateOutputType = {
   productId: string | null
   orderIndex: number | null
   expectedQty: runtime.Decimal | null
+  supplierCode: string | null
   active: boolean | null
 }
 
@@ -60,6 +62,7 @@ export type BoxProductCountAggregateOutputType = {
   productId: number
   orderIndex: number
   expectedQty: number
+  supplierCode: number
   active: number
   _all: number
 }
@@ -81,6 +84,7 @@ export type BoxProductMinAggregateInputType = {
   productId?: true
   orderIndex?: true
   expectedQty?: true
+  supplierCode?: true
   active?: true
 }
 
@@ -90,6 +94,7 @@ export type BoxProductMaxAggregateInputType = {
   productId?: true
   orderIndex?: true
   expectedQty?: true
+  supplierCode?: true
   active?: true
 }
 
@@ -99,6 +104,7 @@ export type BoxProductCountAggregateInputType = {
   productId?: true
   orderIndex?: true
   expectedQty?: true
+  supplierCode?: true
   active?: true
   _all?: true
 }
@@ -195,6 +201,7 @@ export type BoxProductGroupByOutputType = {
   productId: string
   orderIndex: number
   expectedQty: runtime.Decimal | null
+  supplierCode: string | null
   active: boolean
   _count: BoxProductCountAggregateOutputType | null
   _avg: BoxProductAvgAggregateOutputType | null
@@ -227,6 +234,7 @@ export type BoxProductWhereInput = {
   productId?: Prisma.StringFilter<"BoxProduct"> | string
   orderIndex?: Prisma.IntFilter<"BoxProduct"> | number
   expectedQty?: Prisma.DecimalNullableFilter<"BoxProduct"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.StringNullableFilter<"BoxProduct"> | string | null
   active?: Prisma.BoolFilter<"BoxProduct"> | boolean
   box?: Prisma.XOR<Prisma.BoxScalarRelationFilter, Prisma.BoxWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
@@ -238,6 +246,7 @@ export type BoxProductOrderByWithRelationInput = {
   productId?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   expectedQty?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplierCode?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   box?: Prisma.BoxOrderByWithRelationInput
   product?: Prisma.ProductOrderByWithRelationInput
@@ -253,6 +262,7 @@ export type BoxProductWhereUniqueInput = Prisma.AtLeast<{
   productId?: Prisma.StringFilter<"BoxProduct"> | string
   orderIndex?: Prisma.IntFilter<"BoxProduct"> | number
   expectedQty?: Prisma.DecimalNullableFilter<"BoxProduct"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.StringNullableFilter<"BoxProduct"> | string | null
   active?: Prisma.BoolFilter<"BoxProduct"> | boolean
   box?: Prisma.XOR<Prisma.BoxScalarRelationFilter, Prisma.BoxWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
@@ -264,6 +274,7 @@ export type BoxProductOrderByWithAggregationInput = {
   productId?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   expectedQty?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplierCode?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   _count?: Prisma.BoxProductCountOrderByAggregateInput
   _avg?: Prisma.BoxProductAvgOrderByAggregateInput
@@ -281,6 +292,7 @@ export type BoxProductScalarWhereWithAggregatesInput = {
   productId?: Prisma.StringWithAggregatesFilter<"BoxProduct"> | string
   orderIndex?: Prisma.IntWithAggregatesFilter<"BoxProduct"> | number
   expectedQty?: Prisma.DecimalNullableWithAggregatesFilter<"BoxProduct"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.StringNullableWithAggregatesFilter<"BoxProduct"> | string | null
   active?: Prisma.BoolWithAggregatesFilter<"BoxProduct"> | boolean
 }
 
@@ -288,6 +300,7 @@ export type BoxProductCreateInput = {
   id?: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
   box: Prisma.BoxCreateNestedOneWithoutBoxProductsInput
   product: Prisma.ProductCreateNestedOneWithoutBoxProductsInput
@@ -299,6 +312,7 @@ export type BoxProductUncheckedCreateInput = {
   productId: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
 }
 
@@ -306,6 +320,7 @@ export type BoxProductUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   box?: Prisma.BoxUpdateOneRequiredWithoutBoxProductsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutBoxProductsNestedInput
@@ -317,6 +332,7 @@ export type BoxProductUncheckedUpdateInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -326,6 +342,7 @@ export type BoxProductCreateManyInput = {
   productId: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
 }
 
@@ -333,6 +350,7 @@ export type BoxProductUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -342,6 +360,7 @@ export type BoxProductUncheckedUpdateManyInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -366,6 +385,7 @@ export type BoxProductCountOrderByAggregateInput = {
   productId?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   expectedQty?: Prisma.SortOrder
+  supplierCode?: Prisma.SortOrder
   active?: Prisma.SortOrder
 }
 
@@ -380,6 +400,7 @@ export type BoxProductMaxOrderByAggregateInput = {
   productId?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   expectedQty?: Prisma.SortOrder
+  supplierCode?: Prisma.SortOrder
   active?: Prisma.SortOrder
 }
 
@@ -389,6 +410,7 @@ export type BoxProductMinOrderByAggregateInput = {
   productId?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   expectedQty?: Prisma.SortOrder
+  supplierCode?: Prisma.SortOrder
   active?: Prisma.SortOrder
 }
 
@@ -493,6 +515,7 @@ export type BoxProductCreateWithoutProductInput = {
   id?: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
   box: Prisma.BoxCreateNestedOneWithoutBoxProductsInput
 }
@@ -502,6 +525,7 @@ export type BoxProductUncheckedCreateWithoutProductInput = {
   boxId: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
 }
 
@@ -540,6 +564,7 @@ export type BoxProductScalarWhereInput = {
   productId?: Prisma.StringFilter<"BoxProduct"> | string
   orderIndex?: Prisma.IntFilter<"BoxProduct"> | number
   expectedQty?: Prisma.DecimalNullableFilter<"BoxProduct"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.StringNullableFilter<"BoxProduct"> | string | null
   active?: Prisma.BoolFilter<"BoxProduct"> | boolean
 }
 
@@ -547,6 +572,7 @@ export type BoxProductCreateWithoutBoxInput = {
   id?: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
   product: Prisma.ProductCreateNestedOneWithoutBoxProductsInput
 }
@@ -556,6 +582,7 @@ export type BoxProductUncheckedCreateWithoutBoxInput = {
   productId: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
 }
 
@@ -590,6 +617,7 @@ export type BoxProductCreateManyProductInput = {
   boxId: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
 }
 
@@ -597,6 +625,7 @@ export type BoxProductUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   box?: Prisma.BoxUpdateOneRequiredWithoutBoxProductsNestedInput
 }
@@ -606,6 +635,7 @@ export type BoxProductUncheckedUpdateWithoutProductInput = {
   boxId?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -614,6 +644,7 @@ export type BoxProductUncheckedUpdateManyWithoutProductInput = {
   boxId?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -622,6 +653,7 @@ export type BoxProductCreateManyBoxInput = {
   productId: string
   orderIndex: number
   expectedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: string | null
   active?: boolean
 }
 
@@ -629,6 +661,7 @@ export type BoxProductUpdateWithoutBoxInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   product?: Prisma.ProductUpdateOneRequiredWithoutBoxProductsNestedInput
 }
@@ -638,6 +671,7 @@ export type BoxProductUncheckedUpdateWithoutBoxInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -646,6 +680,7 @@ export type BoxProductUncheckedUpdateManyWithoutBoxInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   expectedQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -657,6 +692,7 @@ export type BoxProductSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   productId?: boolean
   orderIndex?: boolean
   expectedQty?: boolean
+  supplierCode?: boolean
   active?: boolean
   box?: boolean | Prisma.BoxDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -668,6 +704,7 @@ export type BoxProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   productId?: boolean
   orderIndex?: boolean
   expectedQty?: boolean
+  supplierCode?: boolean
   active?: boolean
   box?: boolean | Prisma.BoxDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -679,6 +716,7 @@ export type BoxProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   productId?: boolean
   orderIndex?: boolean
   expectedQty?: boolean
+  supplierCode?: boolean
   active?: boolean
   box?: boolean | Prisma.BoxDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -690,10 +728,11 @@ export type BoxProductSelectScalar = {
   productId?: boolean
   orderIndex?: boolean
   expectedQty?: boolean
+  supplierCode?: boolean
   active?: boolean
 }
 
-export type BoxProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "boxId" | "productId" | "orderIndex" | "expectedQty" | "active", ExtArgs["result"]["boxProduct"]>
+export type BoxProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "boxId" | "productId" | "orderIndex" | "expectedQty" | "supplierCode" | "active", ExtArgs["result"]["boxProduct"]>
 export type BoxProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   box?: boolean | Prisma.BoxDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -719,6 +758,7 @@ export type $BoxProductPayload<ExtArgs extends runtime.Types.Extensions.Internal
     productId: string
     orderIndex: number
     expectedQty: runtime.Decimal | null
+    supplierCode: string | null
     active: boolean
   }, ExtArgs["result"]["boxProduct"]>
   composites: {}
@@ -1150,6 +1190,7 @@ export interface BoxProductFieldRefs {
   readonly productId: Prisma.FieldRef<"BoxProduct", 'String'>
   readonly orderIndex: Prisma.FieldRef<"BoxProduct", 'Int'>
   readonly expectedQty: Prisma.FieldRef<"BoxProduct", 'Decimal'>
+  readonly supplierCode: Prisma.FieldRef<"BoxProduct", 'String'>
   readonly active: Prisma.FieldRef<"BoxProduct", 'Boolean'>
 }
     

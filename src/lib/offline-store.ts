@@ -43,6 +43,7 @@ export type OfflineBoxProduct = {
   productId: string;
   orderIndex: number;
   expectedQty: number | null;
+  supplierCode: string | null;
   active: boolean;
 };
 

@@ -23,9 +23,27 @@ async function main() {
   console.log(`  Usuario: ${user.email} (${user.role})\n`);
 
   // ============================================================
-  // PASO 2: PRODUCTOS
+  // PASO 2: OPERARIOS / CONTADORES
   // ============================================================
-  console.log("PASO 2: Creando productos...");
+  console.log("PASO 2: Creando operarios...");
+  const operatorNames = [
+    "Emma", "Noelis", "Rafael", "Sandra", "Yuleidy",
+    "Robert", "Edwin", "Yanina", "Henry", "Estefanía",
+    "Eveling", "Irma", "Hellen", "Richard",
+  ];
+
+  for (const name of operatorNames) {
+    const existing = await prisma.operator.findFirst({ where: { name: { equals: name, mode: "insensitive" } } });
+    if (!existing) {
+      await prisma.operator.create({ data: { id: randomUUID(), name } });
+    }
+  }
+  console.log(`  ${operatorNames.length} operarios creados\n`);
+
+  // ============================================================
+  // PASO 3: PRODUCTOS
+  // ============================================================
+  console.log("PASO 3: Creando productos...");
   const productsData = [
     { code: "MANG-001", barcode: "7750000000017", description: "Manguera hidráulica 1/2 pulgada", unit: "MTR", category: "Mangueras" },
     { code: "TERM-001", barcode: "7750000000024", description: "Terminal JIC hembra 1/2 pulgada", unit: "UND", category: "Terminales" },
@@ -49,9 +67,9 @@ async function main() {
   console.log(`  ${products.length} productos creados\n`);
 
   // ============================================================
-  // PASO 3: ESTRUCTURA FÍSICA DEL ALMACÉN
+  // PASO 4: ESTRUCTURA FÍSICA DEL ALMACÉN
   // ============================================================
-  console.log("PASO 3: Creando estructura del almacén...");
+  console.log("PASO 4: Creando estructura del almacén...");
 
   const warehouse = await prisma.warehouse.upsert({
     where: { code: "AP" },

@@ -165,8 +165,8 @@ export function useOfflineData() {
           productId: bp.productId,
           productCode: product?.code ?? "",
           productDescription: product?.description ?? "",
-          productUnit: product?.unit ?? "UND",
-          supplierCode: product?.supplierCode ?? undefined,
+           productUnit: product?.unit ?? "UND",
+           supplierCode: bp.supplierCode ?? product?.supplierCode ?? undefined,
           expectedQty: bp.expectedQty,
         };
       });
@@ -190,8 +190,8 @@ export function useOfflineData() {
         productId: bp.productId,
         productCode: product?.code ?? "",
         productDescription: product?.description ?? "",
-        productUnit: product?.unit ?? "UND",
-        supplierCode: product?.supplierCode ?? undefined,
+         productUnit: product?.unit ?? "UND",
+         supplierCode: bp.supplierCode ?? product?.supplierCode ?? undefined,
         expectedQty: bp.expectedQty,
       };
     });

@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
 
     for (const [index, product] of products.entries()) {
       try {
+        const existingProduct = await prisma.product.findUnique({ where: { code: product.code } });
         await prisma.product.upsert({
           where: { code: product.code },
           update: {
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
             description: product.description,
             unit: product.unit || "UND",
             category: product.category || null,
-            supplierCode: product.supplierCode || null,
+            supplierCode: existingProduct?.supplierCode ?? product.supplierCode ?? null,
             theoreticalStock: product.theoreticalStock ?? 0,
             active: true,
           },
@@ -106,13 +107,14 @@ export async function POST(request: NextRequest) {
                 if (existingLink || existingLinks < 3) {
                   await prisma.boxProduct.upsert({
                     where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
-                    update: { expectedQty: product.expectedQty ?? null },
+                     update: { expectedQty: product.expectedQty ?? null, supplierCode: product.supplierCode || null },
                     create: {
                       id: randomUUID(),
                       boxId: box.id,
                       productId: productRecord.id,
                       orderIndex: existingLinks,
-                      expectedQty: product.expectedQty ?? null,
+                       expectedQty: product.expectedQty ?? null,
+                       supplierCode: product.supplierCode || null,
                     },
                   });
                   createdBoxes.links++;

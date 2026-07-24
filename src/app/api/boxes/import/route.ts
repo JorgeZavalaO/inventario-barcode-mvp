@@ -82,9 +82,10 @@ export async function POST(request: NextRequest) {
 
         const productKey = productCode.trim().toUpperCase();
         if (!seen.products.has(productKey)) {
+          const existingProduct = await prisma.product.findUnique({ where: { code: productCode.trim() } });
           await prisma.product.upsert({
             where: { code: productCode.trim() },
-            update: { supplierCode: supplierCode?.trim() || undefined },
+            update: { supplierCode: existingProduct?.supplierCode ?? supplierCode?.trim() ?? null },
             create: { id: randomUUID(), code: productCode.trim(), description: productDescription || productCode.trim(), unit: productUnit || "UND", category: productCategory || null, supplierCode: supplierCode?.trim() || null },
           });
           seen.products.add(productKey);
@@ -100,16 +101,17 @@ export async function POST(request: NextRequest) {
         const product = await prisma.product.findUnique({ where: { code: productCode.trim() } });
         if (!product) { errors.push(`Línea ${line}: producto no encontrado`); continue; }
 
+        const existingLink = await prisma.boxProduct.findUnique({ where: { boxId_productId: { boxId: box.id, productId: product.id } } });
         const existingLinks = await prisma.boxProduct.count({ where: { boxId: box.id } });
-        if (existingLinks >= 3) {
+        if (!existingLink && existingLinks >= 3) {
           errors.push(`Línea ${line}: la caja ${importCode}/${palletNumber}/${boxNumber} ya tiene 3 productos`);
           continue;
         }
 
         await prisma.boxProduct.upsert({
           where: { boxId_productId: { boxId: box.id, productId: product.id } },
-          update: { expectedQty: expectedQty ?? null, orderIndex: existingLinks },
-          create: { id: randomUUID(), boxId: box.id, productId: product.id, orderIndex: existingLinks, expectedQty: expectedQty ?? null },
+          update: { expectedQty: expectedQty ?? null, supplierCode: supplierCode?.trim() || null },
+          create: { id: randomUUID(), boxId: box.id, productId: product.id, orderIndex: existingLink?.orderIndex ?? existingLinks, expectedQty: expectedQty ?? null, supplierCode: supplierCode?.trim() || null },
         });
         created.links++;
       } catch (error) {
