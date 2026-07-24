@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import * as XLSX from "xlsx";
 import { apiFetch } from "@/lib/client";
-import { ArrowLeft, LoaderCircle, MapPin, Package, CheckCircle2, XCircle, ScanBarcode } from "lucide-react";
+import { ArrowLeft, LoaderCircle, MapPin, Package, CheckCircle2, XCircle, ScanBarcode, Upload, FileSpreadsheet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +58,65 @@ export default function V2ScanPage() {
 
   const [assignPositionCode, setAssignPositionCode] = useState("");
   const [assignQty, setAssignQty] = useState("");
+  const [importBusy, setImportBusy] = useState(false);
+  const [importResult, setImportResult] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function downloadBoxTemplate() {
+    const wb = XLSX.utils.book_new();
+    const data = [
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-001", descripcion: "Producto ejemplo", unidad: "UND", cantidad_esperada: 10, posicion_esperada: "" },
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-002", descripcion: "Otro producto", unidad: "UND", cantidad_esperada: 5, posicion_esperada: "" },
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-2", codigo_producto: "PROD-003", descripcion: "Tercer producto", unidad: "UND", cantidad_esperada: 20, posicion_esperada: "" },
+    ];
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Cajas");
+    XLSX.writeFile(wb, "plantilla_cajas.xlsx");
+  }
+
+  async function handleBoxImport(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImportBusy(true);
+    setImportResult("");
+    try {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: "buffer" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json<any>(ws);
+      const rows = jsonData.map((row: any) => ({
+        importCode: row.importacion || row.importCode || row.import || "",
+        palletNumber: row.pallet || row.palletNumber || row.numero_pallet || "",
+        boxNumber: row.caja || row.boxNumber || row.numero_caja || "",
+        productCode: row.codigo_producto || row.productCode || row.codigo || "",
+        productDescription: row.descripcion || row.description || "",
+        productUnit: row.unidad || row.unit || "UND",
+        expectedQty: row.cantidad_esperada || row.expectedQty || row.cantidad || 0,
+        expectedPosition: row.posicion_esperada || row.expectedPosition || row.posicion || "",
+      })).filter((r: any) => r.importCode && r.boxNumber && r.productCode);
+      if (rows.length === 0) { setImportResult("No se encontraron filas válidas"); return; }
+      const result = await apiFetch<any>("/api/boxes/import", {
+        method: "POST",
+        body: JSON.stringify({ rows }),
+      });
+      setImportResult(`Importados: ${result.created.imports} importaciones, ${result.created.pallets} pallets, ${result.created.boxes} cajas, ${result.created.links} productos`);
+      await loadImports();
+    } catch (error) {
+      setImportResult(error instanceof Error ? error.message : "Error al importar");
+    } finally {
+      setImportBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function loadImports() {
+    setLoadingImports(true);
+    try {
+      const data = await apiFetch<{ imports: { id: string; code: string; description: string | null }[] }>("/api/boxes/imports");
+      setImports(data.imports);
+    } catch { /* silent */ }
+    finally { setLoadingImports(false); }
+  }
 
   const load = useCallback(async () => {
     try {
@@ -70,14 +130,7 @@ export default function V2ScanPage() {
 
   useEffect(() => {
     if (step !== "IDENTIFY") return;
-    (async () => {
-      setLoadingImports(true);
-      try {
-        const data = await apiFetch<{ imports: { id: string; code: string; description: string | null }[] }>("/api/boxes/imports");
-        setImports(data.imports);
-      } catch { /* silent */ }
-      finally { setLoadingImports(false); }
-    })();
+    void loadImports();
   }, [step]);
 
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2500); return () => clearTimeout(t); }, [toast]);
@@ -255,7 +308,21 @@ export default function V2ScanPage() {
       {step === "IDENTIFY" && (
         <div className="space-y-3">
           <Card><CardContent className="p-3 space-y-3">
-            <p className="text-sm font-medium text-slate-700">Identificar caja</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-700">Identificar caja</p>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="sm" className="text-xs text-slate-400" onClick={downloadBoxTemplate}>
+                  <FileSpreadsheet size={12} /> Plantilla
+                </Button>
+                <Button variant="ghost" size="sm" className="text-xs text-slate-400" onClick={() => fileInputRef.current?.click()} disabled={importBusy}>
+                  {importBusy ? <LoaderCircle className="animate-spin" size={12} /> : <Upload size={12} />} Importar
+                </Button>
+                <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => void handleBoxImport(e)} />
+              </div>
+            </div>
+            {importResult && (
+              <p className={`rounded px-2 py-1 text-xs ${importResult.startsWith("Error") ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>{importResult}</p>
+            )}
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-500">Importación</label>
               <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxImportId} onChange={(e) => void handleImportSelect(e.target.value)} disabled={loadingImports}>

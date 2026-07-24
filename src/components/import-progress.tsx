@@ -17,7 +17,7 @@ export function ImportProgress({
   onClose,
   onComplete,
 }: {
-  products: { code: string; barcode?: string; description: string; unit?: string; category?: string; theoreticalStock?: number }[];
+  products: { code: string; barcode?: string; description: string; unit?: string; category?: string; theoreticalStock?: number; importCode?: string; palletNumber?: string; boxNumber?: string; expectedQty?: number }[];
   onClose: () => void;
   onComplete: () => void;
 }) {

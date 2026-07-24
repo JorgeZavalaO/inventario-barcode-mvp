@@ -1,7 +1,7 @@
 import { test as base, expect } from "@playwright/test";
 
 export const test = base.extend<{ adminPage: any }>({
-  adminPage: async ({ page }, use) => {
+  adminPage: async ({ page }: { page: any }, use: any) => {
     await page.goto("http://localhost:3000/login");
     await page.fill('input[name="email"]', "admin@stockscan.app");
     await page.fill('input[name="password"]', "admin123");

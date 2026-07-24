@@ -275,6 +275,10 @@ export function AppProducts() {
               lower.existencia ||
               0,
           ),
+          importCode: lower.importacion || lower.import || lower.importcode || "",
+          palletNumber: lower.pallet || lower.palletnumber || lower.numero_pallet || "",
+          boxNumber: lower.caja || lower.boxnumber || lower.numero_caja || "",
+          expectedQty: Number(lower.cantidad_esperada || lower.expectedqty || lower.cantidad || 0),
         };
       })
       .filter((row) => row.code && row.description);
@@ -315,6 +319,10 @@ export function AppProducts() {
         unidad: "UND",
         categoria: "Categoría",
         stock_teorico: 25,
+        importacion: "IMP-001",
+        pallet: "PAL-01",
+        caja: "CAJA-1",
+        cantidad_esperada: 10,
       },
     ];
     const ws = XLSX.utils.json_to_sheet(data);
