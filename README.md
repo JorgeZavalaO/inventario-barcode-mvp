@@ -38,7 +38,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Productos con múltiples códigos de barras y presentaciones (cajas, paquetes).
 - Sesiones de inventario V2 con alcance por piso, zona, rack o posiciones específicas.
 - Código proveedor por producto para identificar el código de compra del proveedor.
-- Conteo por caja: identifica productos por importación, pallet y número de caja (pallet opcional), con selects en cascada para evitar errores de digitación.
+- Conteo por caja: identifica productos por importación, pallet y número de caja (pallet opcional), con selects en cascada y búsqueda por texto para evitar errores de digitación.
 - Flujo producto → ubicación: confirmar producto, asignar a una o varias posiciones con cantidades.
 - Participación anónima: cualquier persona puede unirse a una sesión V2 solo con su nombre (sin login).
 - Soporte para conteo por cajas + unidades sueltas.

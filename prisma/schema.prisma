@@ -242,14 +242,14 @@ model BoxCountEntry {
   sessionId    String   @map("session_id")
   countRoundId String   @map("count_round_id")
   boxId        String   @map("box_id")
-  positionId   String   @map("position_id")
+  positionId   String?  @map("position_id")
   operatorId   String   @map("operator_id")
   createdAt    DateTime @default(now())
 
   session    InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   countRound CountRound       @relation(fields: [countRoundId], references: [id])
   box        Box              @relation(fields: [boxId], references: [id])
-  position   StoragePosition  @relation(fields: [positionId], references: [id])
+  position   StoragePosition? @relation(fields: [positionId], references: [id])
   operator   Operator         @relation(fields: [operatorId], references: [id])
   countEvents CountEvent[]
 

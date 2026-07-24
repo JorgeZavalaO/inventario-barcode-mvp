@@ -8,6 +8,7 @@ import { ArrowLeft, MapPin, Plus, LoaderCircle, Trash2, CheckCircle } from "luci
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 type StockItem = {
   id: string;
@@ -106,12 +107,15 @@ export default function ProductLocationsPage() {
             <div className="mb-4 flex items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="flex-1">
                 <label className="mb-1 block text-xs font-medium text-slate-600">Posición</label>
-                <select value={selPosition} onChange={(e) => setSelPosition(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm">
-                  <option value="">Seleccionar...</option>
-                  {allPositions.filter((p) => !stocks.some((s) => s.position.id === p.id)).map((p) => (
-                    <option key={p.id} value={p.id}>{p.code}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={allPositions
+                    .filter((p) => !stocks.some((s) => s.position.id === p.id))
+                    .map((p) => ({ value: p.id, label: p.code }))}
+                  value={selPosition}
+                  onChange={setSelPosition}
+                  placeholder="Seleccionar posición..."
+                  searchPlaceholder="Filtrar posiciones..."
+                />
               </div>
               <div className="w-24">
                 <label className="mb-1 block text-xs font-medium text-slate-600">Stock</label>

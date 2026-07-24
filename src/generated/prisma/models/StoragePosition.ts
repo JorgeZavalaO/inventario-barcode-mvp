@@ -698,10 +698,12 @@ export type StoragePositionCreateNestedOneWithoutBoxCountEntriesInput = {
   connect?: Prisma.StoragePositionWhereUniqueInput
 }
 
-export type StoragePositionUpdateOneRequiredWithoutBoxCountEntriesNestedInput = {
+export type StoragePositionUpdateOneWithoutBoxCountEntriesNestedInput = {
   create?: Prisma.XOR<Prisma.StoragePositionCreateWithoutBoxCountEntriesInput, Prisma.StoragePositionUncheckedCreateWithoutBoxCountEntriesInput>
   connectOrCreate?: Prisma.StoragePositionCreateOrConnectWithoutBoxCountEntriesInput
   upsert?: Prisma.StoragePositionUpsertWithoutBoxCountEntriesInput
+  disconnect?: Prisma.StoragePositionWhereInput | boolean
+  delete?: Prisma.StoragePositionWhereInput | boolean
   connect?: Prisma.StoragePositionWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.StoragePositionUpdateToOneWithWhereWithoutBoxCountEntriesInput, Prisma.StoragePositionUpdateWithoutBoxCountEntriesInput>, Prisma.StoragePositionUncheckedUpdateWithoutBoxCountEntriesInput>
 }

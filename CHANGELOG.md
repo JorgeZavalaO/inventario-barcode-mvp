@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.45.0 (2026-07-24)
+
+### Added (Selects con búsqueda/filtrado)
+
+- **Componente `SearchableSelect`:** Nuevo componente reutilizable que reemplaza los `<select>` nativos por un input con dropdown filtrable. Al escribir al menos 1 letra se filtran las opciones; si no hay texto se muestran todas.
+- **Selector de posiciones filtrable:** El selector de posiciones en la asignación de stock por ubicación ahora permite buscar por código mientras se tipea.
+- **Selects cascada filtrables:** Los tres selects del flujo de cajas (Importación, Pallet, Caja) ahora soportan búsqueda por texto para localizar opciones rápidamente.
+
 ## 0.44.0 (2026-07-24)
 
 ### Added (Código proveedor + flujo anónimo V2 + logout)

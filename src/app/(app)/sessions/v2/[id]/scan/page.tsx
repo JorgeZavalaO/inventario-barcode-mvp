@@ -9,6 +9,7 @@ import { ArrowLeft, LoaderCircle, MapPin, Package, CheckCircle2, XCircle, ScanBa
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 type SessionData = {
   id: string; code: string; name: string; status: string;
@@ -372,28 +373,42 @@ export default function V2ScanPage() {
             )}
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-500">Importación</label>
-              <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxImportId} onChange={(e) => void handleImportSelect(e.target.value)} disabled={loadingImports}>
-                <option value="">{loadingImports ? "Cargando..." : "Seleccionar importación..."}</option>
-                {imports.map((imp) => <option key={imp.id} value={imp.id}>{imp.code}{imp.description ? ` — ${imp.description}` : ""}</option>)}
-              </select>
+              <SearchableSelect
+                options={imports.map((imp) => ({
+                  value: imp.id,
+                  label: `${imp.code}${imp.description ? ` — ${imp.description}` : ""}`,
+                }))}
+                value={selectedBoxImportId}
+                onChange={(val) => void handleImportSelect(val)}
+                placeholder={loadingImports ? "Cargando..." : "Seleccionar importación..."}
+                searchPlaceholder="Filtrar importaciones..."
+                disabled={loadingImports}
+              />
             </div>
             {selectedBoxImportId && !skipPallet && pallets.length > 0 && (
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-500">Pallet</label>
-                <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxPalletId} onChange={(e) => void handlePalletSelect(e.target.value)} disabled={loadingPallets}>
-                  <option value="">{loadingPallets ? "Cargando..." : "Seleccionar pallet..."}</option>
-                  {pallets.map((p) => <option key={p.id} value={p.id}>{p.number}</option>)}
-                </select>
+                <SearchableSelect
+                  options={pallets.map((p) => ({ value: p.id, label: p.number }))}
+                  value={selectedBoxPalletId}
+                  onChange={(val) => void handlePalletSelect(val)}
+                  placeholder={loadingPallets ? "Cargando..." : "Seleccionar pallet..."}
+                  searchPlaceholder="Filtrar pallets..."
+                  disabled={loadingPallets}
+                />
               </div>
             )}
             {selectedBoxImportId && (skipPallet || pallets.length === 0 || selectedBoxPalletId) && (
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-500">Caja</label>
                 {loadingBoxes ? <div className="flex items-center gap-2 py-3 text-sm text-slate-400"><LoaderCircle className="animate-spin" size={14} /> Cargando...</div> : (
-                  <select className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm" value={selectedBoxId} onChange={(e) => void handleBoxSelect(e.target.value)}>
-                    <option value="">Seleccionar caja...</option>
-                    {boxes.map((b) => <option key={b.id} value={b.id}>Caja {b.number}</option>)}
-                  </select>
+                  <SearchableSelect
+                    options={boxes.map((b) => ({ value: b.id, label: `Caja ${b.number}` }))}
+                    value={selectedBoxId}
+                    onChange={(val) => void handleBoxSelect(val)}
+                    placeholder="Seleccionar caja..."
+                    searchPlaceholder="Filtrar cajas..."
+                  />
                 )}
               </div>
             )}

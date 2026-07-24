@@ -1,0 +1,854 @@
+"use client";
+
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import * as XLSX from "xlsx";
+import { apiFetch } from "@/lib/client";
+import {
+  ArrowLeft,
+  LoaderCircle,
+  Package,
+  CheckCircle2,
+  XCircle,
+  Upload,
+  FileSpreadsheet,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+type SessionData = {
+  id: string;
+  code: string;
+  name: string;
+  status: string;
+};
+
+type BoxProduct = {
+  productId: string;
+  productCode: string;
+  productDescription: string;
+  productUnit: string;
+  supplierCode?: string;
+  expectedQty: number | null;
+};
+
+type ProductLine = {
+  quantity: number;
+  notes: string;
+};
+
+type ConfirmedProduct = {
+  product: BoxProduct;
+  correct: boolean;
+  lines: ProductLine[];
+  notes: string;
+};
+
+type Step = "IDENTIFY" | "CONFIRM" | "SUMMARY";
+
+export default function V3ScanPage() {
+  const params = useParams();
+  const id = params.id as string;
+
+  const [session, setSession] = useState<SessionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState("");
+  const [step, setStep] = useState<Step>("IDENTIFY");
+
+  const [selectedBoxImportId, setSelectedBoxImportId] = useState("");
+  const [selectedBoxPalletId, setSelectedBoxPalletId] = useState("");
+  const [selectedBoxId, setSelectedBoxId] = useState("");
+  const [boxImport, setBoxImport] = useState("");
+  const [boxPallet, setBoxPallet] = useState("");
+  const [skipPallet, setSkipPallet] = useState(false);
+
+  const [imports, setImports] = useState<{ id: string; code: string; description: string | null }[]>([]);
+  const [pallets, setPallets] = useState<{ id: string; number: string }[]>([]);
+  const [boxes, setBoxes] = useState<{ id: string; number: string }[]>([]);
+  const [loadingImports, setLoadingImports] = useState(false);
+  const [loadingPallets, setLoadingPallets] = useState(false);
+  const [loadingBoxes, setLoadingBoxes] = useState(false);
+
+  const [resolvedBox, setResolvedBox] = useState<any>(null);
+  const [boxProducts, setBoxProducts] = useState<BoxProduct[]>([]);
+  const [currentProductIdx, setCurrentProductIdx] = useState(0);
+  const [productCorrect, setProductCorrect] = useState(true);
+  const [productLines, setProductLines] = useState<ProductLine[]>([{ quantity: 0, notes: "" }]);
+  const [productNotes, setProductNotes] = useState("");
+  const [confirmedProducts, setConfirmedProducts] = useState<ConfirmedProduct[]>([]);
+
+  const [importBusy, setImportBusy] = useState(false);
+  const [importResult, setImportResult] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [operator, setOperator] = useState<{ id: string; name: string } | null>(null);
+  const [operatorName, setOperatorName] = useState("");
+  const [joining, setJoining] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("stockscan_operator_v3");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setOperator(parsed);
+      } catch {
+        localStorage.removeItem("stockscan_operator_v3");
+      }
+    }
+  }, []);
+
+  async function handleJoin() {
+    if (!operatorName.trim()) return;
+    setJoining(true);
+    try {
+      const result = await apiFetch<{ operator: { id: string; name: string } }>(
+        `/api/sessions/v3/${id}/join`,
+        {
+          method: "POST",
+          body: JSON.stringify({ name: operatorName.trim() }),
+        },
+      );
+      setOperator(result.operator);
+      localStorage.setItem("stockscan_operator_v3", JSON.stringify(result.operator));
+    } catch {
+      setToast("Error al identificar");
+    } finally {
+      setJoining(false);
+    }
+  }
+
+  function downloadBoxTemplate() {
+    const wb = XLSX.utils.book_new();
+    const data = [
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-001", descripcion: "Producto ejemplo", unidad: "UND", cantidad_esperada: 10 },
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-002", descripcion: "Otro producto", unidad: "UND", cantidad_esperada: 5 },
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-2", codigo_producto: "PROD-003", descripcion: "Tercer producto", unidad: "UND", cantidad_esperada: 20 },
+    ];
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, "Cajas");
+    XLSX.writeFile(wb, "plantilla_cajas.xlsx");
+  }
+
+  async function handleBoxImport(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImportBusy(true);
+    setImportResult("");
+    try {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: "buffer" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json<any>(ws);
+      const rows = jsonData
+        .map((row: any) => ({
+          importCode: row.importacion || row.importCode || row.import || "",
+          palletNumber: row.pallet || row.palletNumber || row.numero_pallet || "",
+          boxNumber: row.caja || row.boxNumber || row.numero_caja || "",
+          productCode: row.codigo_producto || row.productCode || row.codigo || "",
+          productDescription: row.descripcion || row.description || "",
+          productUnit: row.unidad || row.unit || "UND",
+          expectedQty: row.cantidad_esperada || row.expectedQty || row.cantidad || 0,
+        }))
+        .filter((r: any) => r.importCode && r.boxNumber && r.productCode);
+      if (rows.length === 0) {
+        setImportResult("No se encontraron filas válidas");
+        return;
+      }
+      const result = await apiFetch<any>("/api/boxes/import", {
+        method: "POST",
+        body: JSON.stringify({ rows }),
+      });
+      setImportResult(
+        `Importados: ${result.created.imports} importaciones, ${result.created.pallets} pallets, ${result.created.boxes} cajas, ${result.created.links} productos`,
+      );
+      await loadImports();
+    } catch (error) {
+      setImportResult(error instanceof Error ? error.message : "Error al importar");
+    } finally {
+      setImportBusy(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  async function loadImports() {
+    setLoadingImports(true);
+    try {
+      const data = await apiFetch<{ imports: { id: string; code: string; description: string | null }[] }>("/api/boxes/imports");
+      setImports(data.imports);
+    } catch {
+      /* silent */
+    } finally {
+      setLoadingImports(false);
+    }
+  }
+
+  const load = useCallback(async () => {
+    try {
+      const data = await apiFetch<any>(`/api/sessions/v3/${id}`);
+      setSession(data.session);
+    } catch {
+      /* silent */
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    if (step !== "IDENTIFY") return;
+    void loadImports();
+  }, [step]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 2500);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  async function handleImportSelect(importId: string) {
+    setSelectedBoxImportId(importId);
+    setSelectedBoxPalletId("");
+    setSelectedBoxId("");
+    setPallets([]);
+    setBoxes([]);
+    setResolvedBox(null);
+    setBoxProducts([]);
+    setSkipPallet(false);
+    if (!importId) return;
+    const imp = imports.find((i) => i.id === importId);
+    if (imp) setBoxImport(imp.code);
+    setLoadingPallets(true);
+    try {
+      const data = await apiFetch<{ pallets: { id: string; number: string }[] }>(
+        `/api/boxes/pallets?importId=${importId}`,
+      );
+      setPallets(data.pallets);
+      if (data.pallets.length === 0) setSkipPallet(true);
+    } catch {
+      /* silent */
+    } finally {
+      setLoadingPallets(false);
+    }
+  }
+
+  async function handlePalletSelect(palletId: string) {
+    setSelectedBoxPalletId(palletId);
+    setSelectedBoxId("");
+    setBoxes([]);
+    setResolvedBox(null);
+    setBoxProducts([]);
+    if (!palletId) {
+      setSkipPallet(false);
+      return;
+    }
+    const pal = pallets.find((p) => p.id === palletId);
+    if (pal) setBoxPallet(pal.number);
+    setLoadingBoxes(true);
+    try {
+      const data = await apiFetch<{ boxes: { id: string; number: string }[] }>(
+        `/api/boxes/boxes?palletId=${palletId}`,
+      );
+      setBoxes(data.boxes);
+    } catch {
+      /* silent */
+    } finally {
+      setLoadingBoxes(false);
+    }
+  }
+
+  async function handleBoxSelect(boxId: string) {
+    setSelectedBoxId(boxId);
+    if (!boxId) {
+      setResolvedBox(null);
+      setBoxProducts([]);
+      return;
+    }
+    const bx = boxes.find((b) => b.id === boxId);
+    if (!bx) return;
+    const p = new URLSearchParams({ import: boxImport.trim(), box: bx.number });
+    if (boxPallet.trim()) p.set("pallet", boxPallet.trim());
+    setBusy(true);
+    try {
+      const data = await apiFetch<any>(`/api/boxes/resolve?${p.toString()}`);
+      setResolvedBox(data.box);
+      setBoxProducts(
+        data.box.products.map((pr: any) => ({
+          productId: pr.productId,
+          productCode: pr.productCode,
+          productDescription: pr.productDescription,
+          productUnit: pr.productUnit,
+          supplierCode: pr.supplierCode || undefined,
+          expectedQty: pr.expectedQty,
+        })),
+      );
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Caja no encontrada");
+      setResolvedBox(null);
+      setBoxProducts([]);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function startConfirmProducts() {
+    if (boxProducts.length === 0) return;
+    setCurrentProductIdx(0);
+    setProductCorrect(true);
+    const firstQty = boxProducts[0].expectedQty ?? 0;
+    setProductLines([{ quantity: firstQty, notes: "" }]);
+    setProductNotes("");
+    setConfirmedProducts([]);
+    setStep("CONFIRM");
+  }
+
+  function addLine() {
+    setProductLines((prev) => [...prev, { quantity: 0, notes: "" }]);
+  }
+
+  function removeLine(idx: number) {
+    if (productLines.length <= 1) return;
+    setProductLines((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateLineQuantity(idx: number, qty: string) {
+    setProductLines((prev) =>
+      prev.map((line, i) => (i === idx ? { ...line, quantity: parseFloat(qty || "0") } : line)),
+    );
+  }
+
+  function updateLineNotes(idx: number, notes: string) {
+    setProductLines((prev) =>
+      prev.map((line, i) => (i === idx ? { ...line, notes } : line)),
+    );
+  }
+
+  function confirmCurrentProduct() {
+    const product = boxProducts[currentProductIdx];
+    const confirmed: ConfirmedProduct = {
+      product,
+      correct: productCorrect,
+      lines: productCorrect ? productLines.filter((l) => l.quantity > 0) : [],
+      notes: productNotes,
+    };
+    const updated = [...confirmedProducts, confirmed];
+    setConfirmedProducts(updated);
+    if (currentProductIdx < boxProducts.length - 1) {
+      const nextIdx = currentProductIdx + 1;
+      setCurrentProductIdx(nextIdx);
+      setProductCorrect(true);
+      const nextQty = boxProducts[nextIdx].expectedQty ?? 0;
+      setProductLines([{ quantity: nextQty, notes: "" }]);
+      setProductNotes("");
+    } else {
+      setStep("SUMMARY");
+    }
+  }
+
+  function correctProducts() {
+    return confirmedProducts.filter((p) => p.correct && p.lines.length > 0);
+  }
+
+  function resetIdentify() {
+    setSelectedBoxImportId("");
+    setSelectedBoxPalletId("");
+    setSelectedBoxId("");
+    setPallets([]);
+    setBoxes([]);
+    setResolvedBox(null);
+    setBoxProducts([]);
+    setConfirmedProducts([]);
+    setSkipPallet(false);
+    setCurrentProductIdx(0);
+    setProductLines([{ quantity: 0, notes: "" }]);
+  }
+
+  async function registerAllCounts() {
+    if (!session || confirmedProducts.length === 0) return;
+    setBusy(true);
+    try {
+      const items = correctProducts().flatMap((cp) =>
+        cp.lines.map((line) => ({
+          productId: cp.product.productId,
+          quantity: line.quantity,
+          notes: line.notes || cp.notes || undefined,
+        })),
+      );
+
+      if (items.length > 0) {
+        await apiFetch<any>(`/api/sessions/v3/${id}/counts`, {
+          method: "POST",
+          body: JSON.stringify({
+            operationId: crypto.randomUUID(),
+            inputMethod: "MANUAL",
+            boxIdentity: {
+              importCode: boxImport.trim(),
+              palletNumber: boxPallet.trim() || undefined,
+              boxNumber: resolvedBox?.number || "",
+            },
+            items,
+          }),
+        });
+      }
+
+      setToast("Conteos registrados");
+      await load();
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error al registrar");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendToReview() {
+    setBusy(true);
+    try {
+      await apiFetch(`/api/sessions/v3/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "REVIEW" }),
+      });
+      setToast("Sesión enviada a revisión");
+      await load();
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center py-16 text-slate-500">
+        <LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...
+      </div>
+    );
+  if (!session)
+    return <div className="py-16 text-center text-slate-500">Sesión no encontrada.</div>;
+
+  if (!operator) {
+    return (
+      <div className="mx-auto max-w-sm space-y-4 p-4">
+        <div className="text-center">
+          <p className="mb-1 text-sm font-medium text-slate-500">{session.name}</p>
+          <h1 className="text-xl font-bold">Identifícate</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Tu nombre quedará registrado en cada lectura.
+          </p>
+        </div>
+        <Card>
+          <CardContent className="p-3 space-y-3">
+            <Input
+              placeholder="Tu nombre"
+              className="h-11 text-center text-lg"
+              value={operatorName}
+              onChange={(e) => setOperatorName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void handleJoin();
+              }}
+              autoFocus
+            />
+            <Button
+              className="h-12 w-full"
+              onClick={() => void handleJoin()}
+              disabled={joining || !operatorName.trim()}
+            >
+              {joining ? <LoaderCircle className="animate-spin" size={16} /> : null}
+              Ingresar a la sesión
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-4 p-4 pb-24">
+      <div className="flex items-center gap-3">
+        <Link href="/sessions/v3" className="text-slate-400 hover:text-slate-600">
+          <ArrowLeft size={20} />
+        </Link>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-base font-bold tracking-tight truncate">{session.name}</h1>
+          <p className="text-xs text-slate-400">{session.code}</p>
+        </div>
+        {toast && (
+          <span className="shrink-0 rounded bg-emerald-50 px-2 py-1 text-xs text-emerald-600">
+            {toast}
+          </span>
+        )}
+      </div>
+
+      {step === "IDENTIFY" && (
+        <div className="space-y-3">
+          <Card>
+            <CardContent className="p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-700">Identificar caja</p>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-slate-400"
+                    onClick={downloadBoxTemplate}
+                  >
+                    <FileSpreadsheet size={12} /> Plantilla
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-slate-400"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={importBusy}
+                  >
+                    {importBusy ? (
+                      <LoaderCircle className="animate-spin" size={12} />
+                    ) : (
+                      <Upload size={12} />
+                    )}{" "}
+                    Importar
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    className="hidden"
+                    onChange={(e) => void handleBoxImport(e)}
+                  />
+                </div>
+              </div>
+              {importResult && (
+                <p
+                  className={`rounded px-2 py-1 text-xs ${importResult.startsWith("Error") ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}`}
+                >
+                  {importResult}
+                </p>
+              )}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">
+                  Importación
+                </label>
+                <select
+                  className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                  value={selectedBoxImportId}
+                  onChange={(e) => void handleImportSelect(e.target.value)}
+                  disabled={loadingImports}
+                >
+                  <option value="">
+                    {loadingImports ? "Cargando..." : "Seleccionar importación..."}
+                  </option>
+                  {imports.map((imp) => (
+                    <option key={imp.id} value={imp.id}>
+                      {imp.code}
+                      {imp.description ? ` — ${imp.description}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedBoxImportId && !skipPallet && pallets.length > 0 && (
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-500">
+                    Pallet
+                  </label>
+                  <select
+                    className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                    value={selectedBoxPalletId}
+                    onChange={(e) => void handlePalletSelect(e.target.value)}
+                    disabled={loadingPallets}
+                  >
+                    <option value="">
+                      {loadingPallets ? "Cargando..." : "Seleccionar pallet..."}
+                    </option>
+                    {pallets.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.number}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {selectedBoxImportId &&
+                (skipPallet || pallets.length === 0 || selectedBoxPalletId) && (
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-500">
+                      Caja
+                    </label>
+                    {loadingBoxes ? (
+                      <div className="flex items-center gap-2 py-3 text-sm text-slate-400">
+                        <LoaderCircle className="animate-spin" size={14} /> Cargando...
+                      </div>
+                    ) : (
+                      <select
+                        className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                        value={selectedBoxId}
+                        onChange={(e) => void handleBoxSelect(e.target.value)}
+                      >
+                        <option value="">Seleccionar caja...</option>
+                        {boxes.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            Caja {b.number}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                )}
+            </CardContent>
+          </Card>
+          {resolvedBox && (
+            <Card className="border-teal-200">
+              <CardContent className="p-3 space-y-3">
+                <div>
+                  <p className="text-sm font-bold text-teal-800">
+                    {resolvedBox.import}
+                    {resolvedBox.pallet ? ` / ${resolvedBox.pallet}` : ""} /{" "}
+                    {resolvedBox.number}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  {boxProducts.map((bp) => (
+                    <div
+                      key={bp.productId}
+                      className="flex items-center justify-between rounded bg-slate-50 px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{bp.productDescription}</p>
+                        <p className="text-xs text-slate-400">
+                          {bp.productCode}
+                          {bp.supplierCode ? ` · Prov: ${bp.supplierCode}` : ""} ·{" "}
+                          {bp.productUnit}
+                        </p>
+                      </div>
+                      <span className="text-xs text-slate-500">
+                        {bp.expectedQty ?? "?"} unds
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <Button className="h-12 w-full" onClick={startConfirmProducts}>
+                  <CheckCircle2 size={16} className="mr-1" /> Confirmar productos
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {step === "CONFIRM" && boxProducts[currentProductIdx] && (
+        <div className="space-y-3">
+          <div className="rounded-lg bg-slate-100 px-3 py-2 text-center text-xs text-slate-500">
+            Producto {currentProductIdx + 1} de {boxProducts.length}
+          </div>
+          <Card>
+            <CardContent className="p-3 space-y-3">
+              <div className="rounded-lg bg-blue-50 p-3">
+                <p className="text-base font-bold text-blue-800">
+                  {boxProducts[currentProductIdx].productDescription}
+                </p>
+                <p className="text-sm text-blue-600">
+                  {boxProducts[currentProductIdx].productCode}
+                  {boxProducts[currentProductIdx].supplierCode
+                    ? ` · Prov: ${boxProducts[currentProductIdx].supplierCode}`
+                    : ""}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Unidad: {boxProducts[currentProductIdx].productUnit} · Esperado:{" "}
+                  {boxProducts[currentProductIdx].expectedQty ?? "?"} unds
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setProductCorrect(true);
+                    const qty = boxProducts[currentProductIdx].expectedQty ?? 0;
+                    setProductLines([{ quantity: qty, notes: "" }]);
+                  }}
+                  className={`flex-1 rounded-lg border-2 py-3 text-sm font-medium min-h-[48px] ${productCorrect ? "border-green-500 bg-green-50 text-green-700" : "border-slate-200 text-slate-500"}`}
+                >
+                  <CheckCircle2 size={16} className="inline mr-1" /> Correcto
+                </button>
+                <button
+                  onClick={() => {
+                    setProductCorrect(false);
+                    setProductLines([]);
+                  }}
+                  className={`flex-1 rounded-lg border-2 py-3 text-sm font-medium min-h-[48px] ${!productCorrect ? "border-red-500 bg-red-50 text-red-700" : "border-slate-200 text-slate-500"}`}
+                >
+                  <XCircle size={16} className="inline mr-1" /> Incorrecto
+                </button>
+              </div>
+              {productCorrect && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-slate-500">
+                      Líneas de cantidad
+                    </label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-teal-600"
+                      onClick={addLine}
+                    >
+                      + Agregar línea
+                    </Button>
+                  </div>
+                  {productLines.map((line, idx) => (
+                    <div key={idx} className="flex gap-2 items-start">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            inputMode="decimal"
+                            className="h-11 text-lg flex-1"
+                            placeholder={`Cantidad ${idx + 1}`}
+                            value={line.quantity || ""}
+                            onChange={(e) => updateLineQuantity(idx, e.target.value)}
+                            min={0}
+                          />
+                          {productLines.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 px-2"
+                              onClick={() => removeLine(idx)}
+                            >
+                              <XCircle size={16} />
+                            </Button>
+                          )}
+                        </div>
+                        <Input
+                          className="h-9 text-xs"
+                          placeholder="Observación línea (opcional)"
+                          value={line.notes}
+                          onChange={(e) => updateLineNotes(idx, e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="rounded bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                    Total:{" "}
+                    <span className="font-bold">
+                      {productLines.reduce((s, l) => s + l.quantity, 0)}
+                    </span>{" "}
+                    unds
+                    {boxProducts[currentProductIdx].expectedQty != null && (
+                      <span>
+                        {" "}
+                        (esperado: {boxProducts[currentProductIdx].expectedQty})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">
+                  Observación general (opcional)
+                </label>
+                <textarea
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm h-16 resize-none"
+                  placeholder={
+                    productCorrect
+                      ? "Ej: empaque dañado..."
+                      : "Ej: oxidado, producto equivocado..."
+                  }
+                  value={productNotes}
+                  onChange={(e) => setProductNotes(e.target.value)}
+                />
+              </div>
+              <Button className="h-12 w-full" onClick={confirmCurrentProduct}>
+                {currentProductIdx < boxProducts.length - 1
+                  ? "Siguiente producto"
+                  : "Finalizar confirmación"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {step === "SUMMARY" && (
+        <div className="space-y-3">
+          <Card>
+            <CardContent className="p-3 space-y-3">
+              <p className="text-sm font-medium text-slate-700">Resumen</p>
+              {confirmedProducts.map((cp, i) => (
+                <div
+                  key={i}
+                  className={`rounded-lg border p-3 ${cp.correct ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-bold">{cp.product.productDescription}</p>
+                    {cp.correct ? (
+                      <CheckCircle2 size={14} className="text-green-500" />
+                    ) : (
+                      <XCircle size={14} className="text-red-500" />
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    {cp.product.productCode} ·{" "}
+                    {cp.lines.reduce((s, l) => s + l.quantity, 0)} unds
+                  </p>
+                  {cp.notes && (
+                    <p className="text-xs text-slate-500 italic mt-1">
+                      Obs: {cp.notes}
+                    </p>
+                  )}
+                  {cp.correct && cp.lines.length > 1 && (
+                    <div className="mt-2 space-y-1">
+                      {cp.lines.map((line, j) => (
+                        <div
+                          key={j}
+                          className="flex items-center justify-between rounded bg-white px-2 py-1 text-xs"
+                        >
+                          <span>Línea {j + 1}</span>
+                          <span>
+                            {line.quantity} unds
+                            {line.notes && ` (${line.notes})`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 h-12"
+              onClick={() => {
+                resetIdentify();
+                setStep("IDENTIFY");
+              }}
+            >
+              Siguiente caja
+            </Button>
+            <Button
+              className="flex-1 h-12"
+              onClick={() => void registerAllCounts()}
+              disabled={busy}
+            >
+              {busy ? (
+                <LoaderCircle className="animate-spin" size={16} />
+              ) : (
+                <Package size={16} />
+              )}{" "}
+              Registrar todo
+            </Button>
+          </div>
+          <Button
+            className="w-full h-12"
+            variant="destructive"
+            onClick={() => void sendToReview()}
+            disabled={busy}
+          >
+            Enviar a revisión
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
