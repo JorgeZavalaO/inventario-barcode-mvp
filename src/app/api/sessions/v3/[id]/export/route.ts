@@ -30,6 +30,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         },
         countRound: true,
         operator: { select: { name: true } },
+        countedByOperator: { select: { name: true } },
       },
       orderBy: { createdAt: "asc" },
     });
@@ -64,7 +65,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
             Unidad: event.product.unit,
             Cantidad: Number(event.quantity),
             "Método ingreso": event.inputMethod,
-            Operador: entry.operator.name,
+             Digitador: entry.operator.name,
+             "Operario que contó": entry.countedByOperator?.name ?? entry.operator.name,
             Observaciones: event.notes ?? "",
             "Fecha conteo": formatDateLima(event.createdAt),
             "Hora conteo": formatTimeLima(event.createdAt),

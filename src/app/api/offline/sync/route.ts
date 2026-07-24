@@ -8,7 +8,7 @@ export async function GET() {
     const auth = await requireRole("ADMIN", "SUPERVISOR", "COUNTER", "VIEWER");
     if (!auth.authorized) return auth.response;
 
-    const [products, imports, pallets, boxes, boxProducts] = await Promise.all([
+    const [products, imports, pallets, boxes, boxProducts, operators] = await Promise.all([
       prisma.product.findMany({
         where: { active: true },
         select: {
@@ -56,6 +56,10 @@ export async function GET() {
           active: true,
         },
       }),
+      prisma.operator.findMany({
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      }),
     ]);
 
     return NextResponse.json({
@@ -70,6 +74,7 @@ export async function GET() {
         ...bp,
         expectedQty: bp.expectedQty ? Number(bp.expectedQty) : null,
       })),
+      operators,
       syncedAt: new Date().toISOString(),
     });
   } catch (error) {

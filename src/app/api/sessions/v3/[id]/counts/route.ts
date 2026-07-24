@@ -14,6 +14,7 @@ const boxItemSchema = z.object({
 const boxCountSchema = z.object({
   operationId: z.string().uuid(),
   operatorId: z.string().uuid().optional(),
+  countedByOperatorId: z.string().uuid().optional(),
   inputMethod: z.enum(["CAMERA", "MANUAL", "USB"]).default("MANUAL"),
   boxIdentity: z.object({
     importCode: z.string().trim().min(1),
@@ -169,9 +170,27 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         throw new Error("Sesión no está disponible para conteos");
       }
 
-      const operatorId = body.operatorId ?? auth.session!.user.id;
-      const operator = await tx.operator.findUnique({ where: { id: operatorId } });
-      if (!operator) throw new Error("Operador no identificado. Ingresa nuevamente a la sesión.");
+       const operatorId = body.operatorId ?? auth.session!.user.id;
+       const operator = await tx.operator.findUnique({ where: { id: operatorId } });
+       if (!operator) throw new Error("Digitador no identificado. Ingresa nuevamente a la sesión.");
+
+       const countedByOperatorId = body.countedByOperatorId ?? operatorId;
+       if (body.countedByOperatorId && countedByOperatorId === operatorId) {
+         throw new Error("El operario contador debe ser diferente del digitador.");
+       }
+       const countedByOperator = await tx.operator.findUnique({ where: { id: countedByOperatorId } });
+       if (!countedByOperator) throw new Error("Operario contador no identificado.");
+
+       await tx.sessionParticipant.upsert({
+         where: { sessionId_operatorId: { sessionId, operatorId } },
+         update: { lastSeenAt: new Date() },
+         create: { sessionId, operatorId },
+       });
+       await tx.sessionParticipant.upsert({
+         where: { sessionId_operatorId: { sessionId, operatorId: countedByOperatorId } },
+         update: { lastSeenAt: new Date() },
+         create: { sessionId, operatorId: countedByOperatorId },
+       });
 
       const { imp, pallet, box } = await resolveBoxWithOptionalPallet(tx, body.boxIdentity.importCode, body.boxIdentity.palletNumber, body.boxIdentity.boxNumber);
 
@@ -220,8 +239,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       const entryId = randomUUID();
       await tx.boxCountEntry.create({
         data: {
-          id: entryId, sessionId, countRoundId: round.id, boxId: box.id,
-          positionId: sessionPosition.positionId, operatorId,
+           id: entryId, sessionId, countRoundId: round.id, boxId: box.id,
+           positionId: sessionPosition.positionId, operatorId, countedByOperatorId,
         },
       });
 
@@ -233,7 +252,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
           data: {
             id: eventId, operationId: `${body.operationId}-${index}`,
             sessionId, positionId: sessionPosition.positionId, countRoundId: round.id,
-            productId: item.productId, operatorId, quantity: item.quantity,
+             productId: item.productId, operatorId, quantity: item.quantity,
+             countedByOperatorId,
             inputMethod: body.inputMethod, boxCountEntryId: entryId,
             notes: item.notes ?? null,
           },
@@ -246,7 +266,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     return NextResponse.json(result, { status: result.duplicate ? 200 : 201 });
   } catch (error) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: error.issues[0]?.message }, { status: 400 });
-    if (error instanceof Error && /Sesión|Posición|Ronda|Producto|Importación|Pallet|Caja|Operador|productos no pertenecen|ya fue contada|aprobada/.test(error.message)) {
+    if (error instanceof Error && /Sesión|Posición|Ronda|Producto|Importación|Pallet|Caja|Operador|Digitador|contador|productos no pertenecen|ya fue contada|aprobada/.test(error.message)) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return apiError(error);

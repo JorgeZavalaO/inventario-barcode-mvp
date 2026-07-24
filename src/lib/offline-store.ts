@@ -1,7 +1,7 @@
 "use client";
 
 const DB_NAME = "stockscan-data";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export type OfflineProduct = {
   id: string;
@@ -46,13 +46,18 @@ export type OfflineBoxProduct = {
   active: boolean;
 };
 
+export type OfflineOperator = {
+  id: string;
+  name: string;
+};
+
 export type SyncMetadata = {
   key: string;
   lastSync: string;
   count: number;
 };
 
-type StoreName = "products" | "imports" | "pallets" | "boxes" | "boxProducts" | "syncMeta";
+type StoreName = "products" | "imports" | "pallets" | "boxes" | "boxProducts" | "operators" | "syncMeta";
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -83,6 +88,10 @@ function openDB(): Promise<IDBDatabase> {
         s.createIndex("boxId", "boxId", { unique: false });
         s.createIndex("productId", "productId", { unique: false });
       }
+      if (!db.objectStoreNames.contains("operators")) {
+        const s = db.createObjectStore("operators", { keyPath: "id" });
+        s.createIndex("name", "name", { unique: false });
+      }
       if (!db.objectStoreNames.contains("syncMeta")) {
         db.createObjectStore("syncMeta", { keyPath: "key" });
       }
@@ -99,6 +108,18 @@ async function putAll<T extends object>(storeName: StoreName, items: T[]): Promi
   for (const item of items) {
     store.put(item);
   }
+  await new Promise<void>((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function replaceAll<T extends object>(storeName: StoreName, items: T[]): Promise<void> {
+  const db = await openDB();
+  const tx = db.transaction(storeName, "readwrite");
+  const store = tx.objectStore(storeName);
+  store.clear();
+  for (const item of items) store.put(item);
   await new Promise<void>((resolve, reject) => {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
@@ -172,6 +193,7 @@ async function getSyncMeta(key: string): Promise<SyncMetadata | undefined> {
 
 export const offlineStore = {
   putAll,
+  replaceAll,
   getAll,
   getByIndex,
   getOneByIndex,

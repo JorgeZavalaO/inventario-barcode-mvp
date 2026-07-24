@@ -243,14 +243,16 @@ model BoxCountEntry {
   countRoundId String   @map("count_round_id")
   boxId        String   @map("box_id")
   positionId   String?  @map("position_id")
-  operatorId   String   @map("operator_id")
-  createdAt    DateTime @default(now())
+  operatorId          String   @map("operator_id")
+  countedByOperatorId String?  @map("counted_by_operator_id")
+  createdAt           DateTime @default(now())
 
   session    InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   countRound CountRound       @relation(fields: [countRoundId], references: [id])
   box        Box              @relation(fields: [boxId], references: [id])
   position   StoragePosition? @relation(fields: [positionId], references: [id])
-  operator   Operator         @relation(fields: [operatorId], references: [id])
+  operator          Operator         @relation(fields: [operatorId], references: [id])
+  countedByOperator Operator?        @relation("BoxCountCountedBy", fields: [countedByOperatorId], references: [id], onDelete: Restrict)
   countEvents CountEvent[]
 
   @@unique([countRoundId, boxId])
@@ -265,6 +267,8 @@ model Operator {
   sessionParticipants SessionParticipant[]
   countEvents         CountEvent[]
   boxCountEntries     BoxCountEntry[]
+  countedBoxEntries   BoxCountEntry[] @relation("BoxCountCountedBy")
+  countedEvents       CountEvent[]    @relation("CountEventCountedBy")
 
   @@map("operators")
 }
@@ -320,7 +324,8 @@ model CountEvent {
   operationId     String      @unique @map("operation_id")
   sessionId       String      @map("session_id")
   productId       String      @map("product_id")
-  operatorId      String      @map("operator_id")
+  operatorId          String      @map("operator_id")
+  countedByOperatorId String?     @map("counted_by_operator_id")
   quantity        Decimal     @db.Decimal(14, 3)
   inputMethod     InputMethod @default(CAMERA) @map("input_method")
   createdAt       DateTime    @default(now()) @map("created_at")
@@ -340,7 +345,8 @@ model CountEvent {
 
   session    InventorySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   product    Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
-  operator   Operator         @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+  operator          Operator         @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+  countedByOperator Operator?        @relation("CountEventCountedBy", fields: [countedByOperatorId], references: [id], onDelete: Restrict)
   countRound CountRound?      @relation(fields: [countRoundId], references: [id])
   boxCountEntry BoxCountEntry? @relation(fields: [boxCountEntryId], references: [id])
 

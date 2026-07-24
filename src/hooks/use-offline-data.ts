@@ -8,6 +8,7 @@ import {
   type OfflinePallet,
   type OfflineBox,
   type OfflineBoxProduct,
+  type OfflineOperator,
 } from "@/lib/offline-store";
 
 export type OfflineDataState = {
@@ -16,6 +17,7 @@ export type OfflineDataState = {
   pallets: OfflinePallet[];
   boxes: OfflineBox[];
   boxProducts: OfflineBoxProduct[];
+  operators: OfflineOperator[];
   loading: boolean;
   syncing: boolean;
   lastSync: string | null;
@@ -30,6 +32,7 @@ export function useOfflineData() {
     pallets: [],
     boxes: [],
     boxProducts: [],
+    operators: [],
     loading: true,
     syncing: false,
     lastSync: null,
@@ -39,12 +42,13 @@ export function useOfflineData() {
 
   const loadFromCache = useCallback(async () => {
     try {
-      const [products, imports, pallets, boxes, boxProducts, meta] = await Promise.all([
+      const [products, imports, pallets, boxes, boxProducts, operators, meta] = await Promise.all([
         offlineStore.getAll<OfflineProduct>("products"),
         offlineStore.getAll<OfflineImport>("imports"),
         offlineStore.getAll<OfflinePallet>("pallets"),
         offlineStore.getAll<OfflineBox>("boxes"),
         offlineStore.getAll<OfflineBoxProduct>("boxProducts"),
+        offlineStore.getAll<OfflineOperator>("operators"),
         offlineStore.getSyncMeta("full-sync"),
       ]);
 
@@ -54,7 +58,8 @@ export function useOfflineData() {
         imports,
         pallets,
         boxes,
-        boxProducts,
+         boxProducts,
+         operators,
         loading: false,
         lastSync: meta?.lastSync ?? null,
         counts: {
@@ -90,16 +95,18 @@ export function useOfflineData() {
       const resp = await fetch("/api/offline/sync", { credentials: "include" });
       if (!resp.ok) throw new Error("Error al sincronizar");
       const data = await resp.json();
+      const operators = data.operators ?? [];
 
       await Promise.all([
-        offlineStore.putAll("products", data.products),
-        offlineStore.putAll("imports", data.imports),
-        offlineStore.putAll("pallets", data.pallets),
-        offlineStore.putAll("boxes", data.boxes),
-        offlineStore.putAll("boxProducts", data.boxProducts),
+        offlineStore.replaceAll("products", data.products),
+        offlineStore.replaceAll("imports", data.imports),
+        offlineStore.replaceAll("pallets", data.pallets),
+        offlineStore.replaceAll("boxes", data.boxes),
+        offlineStore.replaceAll("boxProducts", data.boxProducts),
+        offlineStore.replaceAll("operators", operators),
       ]);
 
-      const totalItems = data.products.length + data.imports.length + data.pallets.length + data.boxes.length + data.boxProducts.length;
+      const totalItems = data.products.length + data.imports.length + data.pallets.length + data.boxes.length + data.boxProducts.length + operators.length;
       await offlineStore.updateSyncMeta("full-sync", totalItems);
 
       await loadFromCache();

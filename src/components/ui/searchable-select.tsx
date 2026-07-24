@@ -18,6 +18,8 @@ type SearchableSelectProps = {
   disabled?: boolean;
   className?: string;
   emptyMessage?: string;
+  allowCustom?: boolean;
+  onCreateOption?: (label: string) => void | Promise<void>;
 };
 
 export function SearchableSelect({
@@ -29,6 +31,8 @@ export function SearchableSelect({
   disabled = false,
   className,
   emptyMessage = "Sin resultados",
+  allowCustom = false,
+  onCreateOption,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -45,6 +49,8 @@ export function SearchableSelect({
   }, [options, search]);
 
   const selectedLabel = options.find((o) => o.value === value)?.label;
+  const customLabel = search.trim();
+  const hasExactOption = options.some((option) => option.label.toLowerCase() === customLabel.toLowerCase());
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -101,6 +107,21 @@ export function SearchableSelect({
              />
           </div>
           <ul className="max-h-60 overflow-y-auto py-1">
+            {allowCustom && onCreateOption && customLabel && !hasExactOption && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void onCreateOption(customLabel);
+                    setOpen(false);
+                    setSearch("");
+                  }}
+                  className="w-full border-b border-slate-100 px-3 py-2 text-left text-sm font-medium text-teal-700 hover:bg-teal-50"
+                >
+                  Crear operario &quot;{customLabel}&quot;
+                </button>
+              </li>
+            )}
             {filtered.length === 0 ? (
               <li className="px-3 py-2 text-center text-xs text-slate-400">{emptyMessage}</li>
             ) : (

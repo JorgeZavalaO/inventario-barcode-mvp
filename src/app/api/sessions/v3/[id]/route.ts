@@ -21,6 +21,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
               },
             },
             countEvents: { where: { reversedAt: null }, include: { product: true } },
+            countedByOperator: { select: { id: true, name: true } },
           },
           orderBy: { createdAt: "desc" },
         },

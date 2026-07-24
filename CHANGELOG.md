@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.53.0 (2026-07-24)
+
+### Changed
+
+- **Modo offline V3:** Se almacenan también operarios y sesiones visitadas, permitiendo recargar una sesión y seleccionar el contador sin conexión.
+- **Sincronización:** La actualización de datos reemplaza el cache anterior para evitar registros obsoletos.
+- **Cola offline:** Los conteos que quedaron en estado `SYNCING` se recuperan al reabrir la aplicación y los errores pueden reintentarse manualmente.
+
+## 0.52.0 (2026-07-24)
+
+### Added
+
+- **Catálogo V3:** Se cargaron los 13 operarios iniciales proporcionados.
+- **Alta desde el selector:** Si el operario contador no aparece en la lista, se puede escribir y crear directamente desde el formulario de identificación de cajas.
+
+## 0.51.0 (2026-07-24)
+
+### Added
+
+- **Operario contador V3:** El formulario de identificación de cajas permite seleccionar quién contó físicamente las unidades, separado del digitador que registra la información.
+- **Auditoría V3:** Cada conteo guarda digitador y operario contador en `BoxCountEntry` y `CountEvent`; la revisión y el Excel muestran ambos.
+
 ## 0.50.0 (2026-07-24)
 
 ### Added

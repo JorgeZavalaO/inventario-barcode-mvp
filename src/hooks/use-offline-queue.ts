@@ -36,7 +36,7 @@ export function useOfflineQueue() {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [isOnline, setIsOnline] = useState(true);
   const syncRef = useRef(false);
-  const syncFnRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const syncFnRef = useRef<(retryErrors?: boolean) => Promise<void>>(() => Promise.resolve());
 
   const loadItems = useCallback(async () => {
     try {
@@ -48,23 +48,35 @@ export function useOfflineQueue() {
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
       });
-      setItems(all);
+      const syncing = all.filter((item) => item.status === "SYNCING");
+      if (syncing.length > 0) {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        for (const item of syncing) {
+          tx.objectStore(STORE_NAME).put({ ...item, status: "PENDING" });
+        }
+        await new Promise<void>((resolve, reject) => {
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+      setItems(all.map((item) => item.status === "SYNCING" ? { ...item, status: "PENDING" } : item));
     } catch { /* silent */ }
   }, []);
 
-  const sync = useCallback(async () => {
+  const sync = useCallback(async (retryErrors = false) => {
     if (syncRef.current) return;
+    if (!navigator.onLine) return;
     syncRef.current = true;
 
     try {
       const db = await openDB();
-      const pending: QueueItem[] = await new Promise((resolve, reject) => {
+      const queued: QueueItem[] = await new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, "readonly");
-        const index = tx.objectStore(STORE_NAME).index("status");
-        const req = index.getAll("PENDING");
+        const req = tx.objectStore(STORE_NAME).getAll();
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
       });
+      const pending = queued.filter((item) => item.status === "PENDING" || (retryErrors && item.status === "ERROR"));
 
       for (const item of pending) {
         const tx = db.transaction(STORE_NAME, "readwrite");

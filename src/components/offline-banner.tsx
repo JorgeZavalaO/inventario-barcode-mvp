@@ -46,7 +46,7 @@ export function OfflineBanner() {
   async function handleSyncQueue() {
     setSyncingQueue(true);
     try {
-      await queue.sync();
+      await queue.sync(true);
     } finally {
       setSyncingQueue(false);
     }

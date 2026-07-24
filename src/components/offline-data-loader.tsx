@@ -28,7 +28,8 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
   const checkExistingData = useCallback(async () => {
     try {
       const meta = await offlineStore.getSyncMeta("full-sync");
-      if (meta && meta.count > 0) {
+      const operators = await offlineStore.getAll("operators");
+      if (meta && meta.count > 0 && (operators.length > 0 || !navigator.onLine)) {
         setHasCachedData(true);
         setLoading(false);
         return true;
@@ -58,35 +59,39 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
       const resp = await fetch("/api/offline/sync", { credentials: "include" });
       if (!resp.ok) throw new Error("Error al descargar datos");
       const data = await resp.json();
+      const operators = data.operators ?? [];
 
       setProgress(10);
       setCurrentStage(`Procesando ${data.products.length} productos...`);
 
       await new Promise((r) => setTimeout(r, 100));
-      await offlineStore.putAll("products", data.products);
+      await offlineStore.replaceAll("products", data.products);
       setProgress(10 + STAGES[0].weight);
       setCurrentStage(`${data.products.length} productos guardados`);
 
       await new Promise((r) => setTimeout(r, 50));
       setCurrentStage(`Procesando ${data.imports.length} importaciones...`);
-      await offlineStore.putAll("imports", data.imports);
+      await offlineStore.replaceAll("imports", data.imports);
       setProgress(10 + STAGES[0].weight + STAGES[1].weight);
 
       await new Promise((r) => setTimeout(r, 50));
       setCurrentStage(`Procesando ${data.pallets.length} pallets...`);
-      await offlineStore.putAll("pallets", data.pallets);
+      await offlineStore.replaceAll("pallets", data.pallets);
       setProgress(10 + STAGES[0].weight + STAGES[1].weight + STAGES[2].weight);
 
       await new Promise((r) => setTimeout(r, 50));
       setCurrentStage(`Procesando ${data.boxes.length} cajas...`);
-      await offlineStore.putAll("boxes", data.boxes);
+      await offlineStore.replaceAll("boxes", data.boxes);
       setProgress(10 + STAGES[0].weight + STAGES[1].weight + STAGES[2].weight + STAGES[3].weight);
 
       await new Promise((r) => setTimeout(r, 50));
       setCurrentStage(`Procesando ${data.boxProducts.length} productos de caja...`);
-      await offlineStore.putAll("boxProducts", data.boxProducts);
+      await offlineStore.replaceAll("boxProducts", data.boxProducts);
 
-      const totalItems = data.products.length + data.imports.length + data.pallets.length + data.boxes.length + data.boxProducts.length;
+      setCurrentStage(`Procesando ${operators.length} operarios...`);
+      await offlineStore.replaceAll("operators", operators);
+
+      const totalItems = data.products.length + data.imports.length + data.pallets.length + data.boxes.length + data.boxProducts.length + operators.length;
       await offlineStore.updateSyncMeta("full-sync", totalItems);
 
       setProgress(100);

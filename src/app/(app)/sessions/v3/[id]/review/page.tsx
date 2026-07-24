@@ -56,6 +56,8 @@ type BoxDifference = {
   }[];
   eventCount: number;
   countedAt: string;
+  digitizerName: string;
+  countedByName: string;
 };
 
 type ReviewSummary = {
@@ -354,6 +356,8 @@ export default function V3ReviewPage() {
                   <TableHead>Pallet</TableHead>
                   <TableHead>Caja</TableHead>
                   <TableHead>Producto</TableHead>
+                  <TableHead>Digitador</TableHead>
+                  <TableHead>Operario contador</TableHead>
                   <TableHead className="text-right">Esperado</TableHead>
                   <TableHead className="text-right">Contado</TableHead>
                   <TableHead className="text-right">Diferencia</TableHead>
@@ -374,6 +378,8 @@ export default function V3ReviewPage() {
                       <p className="text-sm font-medium">{row.product.productDescription}</p>
                       <p className="text-xs text-slate-400">{row.product.productCode}</p>
                     </TableCell>
+                    <TableCell className="text-xs">{row.digitizerName}</TableCell>
+                    <TableCell className="text-xs">{row.countedByName}</TableCell>
                     <TableCell className="text-right text-sm">{row.product.expectedQty}</TableCell>
                     <TableCell className="text-right text-sm font-medium">{row.product.countedQty}</TableCell>
                     <TableCell className="text-right">

@@ -24,6 +24,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
           include: { product: true },
         },
         countRound: true,
+        operator: { select: { name: true } },
+        countedByOperator: { select: { name: true } },
       },
       orderBy: { createdAt: "asc" },
     });
@@ -97,8 +99,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         difference: totalCounted - totalExpected,
         diffType: totalCounted - totalExpected > 0 ? "sobrante" : totalCounted - totalExpected < 0 ? "faltante" : "coincide",
         products,
-        eventCount: totalEvents,
-        countedAt: latestEntry.createdAt,
+         eventCount: totalEvents,
+         countedAt: latestEntry.createdAt,
+         digitizerName: latestEntry.operator.name,
+         countedByName: latestEntry.countedByOperator?.name ?? latestEntry.operator.name,
       };
     });
 

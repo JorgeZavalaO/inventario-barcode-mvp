@@ -262,6 +262,7 @@ export const BoxCountEntryScalarFieldEnum = {
   boxId: 'boxId',
   positionId: 'positionId',
   operatorId: 'operatorId',
+  countedByOperatorId: 'countedByOperatorId',
   createdAt: 'createdAt'
 } as const
 
@@ -316,6 +317,7 @@ export const CountEventScalarFieldEnum = {
   sessionId: 'sessionId',
   productId: 'productId',
   operatorId: 'operatorId',
+  countedByOperatorId: 'countedByOperatorId',
   quantity: 'quantity',
   inputMethod: 'inputMethod',
   createdAt: 'createdAt',

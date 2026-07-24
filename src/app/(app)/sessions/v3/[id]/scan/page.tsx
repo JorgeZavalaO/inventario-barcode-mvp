@@ -27,7 +27,10 @@ type SessionData = {
   code: string;
   name: string;
   status: string;
+  sessionParticipants?: { operator: { id: string; name: string } }[];
 };
+
+type Operator = { id: string; name: string };
 
 type BoxProduct = {
   productId: string;
@@ -90,6 +93,8 @@ export default function V3ScanPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [operator, setOperator] = useState<{ id: string; name: string } | null>(null);
   const [operatorName, setOperatorName] = useState("");
+  const [operators, setOperators] = useState<Operator[]>([]);
+  const [countedByOperatorId, setCountedByOperatorId] = useState("");
   const [joining, setJoining] = useState(false);
 
   const offlineData = useOfflineData();
@@ -107,6 +112,42 @@ export default function V3ScanPage() {
     }
   }, []);
 
+  useEffect(() => {
+    const cached = localStorage.getItem("stockscan_operators_v3");
+    if (cached) {
+      try {
+        setOperators(JSON.parse(cached) as Operator[]);
+      } catch {
+        localStorage.removeItem("stockscan_operators_v3");
+      }
+    }
+    void apiFetch<{ operators: Operator[] }>("/api/operators")
+      .then((data) => {
+        setOperators(data.operators);
+        localStorage.setItem("stockscan_operators_v3", JSON.stringify(data.operators));
+      })
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    if (offlineData.operators.length === 0) return;
+    setOperators((current) => {
+      const merged = new Map(current.map((item) => [item.id, item]));
+      for (const item of offlineData.operators) merged.set(item.id, item);
+      return Array.from(merged.values());
+    });
+  }, [offlineData.operators]);
+
+  useEffect(() => {
+    const participants = session?.sessionParticipants?.map(({ operator: participant }) => participant) ?? [];
+    if (participants.length === 0) return;
+    setOperators((current) => {
+      const merged = new Map(current.map((item) => [item.id, item]));
+      for (const participant of participants) merged.set(participant.id, participant);
+      return Array.from(merged.values());
+    });
+  }, [session]);
+
   async function handleJoin() {
     if (!operatorName.trim()) return;
     setJoining(true);
@@ -119,11 +160,30 @@ export default function V3ScanPage() {
         },
       );
       setOperator(result.operator);
+      setOperators((current) => current.some((item) => item.id === result.operator.id) ? current : [...current, result.operator]);
       localStorage.setItem("stockscan_operator_v3", JSON.stringify(result.operator));
     } catch {
       setToast("Error al identificar");
     } finally {
       setJoining(false);
+    }
+  }
+
+  async function createCountedOperator(name: string) {
+    try {
+      const result = await apiFetch<{ operator: Operator }>("/api/operators", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      });
+      if (result.operator.id === operator?.id) {
+        setToast("El operario contador debe ser diferente del digitador");
+        return;
+      }
+      setOperators((current) => current.some((item) => item.id === result.operator.id) ? current : [...current, result.operator]);
+      setCountedByOperatorId(result.operator.id);
+      setToast("Operario agregado");
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "No se pudo crear el operario");
     }
   }
 
@@ -192,7 +252,8 @@ export default function V3ScanPage() {
         setImports(data.imports);
       }
     } catch {
-      /* silent */
+      const offlineImports = await offlineData.getImports();
+      if (offlineImports.length > 0) setImports(offlineImports);
     } finally {
       setLoadingImports(false);
     }
@@ -202,8 +263,16 @@ export default function V3ScanPage() {
     try {
       const data = await apiFetch<any>(`/api/sessions/v3/${id}`);
       setSession(data.session);
+      localStorage.setItem(`stockscan_session_v3_${id}`, JSON.stringify(data.session));
     } catch {
-      /* silent */
+      const cached = localStorage.getItem(`stockscan_session_v3_${id}`);
+      if (cached) {
+        try {
+          setSession(JSON.parse(cached) as SessionData);
+        } catch {
+          localStorage.removeItem(`stockscan_session_v3_${id}`);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -416,6 +485,10 @@ export default function V3ScanPage() {
 
   async function registerAllCounts(): Promise<boolean> {
     if (!session || confirmedProducts.length === 0) return false;
+    if (!operator || !countedByOperatorId || countedByOperatorId === operator.id) {
+      setToast("Selecciona el operario que contó las unidades");
+      return false;
+    }
     setBusy(true);
     try {
       const items = correctProducts().flatMap((cp) =>
@@ -427,9 +500,10 @@ export default function V3ScanPage() {
       );
 
       if (items.length > 0) {
-        const payload = {
-          operationId: crypto.randomUUID(),
-          operatorId: operator?.id,
+          const payload = {
+            operationId: crypto.randomUUID(),
+            operatorId: operator?.id,
+            countedByOperatorId,
           inputMethod: "MANUAL" as const,
           boxIdentity: {
             importCode: boxImport.trim(),
@@ -610,6 +684,27 @@ export default function V3ScanPage() {
                   {importResult}
                 </p>
               )}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">
+                  Operario que contó las unidades
+                </label>
+                <SearchableSelect
+                  options={operators
+                    .filter((item) => item.id !== operator?.id)
+                    .map((item) => ({ value: item.id, label: item.name }))}
+                  value={countedByOperatorId}
+                  onChange={setCountedByOperatorId}
+                  placeholder="Seleccionar operario contador..."
+                  searchPlaceholder="Filtrar operarios..."
+                  disabled={!operator}
+                  emptyMessage="No hay otro operario disponible"
+                  allowCustom
+                  onCreateOption={createCountedOperator}
+                />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Digitador: {operator?.name ?? "sin identificar"}
+                </p>
+              </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-500">
                   Importación

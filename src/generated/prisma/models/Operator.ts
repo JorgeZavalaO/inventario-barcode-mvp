@@ -169,6 +169,8 @@ export type OperatorWhereInput = {
   sessionParticipants?: Prisma.SessionParticipantListRelationFilter
   countEvents?: Prisma.CountEventListRelationFilter
   boxCountEntries?: Prisma.BoxCountEntryListRelationFilter
+  countedBoxEntries?: Prisma.BoxCountEntryListRelationFilter
+  countedEvents?: Prisma.CountEventListRelationFilter
 }
 
 export type OperatorOrderByWithRelationInput = {
@@ -178,6 +180,8 @@ export type OperatorOrderByWithRelationInput = {
   sessionParticipants?: Prisma.SessionParticipantOrderByRelationAggregateInput
   countEvents?: Prisma.CountEventOrderByRelationAggregateInput
   boxCountEntries?: Prisma.BoxCountEntryOrderByRelationAggregateInput
+  countedBoxEntries?: Prisma.BoxCountEntryOrderByRelationAggregateInput
+  countedEvents?: Prisma.CountEventOrderByRelationAggregateInput
 }
 
 export type OperatorWhereUniqueInput = Prisma.AtLeast<{
@@ -190,6 +194,8 @@ export type OperatorWhereUniqueInput = Prisma.AtLeast<{
   sessionParticipants?: Prisma.SessionParticipantListRelationFilter
   countEvents?: Prisma.CountEventListRelationFilter
   boxCountEntries?: Prisma.BoxCountEntryListRelationFilter
+  countedBoxEntries?: Prisma.BoxCountEntryListRelationFilter
+  countedEvents?: Prisma.CountEventListRelationFilter
 }, "id">
 
 export type OperatorOrderByWithAggregationInput = {
@@ -217,6 +223,8 @@ export type OperatorCreateInput = {
   sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutOperatorInput
   countEvents?: Prisma.CountEventCreateNestedManyWithoutOperatorInput
   boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorUncheckedCreateInput = {
@@ -226,6 +234,8 @@ export type OperatorUncheckedCreateInput = {
   sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutOperatorInput
   countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutOperatorInput
   boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorUpdateInput = {
@@ -235,6 +245,8 @@ export type OperatorUpdateInput = {
   sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutOperatorNestedInput
   countEvents?: Prisma.CountEventUpdateManyWithoutOperatorNestedInput
   boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 export type OperatorUncheckedUpdateInput = {
@@ -244,6 +256,8 @@ export type OperatorUncheckedUpdateInput = {
   sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutOperatorNestedInput
   countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutOperatorNestedInput
   boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUncheckedUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 export type OperatorCreateManyInput = {
@@ -267,6 +281,11 @@ export type OperatorUncheckedUpdateManyInput = {
 export type OperatorScalarRelationFilter = {
   is?: Prisma.OperatorWhereInput
   isNot?: Prisma.OperatorWhereInput
+}
+
+export type OperatorNullableScalarRelationFilter = {
+  is?: Prisma.OperatorWhereInput | null
+  isNot?: Prisma.OperatorWhereInput | null
 }
 
 export type OperatorCountOrderByAggregateInput = {
@@ -293,12 +312,28 @@ export type OperatorCreateNestedOneWithoutBoxCountEntriesInput = {
   connect?: Prisma.OperatorWhereUniqueInput
 }
 
+export type OperatorCreateNestedOneWithoutCountedBoxEntriesInput = {
+  create?: Prisma.XOR<Prisma.OperatorCreateWithoutCountedBoxEntriesInput, Prisma.OperatorUncheckedCreateWithoutCountedBoxEntriesInput>
+  connectOrCreate?: Prisma.OperatorCreateOrConnectWithoutCountedBoxEntriesInput
+  connect?: Prisma.OperatorWhereUniqueInput
+}
+
 export type OperatorUpdateOneRequiredWithoutBoxCountEntriesNestedInput = {
   create?: Prisma.XOR<Prisma.OperatorCreateWithoutBoxCountEntriesInput, Prisma.OperatorUncheckedCreateWithoutBoxCountEntriesInput>
   connectOrCreate?: Prisma.OperatorCreateOrConnectWithoutBoxCountEntriesInput
   upsert?: Prisma.OperatorUpsertWithoutBoxCountEntriesInput
   connect?: Prisma.OperatorWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.OperatorUpdateToOneWithWhereWithoutBoxCountEntriesInput, Prisma.OperatorUpdateWithoutBoxCountEntriesInput>, Prisma.OperatorUncheckedUpdateWithoutBoxCountEntriesInput>
+}
+
+export type OperatorUpdateOneWithoutCountedBoxEntriesNestedInput = {
+  create?: Prisma.XOR<Prisma.OperatorCreateWithoutCountedBoxEntriesInput, Prisma.OperatorUncheckedCreateWithoutCountedBoxEntriesInput>
+  connectOrCreate?: Prisma.OperatorCreateOrConnectWithoutCountedBoxEntriesInput
+  upsert?: Prisma.OperatorUpsertWithoutCountedBoxEntriesInput
+  disconnect?: Prisma.OperatorWhereInput | boolean
+  delete?: Prisma.OperatorWhereInput | boolean
+  connect?: Prisma.OperatorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OperatorUpdateToOneWithWhereWithoutCountedBoxEntriesInput, Prisma.OperatorUpdateWithoutCountedBoxEntriesInput>, Prisma.OperatorUncheckedUpdateWithoutCountedBoxEntriesInput>
 }
 
 export type OperatorCreateNestedOneWithoutSessionParticipantsInput = {
@@ -321,6 +356,12 @@ export type OperatorCreateNestedOneWithoutCountEventsInput = {
   connect?: Prisma.OperatorWhereUniqueInput
 }
 
+export type OperatorCreateNestedOneWithoutCountedEventsInput = {
+  create?: Prisma.XOR<Prisma.OperatorCreateWithoutCountedEventsInput, Prisma.OperatorUncheckedCreateWithoutCountedEventsInput>
+  connectOrCreate?: Prisma.OperatorCreateOrConnectWithoutCountedEventsInput
+  connect?: Prisma.OperatorWhereUniqueInput
+}
+
 export type OperatorUpdateOneRequiredWithoutCountEventsNestedInput = {
   create?: Prisma.XOR<Prisma.OperatorCreateWithoutCountEventsInput, Prisma.OperatorUncheckedCreateWithoutCountEventsInput>
   connectOrCreate?: Prisma.OperatorCreateOrConnectWithoutCountEventsInput
@@ -329,12 +370,24 @@ export type OperatorUpdateOneRequiredWithoutCountEventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OperatorUpdateToOneWithWhereWithoutCountEventsInput, Prisma.OperatorUpdateWithoutCountEventsInput>, Prisma.OperatorUncheckedUpdateWithoutCountEventsInput>
 }
 
+export type OperatorUpdateOneWithoutCountedEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.OperatorCreateWithoutCountedEventsInput, Prisma.OperatorUncheckedCreateWithoutCountedEventsInput>
+  connectOrCreate?: Prisma.OperatorCreateOrConnectWithoutCountedEventsInput
+  upsert?: Prisma.OperatorUpsertWithoutCountedEventsInput
+  disconnect?: Prisma.OperatorWhereInput | boolean
+  delete?: Prisma.OperatorWhereInput | boolean
+  connect?: Prisma.OperatorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OperatorUpdateToOneWithWhereWithoutCountedEventsInput, Prisma.OperatorUpdateWithoutCountedEventsInput>, Prisma.OperatorUncheckedUpdateWithoutCountedEventsInput>
+}
+
 export type OperatorCreateWithoutBoxCountEntriesInput = {
   id?: string
   name: string
   createdAt?: Date | string
   sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutOperatorInput
   countEvents?: Prisma.CountEventCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorUncheckedCreateWithoutBoxCountEntriesInput = {
@@ -343,11 +396,38 @@ export type OperatorUncheckedCreateWithoutBoxCountEntriesInput = {
   createdAt?: Date | string
   sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutOperatorInput
   countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorCreateOrConnectWithoutBoxCountEntriesInput = {
   where: Prisma.OperatorWhereUniqueInput
   create: Prisma.XOR<Prisma.OperatorCreateWithoutBoxCountEntriesInput, Prisma.OperatorUncheckedCreateWithoutBoxCountEntriesInput>
+}
+
+export type OperatorCreateWithoutCountedBoxEntriesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutOperatorInput
+  countEvents?: Prisma.CountEventCreateNestedManyWithoutOperatorInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutOperatorInput
+  countedEvents?: Prisma.CountEventCreateNestedManyWithoutCountedByOperatorInput
+}
+
+export type OperatorUncheckedCreateWithoutCountedBoxEntriesInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutOperatorInput
+  countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutOperatorInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutOperatorInput
+  countedEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountedByOperatorInput
+}
+
+export type OperatorCreateOrConnectWithoutCountedBoxEntriesInput = {
+  where: Prisma.OperatorWhereUniqueInput
+  create: Prisma.XOR<Prisma.OperatorCreateWithoutCountedBoxEntriesInput, Prisma.OperatorUncheckedCreateWithoutCountedBoxEntriesInput>
 }
 
 export type OperatorUpsertWithoutBoxCountEntriesInput = {
@@ -367,6 +447,8 @@ export type OperatorUpdateWithoutBoxCountEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutOperatorNestedInput
   countEvents?: Prisma.CountEventUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 export type OperatorUncheckedUpdateWithoutBoxCountEntriesInput = {
@@ -375,6 +457,39 @@ export type OperatorUncheckedUpdateWithoutBoxCountEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutOperatorNestedInput
   countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUncheckedUpdateManyWithoutCountedByOperatorNestedInput
+}
+
+export type OperatorUpsertWithoutCountedBoxEntriesInput = {
+  update: Prisma.XOR<Prisma.OperatorUpdateWithoutCountedBoxEntriesInput, Prisma.OperatorUncheckedUpdateWithoutCountedBoxEntriesInput>
+  create: Prisma.XOR<Prisma.OperatorCreateWithoutCountedBoxEntriesInput, Prisma.OperatorUncheckedCreateWithoutCountedBoxEntriesInput>
+  where?: Prisma.OperatorWhereInput
+}
+
+export type OperatorUpdateToOneWithWhereWithoutCountedBoxEntriesInput = {
+  where?: Prisma.OperatorWhereInput
+  data: Prisma.XOR<Prisma.OperatorUpdateWithoutCountedBoxEntriesInput, Prisma.OperatorUncheckedUpdateWithoutCountedBoxEntriesInput>
+}
+
+export type OperatorUpdateWithoutCountedBoxEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutOperatorNestedInput
+  countEvents?: Prisma.CountEventUpdateManyWithoutOperatorNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutOperatorNestedInput
+  countedEvents?: Prisma.CountEventUpdateManyWithoutCountedByOperatorNestedInput
+}
+
+export type OperatorUncheckedUpdateWithoutCountedBoxEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutOperatorNestedInput
+  countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutOperatorNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutOperatorNestedInput
+  countedEvents?: Prisma.CountEventUncheckedUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 export type OperatorCreateWithoutSessionParticipantsInput = {
@@ -383,6 +498,8 @@ export type OperatorCreateWithoutSessionParticipantsInput = {
   createdAt?: Date | string
   countEvents?: Prisma.CountEventCreateNestedManyWithoutOperatorInput
   boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorUncheckedCreateWithoutSessionParticipantsInput = {
@@ -391,6 +508,8 @@ export type OperatorUncheckedCreateWithoutSessionParticipantsInput = {
   createdAt?: Date | string
   countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutOperatorInput
   boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorCreateOrConnectWithoutSessionParticipantsInput = {
@@ -415,6 +534,8 @@ export type OperatorUpdateWithoutSessionParticipantsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   countEvents?: Prisma.CountEventUpdateManyWithoutOperatorNestedInput
   boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 export type OperatorUncheckedUpdateWithoutSessionParticipantsInput = {
@@ -423,6 +544,8 @@ export type OperatorUncheckedUpdateWithoutSessionParticipantsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutOperatorNestedInput
   boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUncheckedUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 export type OperatorCreateWithoutCountEventsInput = {
@@ -431,6 +554,8 @@ export type OperatorCreateWithoutCountEventsInput = {
   createdAt?: Date | string
   sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutOperatorInput
   boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorUncheckedCreateWithoutCountEventsInput = {
@@ -439,11 +564,38 @@ export type OperatorUncheckedCreateWithoutCountEventsInput = {
   createdAt?: Date | string
   sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutOperatorInput
   boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountedByOperatorInput
+  countedEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutCountedByOperatorInput
 }
 
 export type OperatorCreateOrConnectWithoutCountEventsInput = {
   where: Prisma.OperatorWhereUniqueInput
   create: Prisma.XOR<Prisma.OperatorCreateWithoutCountEventsInput, Prisma.OperatorUncheckedCreateWithoutCountEventsInput>
+}
+
+export type OperatorCreateWithoutCountedEventsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  sessionParticipants?: Prisma.SessionParticipantCreateNestedManyWithoutOperatorInput
+  countEvents?: Prisma.CountEventCreateNestedManyWithoutOperatorInput
+  boxCountEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryCreateNestedManyWithoutCountedByOperatorInput
+}
+
+export type OperatorUncheckedCreateWithoutCountedEventsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  sessionParticipants?: Prisma.SessionParticipantUncheckedCreateNestedManyWithoutOperatorInput
+  countEvents?: Prisma.CountEventUncheckedCreateNestedManyWithoutOperatorInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutOperatorInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedCreateNestedManyWithoutCountedByOperatorInput
+}
+
+export type OperatorCreateOrConnectWithoutCountedEventsInput = {
+  where: Prisma.OperatorWhereUniqueInput
+  create: Prisma.XOR<Prisma.OperatorCreateWithoutCountedEventsInput, Prisma.OperatorUncheckedCreateWithoutCountedEventsInput>
 }
 
 export type OperatorUpsertWithoutCountEventsInput = {
@@ -463,6 +615,8 @@ export type OperatorUpdateWithoutCountEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutOperatorNestedInput
   boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 export type OperatorUncheckedUpdateWithoutCountEventsInput = {
@@ -471,6 +625,39 @@ export type OperatorUncheckedUpdateWithoutCountEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutOperatorNestedInput
   boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountedByOperatorNestedInput
+  countedEvents?: Prisma.CountEventUncheckedUpdateManyWithoutCountedByOperatorNestedInput
+}
+
+export type OperatorUpsertWithoutCountedEventsInput = {
+  update: Prisma.XOR<Prisma.OperatorUpdateWithoutCountedEventsInput, Prisma.OperatorUncheckedUpdateWithoutCountedEventsInput>
+  create: Prisma.XOR<Prisma.OperatorCreateWithoutCountedEventsInput, Prisma.OperatorUncheckedCreateWithoutCountedEventsInput>
+  where?: Prisma.OperatorWhereInput
+}
+
+export type OperatorUpdateToOneWithWhereWithoutCountedEventsInput = {
+  where?: Prisma.OperatorWhereInput
+  data: Prisma.XOR<Prisma.OperatorUpdateWithoutCountedEventsInput, Prisma.OperatorUncheckedUpdateWithoutCountedEventsInput>
+}
+
+export type OperatorUpdateWithoutCountedEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionParticipants?: Prisma.SessionParticipantUpdateManyWithoutOperatorNestedInput
+  countEvents?: Prisma.CountEventUpdateManyWithoutOperatorNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUpdateManyWithoutCountedByOperatorNestedInput
+}
+
+export type OperatorUncheckedUpdateWithoutCountedEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessionParticipants?: Prisma.SessionParticipantUncheckedUpdateManyWithoutOperatorNestedInput
+  countEvents?: Prisma.CountEventUncheckedUpdateManyWithoutOperatorNestedInput
+  boxCountEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutOperatorNestedInput
+  countedBoxEntries?: Prisma.BoxCountEntryUncheckedUpdateManyWithoutCountedByOperatorNestedInput
 }
 
 
@@ -482,12 +669,16 @@ export type OperatorCountOutputType = {
   sessionParticipants: number
   countEvents: number
   boxCountEntries: number
+  countedBoxEntries: number
+  countedEvents: number
 }
 
 export type OperatorCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessionParticipants?: boolean | OperatorCountOutputTypeCountSessionParticipantsArgs
   countEvents?: boolean | OperatorCountOutputTypeCountCountEventsArgs
   boxCountEntries?: boolean | OperatorCountOutputTypeCountBoxCountEntriesArgs
+  countedBoxEntries?: boolean | OperatorCountOutputTypeCountCountedBoxEntriesArgs
+  countedEvents?: boolean | OperatorCountOutputTypeCountCountedEventsArgs
 }
 
 /**
@@ -521,6 +712,20 @@ export type OperatorCountOutputTypeCountBoxCountEntriesArgs<ExtArgs extends runt
   where?: Prisma.BoxCountEntryWhereInput
 }
 
+/**
+ * OperatorCountOutputType without action
+ */
+export type OperatorCountOutputTypeCountCountedBoxEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BoxCountEntryWhereInput
+}
+
+/**
+ * OperatorCountOutputType without action
+ */
+export type OperatorCountOutputTypeCountCountedEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CountEventWhereInput
+}
+
 
 export type OperatorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -529,6 +734,8 @@ export type OperatorSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   sessionParticipants?: boolean | Prisma.Operator$sessionParticipantsArgs<ExtArgs>
   countEvents?: boolean | Prisma.Operator$countEventsArgs<ExtArgs>
   boxCountEntries?: boolean | Prisma.Operator$boxCountEntriesArgs<ExtArgs>
+  countedBoxEntries?: boolean | Prisma.Operator$countedBoxEntriesArgs<ExtArgs>
+  countedEvents?: boolean | Prisma.Operator$countedEventsArgs<ExtArgs>
   _count?: boolean | Prisma.OperatorCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["operator"]>
 
@@ -555,6 +762,8 @@ export type OperatorInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   sessionParticipants?: boolean | Prisma.Operator$sessionParticipantsArgs<ExtArgs>
   countEvents?: boolean | Prisma.Operator$countEventsArgs<ExtArgs>
   boxCountEntries?: boolean | Prisma.Operator$boxCountEntriesArgs<ExtArgs>
+  countedBoxEntries?: boolean | Prisma.Operator$countedBoxEntriesArgs<ExtArgs>
+  countedEvents?: boolean | Prisma.Operator$countedEventsArgs<ExtArgs>
   _count?: boolean | Prisma.OperatorCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OperatorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -566,6 +775,8 @@ export type $OperatorPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     sessionParticipants: Prisma.$SessionParticipantPayload<ExtArgs>[]
     countEvents: Prisma.$CountEventPayload<ExtArgs>[]
     boxCountEntries: Prisma.$BoxCountEntryPayload<ExtArgs>[]
+    countedBoxEntries: Prisma.$BoxCountEntryPayload<ExtArgs>[]
+    countedEvents: Prisma.$CountEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -968,6 +1179,8 @@ export interface Prisma__OperatorClient<T, Null = never, ExtArgs extends runtime
   sessionParticipants<T extends Prisma.Operator$sessionParticipantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Operator$sessionParticipantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   countEvents<T extends Prisma.Operator$countEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Operator$countEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CountEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   boxCountEntries<T extends Prisma.Operator$boxCountEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Operator$boxCountEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BoxCountEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  countedBoxEntries<T extends Prisma.Operator$countedBoxEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Operator$countedBoxEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BoxCountEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  countedEvents<T extends Prisma.Operator$countedEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Operator$countedEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CountEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1462,6 +1675,54 @@ export type Operator$boxCountEntriesArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.BoxCountEntryScalarFieldEnum | Prisma.BoxCountEntryScalarFieldEnum[]
+}
+
+/**
+ * Operator.countedBoxEntries
+ */
+export type Operator$countedBoxEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BoxCountEntry
+   */
+  select?: Prisma.BoxCountEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BoxCountEntry
+   */
+  omit?: Prisma.BoxCountEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BoxCountEntryInclude<ExtArgs> | null
+  where?: Prisma.BoxCountEntryWhereInput
+  orderBy?: Prisma.BoxCountEntryOrderByWithRelationInput | Prisma.BoxCountEntryOrderByWithRelationInput[]
+  cursor?: Prisma.BoxCountEntryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BoxCountEntryScalarFieldEnum | Prisma.BoxCountEntryScalarFieldEnum[]
+}
+
+/**
+ * Operator.countedEvents
+ */
+export type Operator$countedEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CountEvent
+   */
+  select?: Prisma.CountEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CountEvent
+   */
+  omit?: Prisma.CountEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CountEventInclude<ExtArgs> | null
+  where?: Prisma.CountEventWhereInput
+  orderBy?: Prisma.CountEventOrderByWithRelationInput | Prisma.CountEventOrderByWithRelationInput[]
+  cursor?: Prisma.CountEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CountEventScalarFieldEnum | Prisma.CountEventScalarFieldEnum[]
 }
 
 /**
