@@ -38,7 +38,7 @@ export function SessionJoinForm({
               id="join-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ej. Jorge"
+              placeholder="Ej. Nombre Apellido"
               autoFocus
               required
             />
