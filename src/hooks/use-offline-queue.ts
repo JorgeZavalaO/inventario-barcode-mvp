@@ -88,7 +88,7 @@ export function useOfflineQueue() {
         try {
           const resp = await fetch(item.endpoint, {
             method: item.method,
-            credentials: "include",
+            credentials: "omit",
             headers: { "Content-Type": "application/json" },
             body: item.body,
           });
@@ -178,12 +178,30 @@ export function useOfflineQueue() {
     return 0;
   }, [loadItems]);
 
+  const removeItem = useCallback(async (itemId: string) => {
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      tx.objectStore(STORE_NAME).delete(itemId);
+      await new Promise<void>((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
+      setItems((prev) => prev.filter((item) => item.id !== itemId));
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   return {
     items,
     isOnline,
     add,
     sync,
     clearSynced,
+    removeItem,
     pendingCount: items.filter((i) => i.status === "PENDING" || i.status === "ERROR").length,
     syncedCount: items.filter((i) => i.status === "SYNCED").length,
   };

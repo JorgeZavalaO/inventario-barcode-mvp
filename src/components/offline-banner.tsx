@@ -33,6 +33,7 @@ export function OfflineBanner() {
   const [syncingQueue, setSyncingQueue] = useState(false);
   const [syncingData, setSyncingData] = useState(false);
   const [dataToast, setDataToast] = useState("");
+  const [deletingQueueItem, setDeletingQueueItem] = useState<string | null>(null);
 
   const isOnline = queue.isOnline;
   const pendingCount = queue.pendingCount;
@@ -71,6 +72,14 @@ export function OfflineBanner() {
         ? `${removed} conteo${removed === 1 ? "" : "s"} sincronizado${removed === 1 ? "" : "s"} eliminado${removed === 1 ? "" : "s"}`
         : "No hay conteos sincronizados para limpiar",
     );
+    setTimeout(() => setQueueToast(""), 3000);
+  }
+
+  async function handleRemoveQueueItem(itemId: string) {
+    setDeletingQueueItem(itemId);
+    const removed = await queue.removeItem(itemId);
+    setDeletingQueueItem(null);
+    setQueueToast(removed ? "Registro eliminado del dispositivo" : "No se pudo eliminar el registro local");
     setTimeout(() => setQueueToast(""), 3000);
   }
 
@@ -167,11 +176,10 @@ export function OfflineBanner() {
               {pendingCount > 0 && (
                 <div className="border-t border-slate-100 pt-3 space-y-2">
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Cola de sincronización</p>
-                  <div className="space-y-1">
-                    {queue.items
-                      .filter((i) => i.status !== "SYNCED")
-                      .slice(0, 5)
-                      .map((item) => {
+                   <div className="max-h-40 space-y-1 overflow-y-auto">
+                     {queue.items
+                       .filter((i) => i.status !== "SYNCED")
+                       .map((item) => {
                         let body: QueueBody = {};
                         try { body = JSON.parse(item.body) as QueueBody; } catch { /* silent */ }
                         const label = body?.boxIdentity
@@ -184,10 +192,24 @@ export function OfflineBanner() {
                             {item.status === "SYNCING" && <LoaderCircle size={12} className="animate-spin text-blue-500 shrink-0" />}
                             {item.status === "ERROR" && <AlertTriangle size={12} className="text-red-500 shrink-0" />}
                             <span className="flex-1 truncate text-slate-600">{label}</span>
-                            <span className="text-slate-400">
-                              {formatTimeLima(item.createdAt)}
-                            </span>
-                          </div>
+                           <span className="text-slate-400">
+                             {formatTimeLima(item.createdAt)}
+                           </span>
+                           <button
+                             type="button"
+                             className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                             title="Eliminar registro local"
+                             aria-label={`Eliminar registro local ${label}`}
+                             onClick={() => void handleRemoveQueueItem(item.id)}
+                             disabled={item.status === "SYNCING" || deletingQueueItem === item.id}
+                           >
+                             {deletingQueueItem === item.id ? (
+                               <LoaderCircle size={12} className="animate-spin" />
+                             ) : (
+                               <Trash2 size={12} />
+                             )}
+                           </button>
+                         </div>
                         );
                       })}
                   </div>

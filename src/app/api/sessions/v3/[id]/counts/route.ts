@@ -152,7 +152,6 @@ async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any,
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuth();
-    if (!auth.authorized) return auth.response;
     const { id: sessionId } = await context.params;
 
     const raw = await request.json();
@@ -170,7 +169,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         throw new Error("Sesión no está disponible para conteos");
       }
 
-       const operatorId = body.operatorId ?? auth.session!.user.id;
+       const operatorId = body.operatorId ?? (auth.authorized ? auth.session.user.id : undefined);
+       if (!operatorId) throw new Error("Digitador no identificado. Ingresa nuevamente a la sesión.");
        const operator = await tx.operator.findUnique({ where: { id: operatorId } });
        if (!operator) throw new Error("Digitador no identificado. Ingresa nuevamente a la sesión.");
 

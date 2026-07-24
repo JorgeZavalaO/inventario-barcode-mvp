@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.66.0 (2026-07-24)
+
+### Fixed
+
+- **Cola de conteos invitados:** La sincronización V3 no depende de credenciales de usuario; valida el operador incluido en cada registro.
+- **Eliminación local:** Cada registro pendiente o con error tiene un botón para eliminarlo únicamente del dispositivo.
+
 ## 0.65.0 (2026-07-24)
 
 ### Fixed
