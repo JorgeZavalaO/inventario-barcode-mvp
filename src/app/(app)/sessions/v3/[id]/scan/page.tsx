@@ -527,7 +527,7 @@ export default function V3ScanPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-4 pb-24">
+    <div className="mx-auto max-w-3xl space-y-4 p-4 pb-24">
       <div className="flex items-center gap-3">
         <Link href="/sessions/v3" className="text-slate-400 hover:text-slate-600">
           <ArrowLeft size={20} />
@@ -568,8 +568,8 @@ export default function V3ScanPage() {
               </CardContent>
             </Card>
           )}
-          <Card>
-            <CardContent className="p-3 space-y-3">
+          <Card className="relative z-20 overflow-visible">
+            <CardContent className="relative z-20 min-h-[270px] space-y-3 p-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-slate-700">Identificar caja</p>
                 <div className="flex gap-1">

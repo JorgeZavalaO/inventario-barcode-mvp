@@ -36,9 +36,12 @@ export function SearchableSelect({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return options;
+    const sorted = [...options].sort((a, b) =>
+      a.label.localeCompare(b.label, "es", { numeric: true, sensitivity: "base" }),
+    );
+    if (!search.trim()) return sorted;
     const term = search.toLowerCase();
-    return options.filter((o) => o.label.toLowerCase().includes(term));
+    return sorted.filter((o) => o.label.toLowerCase().includes(term));
   }, [options, search]);
 
   const selectedLabel = options.find((o) => o.value === value)?.label;

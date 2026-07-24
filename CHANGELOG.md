@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.48.4 (2026-07-24)
+
+### Changed
+
+- **Selectores ordenados:** Todos los `SearchableSelect` ahora ordenan sus opciones alfanuméricamente, respetando el orden natural de números (`CAJA-2` antes de `CAJA-10`) y sin distinguir mayúsculas o acentos.
+
+## 0.48.3 (2026-07-24)
+
+### Fixed
+
+- **Dropdown de cajas:** El card del formulario V3 ahora permite que los selectores se expandan sin quedar recortados por el contenedor.
+- **Formulario V3:** Se amplió el ancho máximo y el espacio vertical del card de identificación.
+
 ## 0.48.2 (2026-07-24)
 
 ### Fixed
