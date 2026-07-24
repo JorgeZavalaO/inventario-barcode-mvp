@@ -244,7 +244,7 @@ export default function V3ScanPage() {
   async function loadImports() {
     setLoadingImports(true);
     try {
-      if (hasOfflineData) {
+      if (!offlineData.isOnline && hasOfflineData) {
         const offlineImports = await offlineData.getImports();
         setImports(offlineImports);
       } else {
@@ -297,6 +297,7 @@ export default function V3ScanPage() {
     setSelectedBoxImportId(importId);
     setSelectedBoxPalletId("");
     setSelectedBoxId("");
+    setBoxPallet("");
     setPallets([]);
     setBoxes([]);
     setResolvedBox(null);
@@ -307,19 +308,33 @@ export default function V3ScanPage() {
     if (imp) setBoxImport(imp.code);
     setLoadingPallets(true);
     try {
-      if (hasOfflineData) {
+      if (!offlineData.isOnline && hasOfflineData) {
         const offlinePallets = await offlineData.getPalletsByImport(importId);
         setPallets(offlinePallets);
-        if (offlinePallets.length === 0) setSkipPallet(true);
+        if (offlinePallets.length === 0) {
+          setSkipPallet(true);
+          setBoxes(await offlineData.getBoxesByImport(importId));
+        }
       } else {
         const data = await apiFetch<{ pallets: { id: string; number: string }[] }>(
           `/api/boxes/pallets?importId=${importId}`,
         );
         setPallets(data.pallets);
-        if (data.pallets.length === 0) setSkipPallet(true);
+        if (data.pallets.length === 0) {
+          setSkipPallet(true);
+          const boxesData = await apiFetch<{ boxes: { id: string; number: string }[] }>(
+            `/api/boxes/boxes?importId=${importId}`,
+          );
+          setBoxes(boxesData.boxes);
+        }
       }
     } catch {
-      /* silent */
+      const offlinePallets = await offlineData.getPalletsByImport(importId);
+      setPallets(offlinePallets);
+      if (offlinePallets.length === 0) {
+        setSkipPallet(true);
+        setBoxes(await offlineData.getBoxesByImport(importId));
+      }
     } finally {
       setLoadingPallets(false);
     }
@@ -332,6 +347,7 @@ export default function V3ScanPage() {
     setResolvedBox(null);
     setBoxProducts([]);
     if (!palletId) {
+      setBoxPallet("");
       setSkipPallet(false);
       return;
     }
@@ -339,7 +355,7 @@ export default function V3ScanPage() {
     if (pal) setBoxPallet(pal.number);
     setLoadingBoxes(true);
     try {
-      if (hasOfflineData) {
+      if (!offlineData.isOnline && hasOfflineData) {
         const offlineBoxes = await offlineData.getBoxesByPallet(palletId);
         setBoxes(offlineBoxes);
       } else {
@@ -349,7 +365,7 @@ export default function V3ScanPage() {
         setBoxes(data.boxes);
       }
     } catch {
-      /* silent */
+      setBoxes(await offlineData.getBoxesByPallet(palletId));
     } finally {
       setLoadingBoxes(false);
     }
@@ -366,7 +382,7 @@ export default function V3ScanPage() {
     if (!bx) return;
     setBusy(true);
     try {
-      if (hasOfflineData) {
+      if (!offlineData.isOnline && hasOfflineData) {
         const resolved = await offlineData.resolveBox(boxImport.trim(), bx.number, boxPallet.trim() || undefined);
         if (resolved) {
           setResolvedBox(resolved);

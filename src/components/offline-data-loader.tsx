@@ -23,15 +23,12 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
   const [currentStage, setCurrentStage] = useState("Verificando datos...");
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(true);
-  const [hasCachedData, setHasCachedData] = useState(false);
 
-  const checkExistingData = useCallback(async () => {
+  const hasCachedOfflineData = useCallback(async () => {
     try {
       const meta = await offlineStore.getSyncMeta("full-sync");
       const operators = await offlineStore.getAll("operators");
       if (meta && meta.count > 0 && (operators.length > 0 || !navigator.onLine)) {
-        setHasCachedData(true);
-        setLoading(false);
         return true;
       }
     } catch { /* silent */ }
@@ -40,19 +37,21 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
 
   const downloadData = useCallback(async () => {
     setIsOnline(navigator.onLine);
+    const hasData = await hasCachedOfflineData();
+
     if (!navigator.onLine) {
-      const hasData = await checkExistingData();
-      if (!hasData) {
+      if (hasData) {
+        setError(null);
+        setLoading(false);
+      } else {
         setError("Sin conexión y sin datos offline. Conéctese a internet para descargar datos.");
         setLoading(false);
       }
       return;
     }
 
-    const hasData = await checkExistingData();
-    if (hasData) return;
-
     try {
+      setError(null);
       setCurrentStage("Descargando datos del servidor...");
       setProgress(5);
 
@@ -96,16 +95,20 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
 
       setProgress(100);
       setCurrentStage("Datos descargados correctamente");
-      setHasCachedData(true);
 
       await new Promise((r) => setTimeout(r, 500));
       setLoading(false);
       window.dispatchEvent(new CustomEvent("offline-data-synced"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al descargar datos");
+      if (hasData) {
+        setError(null);
+        setCurrentStage("Usando datos offline guardados");
+      } else {
+        setError(err instanceof Error ? err.message : "Error al descargar datos");
+      }
       setLoading(false);
     }
-  }, [checkExistingData]);
+  }, [hasCachedOfflineData]);
 
   useEffect(() => {
     void downloadData();

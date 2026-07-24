@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.62.0 (2026-07-24)
+
+### Changed
+
+- **Inicio offline:** Al iniciar con conexión se sincroniza y reemplaza todo el cache local; al iniciar sin conexión se utiliza el último cache completo disponible.
+
+## 0.61.0 (2026-07-24)
+
+### Fixed
+
+- **Cajas V3:** Cuando existe cache local pero hay conexión, la selección consulta los datos actuales del servidor para mostrar importaciones y cajas recién cargadas.
+- **Importaciones sin pallet:** Las cajas ahora se cargan directamente por importación cuando no hay un pallet seleccionado.
+
 ## 0.60.0 (2026-07-24)
 
 ### Changed

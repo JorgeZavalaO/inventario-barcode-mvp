@@ -1,6 +1,6 @@
 {
   "name": "inventario-barcode-mvp",
-  "version": "0.60.0",
+  "version": "0.62.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,6 +14,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
+    "db:operators": "npx tsx scripts/create-operators.ts",
     "db:studio": "prisma studio",
     "db:push": "prisma db push"
   },
