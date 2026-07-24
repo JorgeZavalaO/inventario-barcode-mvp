@@ -93,6 +93,7 @@ export default function V3ScanPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [operator, setOperator] = useState<{ id: string; name: string } | null>(null);
   const [operatorName, setOperatorName] = useState("");
+  const [selectedOperatorId, setSelectedOperatorId] = useState("");
   const [operators, setOperators] = useState<Operator[]>([]);
   const [countedByOperatorId, setCountedByOperatorId] = useState("");
   const [joining, setJoining] = useState(false);
@@ -106,6 +107,8 @@ export default function V3ScanPage() {
       try {
         const parsed = JSON.parse(stored);
         setOperator(parsed);
+        setSelectedOperatorId(parsed.id);
+        setOperatorName(parsed.name);
       } catch {
         localStorage.removeItem("stockscan_operator_v3");
       }
@@ -152,6 +155,20 @@ export default function V3ScanPage() {
     if (!operatorName.trim()) return;
     setJoining(true);
     try {
+      if (!offlineData.isOnline) {
+        const cachedOperator = operators.find(
+          (item) => item.id === selectedOperatorId || item.name.toLowerCase() === operatorName.trim().toLowerCase(),
+        );
+        if (!cachedOperator) {
+          setToast("Selecciona un operario sincronizado para entrar offline");
+          return;
+        }
+        setOperator(cachedOperator);
+        setSelectedOperatorId(cachedOperator.id);
+        setOperatorName(cachedOperator.name);
+        localStorage.setItem("stockscan_operator_v3", JSON.stringify(cachedOperator));
+        return;
+      }
       const result = await apiFetch<{ operator: { id: string; name: string } }>(
         `/api/sessions/v3/${id}/join`,
         {
@@ -160,6 +177,8 @@ export default function V3ScanPage() {
         },
       );
       setOperator(result.operator);
+      setSelectedOperatorId(result.operator.id);
+      setOperatorName(result.operator.name);
       setOperators((current) => current.some((item) => item.id === result.operator.id) ? current : [...current, result.operator]);
       localStorage.setItem("stockscan_operator_v3", JSON.stringify(result.operator));
     } catch {
@@ -170,6 +189,15 @@ export default function V3ScanPage() {
   }
 
   async function createCountedOperator(name: string) {
+    if (!offlineData.isOnline) {
+      const existing = operators.find((item) => item.name.toLowerCase() === name.trim().toLowerCase());
+      if (existing && existing.id !== operator?.id) {
+        setCountedByOperatorId(existing.id);
+      } else {
+        setToast("Sin conexión: selecciona un operario sincronizado");
+      }
+      return;
+    }
     try {
       const result = await apiFetch<{ operator: Operator }>("/api/operators", {
         method: "POST",
@@ -604,20 +632,35 @@ export default function V3ScanPage() {
         </div>
         <Card>
           <CardContent className="p-3 space-y-3">
-            <Input
-              placeholder="Tu nombre"
-              className="h-11 text-center text-lg"
-              value={operatorName}
-              onChange={(e) => setOperatorName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") void handleJoin();
-              }}
-              autoFocus
-            />
+            {offlineData.isOnline ? (
+              <Input
+                placeholder="Tu nombre"
+                className="h-11 text-center text-lg"
+                value={operatorName}
+                onChange={(e) => setOperatorName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void handleJoin();
+                }}
+                autoFocus
+              />
+            ) : (
+              <SearchableSelect
+                options={operators.map((item) => ({ value: item.id, label: item.name }))}
+                value={selectedOperatorId}
+                onChange={(value) => {
+                  const selected = operators.find((item) => item.id === value);
+                  setSelectedOperatorId(value);
+                  setOperatorName(selected?.name ?? "");
+                }}
+                placeholder="Seleccionar operario sincronizado..."
+                searchPlaceholder="Filtrar operarios..."
+                emptyMessage="No hay operarios sincronizados"
+              />
+            )}
             <Button
               className="h-12 w-full"
               onClick={() => void handleJoin()}
-              disabled={joining || !operatorName.trim()}
+              disabled={joining || (offlineData.isOnline ? !operatorName.trim() : !selectedOperatorId)}
             >
               {joining ? <LoaderCircle className="animate-spin" size={16} /> : null}
               Ingresar a la sesión

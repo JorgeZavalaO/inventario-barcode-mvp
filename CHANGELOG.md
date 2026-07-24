@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.65.0 (2026-07-24)
+
+### Fixed
+
+- **Sincronización de conteos:** Las operaciones pendientes ahora conservan la sesión autenticada al sincronizarse online.
+- **Cola offline:** Se corrigió el auto-reintento de la cola y se agregó confirmación visible al limpiar conteos sincronizados.
+
+## 0.64.0 (2026-07-24)
+
+### Fixed
+
+- **Identificación offline V3:** Un usuario sin operador guardado puede entrar usando un operario previamente sincronizado, sin intentar llamar a la API mientras no hay conexión.
+
 ## 0.63.0 (2026-07-24)
 
 ### Fixed

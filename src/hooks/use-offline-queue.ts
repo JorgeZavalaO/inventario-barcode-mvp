@@ -87,6 +87,7 @@ export function useOfflineQueue() {
         try {
           const resp = await fetch(item.endpoint, {
             method: item.method,
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: item.body,
           });
@@ -173,7 +174,9 @@ export function useOfflineQueue() {
         tx.onerror = () => reject(tx.error);
       });
       await loadItems();
+      return synced.length;
     } catch { /* silent */ }
+    return 0;
   }, [loadItems]);
 
   return {
@@ -183,5 +186,6 @@ export function useOfflineQueue() {
     sync,
     clearSynced,
     pendingCount: items.filter((i) => i.status === "PENDING" || i.status === "ERROR").length,
+    syncedCount: items.filter((i) => i.status === "SYNCED").length,
   };
 }

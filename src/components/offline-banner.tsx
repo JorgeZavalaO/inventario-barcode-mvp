@@ -30,26 +30,42 @@ export function OfflineBanner() {
 
   const isOnline = queue.isOnline;
   const pendingCount = queue.pendingCount;
+  const syncedCount = queue.syncedCount;
+  const syncQueue = queue.sync;
   const errorCount = queue.items.filter((i) => i.status === "ERROR").length;
   const syncingCount = queue.items.filter((i) => i.status === "SYNCING").length;
+  const [queueToast, setQueueToast] = useState("");
 
   useEffect(() => {
     if (isOnline && pendingCount > 0) {
       const t = setTimeout(() => {
         setSyncingQueue(true);
-        void queue.sync().finally(() => setSyncingQueue(false));
+        void syncQueue().finally(() => setSyncingQueue(false));
       }, 1500);
       return () => clearTimeout(t);
     }
-  }, [isOnline, pendingCount, queue]);
+  }, [isOnline, pendingCount, syncQueue]);
 
   async function handleSyncQueue() {
     setSyncingQueue(true);
+    setQueueToast("");
     try {
       await queue.sync(true);
+      setQueueToast("Sincronización ejecutada");
+      setTimeout(() => setQueueToast(""), 3000);
     } finally {
       setSyncingQueue(false);
     }
+  }
+
+  async function handleClearSynced() {
+    const removed = await queue.clearSynced();
+    setQueueToast(
+      removed > 0
+        ? `${removed} conteo${removed === 1 ? "" : "s"} sincronizado${removed === 1 ? "" : "s"} eliminado${removed === 1 ? "" : "s"}`
+        : "No hay conteos sincronizados para limpiar",
+    );
+    setTimeout(() => setQueueToast(""), 3000);
   }
 
   async function handleSyncData() {
@@ -186,7 +202,16 @@ export function OfflineBanner() {
                       Sincronizar conteos ({pendingCount})
                     </Button>
                   )}
+                  {!isOnline && pendingCount > 0 && (
+                    <p className="text-xs text-slate-400">
+                      Los conteos quedan guardados y se sincronizarán al recuperar la conexión.
+                    </p>
+                  )}
                 </div>
+              )}
+
+              {queueToast && (
+                <p className="rounded bg-slate-50 px-2 py-1 text-xs text-slate-600">{queueToast}</p>
               )}
 
               <div className="border-t border-slate-100 pt-2">
@@ -194,9 +219,10 @@ export function OfflineBanner() {
                   size="sm"
                   variant="ghost"
                   className="w-full h-8 text-xs text-slate-400"
-                  onClick={() => void queue.clearSynced()}
+                  onClick={() => void handleClearSynced()}
+                  disabled={syncedCount === 0}
                 >
-                  <Trash2 size={12} className="mr-1" /> Limpiar sincronizados
+                  <Trash2 size={12} className="mr-1" /> Limpiar sincronizados ({syncedCount})
                 </Button>
               </div>
             </div>
