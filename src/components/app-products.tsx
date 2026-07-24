@@ -328,6 +328,19 @@ export function AppProducts() {
       },
     ];
     const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = [
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 28 },
+      { wch: 12 },
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 20 },
+    ];
     XLSX.utils.book_append_sheet(wb, ws, "Productos");
     XLSX.writeFile(wb, "plantilla_productos.xlsx");
   }

@@ -1,10 +1,11 @@
-const CACHE = "stockscan-v2";
-const API_CACHE = "stockscan-api-v2";
-const STATIC_CACHE = "stockscan-static-v2";
+const CACHE = "stockscan-v3";
+const API_CACHE = "stockscan-api-v3";
+const STATIC_CACHE = "stockscan-static-v3";
 
 const PRECACHE_URLS = [
   "/",
   "/sessions",
+  "/sessions/v1",
   "/sessions/v3",
   "/sessions/v3/new",
   "/manifest.webmanifest",
@@ -82,6 +83,15 @@ async function networkFirst(request, cacheName) {
 function offlineFallback(request) {
   const url = new URL(request.url);
   if (request.destination === "document" || url.pathname.startsWith("/sessions")) {
+    if (url.pathname.startsWith("/sessions/v3")) {
+      return caches.match("/sessions/v3");
+    }
+    if (url.pathname.startsWith("/sessions/v1")) {
+      return caches.match("/sessions/v1");
+    }
+    if (url.pathname.startsWith("/sessions")) {
+      return caches.match("/sessions");
+    }
     return caches.match("/");
   }
   return new Response(JSON.stringify({ error: "offline", queued: true }), {

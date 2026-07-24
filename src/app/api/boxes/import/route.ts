@@ -10,6 +10,7 @@ const rowSchema = z.object({
   palletNumber: z.string().trim().min(1).max(30),
   boxNumber: z.string().trim().min(1).max(30),
   productCode: z.string().trim().min(1).max(80),
+  supplierCode: z.string().trim().max(80).optional(),
   productDescription: z.string().trim().min(1).max(240).optional(),
   productUnit: z.string().trim().max(20).optional(),
   productCategory: z.string().trim().max(100).optional(),
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     for (const [index, row] of rows.entries()) {
       try {
         const line = index + 1;
-        const { importCode, palletNumber, boxNumber, productCode, productDescription, productUnit, productCategory, expectedQty, expectedPosition } = row;
+        const { importCode, palletNumber, boxNumber, productCode, supplierCode, productDescription, productUnit, productCategory, expectedQty, expectedPosition } = row;
 
         const impKey = importCode.trim().toUpperCase();
         if (!seen.imports.has(impKey)) {
@@ -83,8 +84,8 @@ export async function POST(request: NextRequest) {
         if (!seen.products.has(productKey)) {
           await prisma.product.upsert({
             where: { code: productCode.trim() },
-            update: {},
-            create: { id: randomUUID(), code: productCode.trim(), description: productDescription || productCode.trim(), unit: productUnit || "UND", category: productCategory || null },
+            update: { supplierCode: supplierCode?.trim() || undefined },
+            create: { id: randomUUID(), code: productCode.trim(), description: productDescription || productCode.trim(), unit: productUnit || "UND", category: productCategory || null, supplierCode: supplierCode?.trim() || null },
           });
           seen.products.add(productKey);
           created.products++;

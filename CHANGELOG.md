@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.48.1 (2026-07-24)
+
+### Fixed
+
+- **Plantilla de productos:** Se ajustaron los anchos de las columnas Excel para mostrar completos `codigo_proveedor`, `stock_teorico` y `cantidad_esperada`.
+
 ## 0.48.0 (2026-07-24)
 
 ### Added (Auto-descarga de datos al ingresar)

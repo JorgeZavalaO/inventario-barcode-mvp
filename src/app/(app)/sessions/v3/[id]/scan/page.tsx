@@ -20,6 +20,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 type SessionData = {
   id: string;
@@ -128,9 +129,9 @@ export default function V3ScanPage() {
   function downloadBoxTemplate() {
     const wb = XLSX.utils.book_new();
     const data = [
-      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-001", descripcion: "Producto ejemplo", unidad: "UND", cantidad_esperada: 10 },
-      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-002", descripcion: "Otro producto", unidad: "UND", cantidad_esperada: 5 },
-      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-2", codigo_producto: "PROD-003", descripcion: "Tercer producto", unidad: "UND", cantidad_esperada: 20 },
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-001", codigo_proveedor: "PROV-001", descripcion: "Producto ejemplo", unidad: "UND", cantidad_esperada: 10 },
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-1", codigo_producto: "PROD-002", codigo_proveedor: "PROV-002", descripcion: "Otro producto", unidad: "UND", cantidad_esperada: 5 },
+      { importacion: "IMP-001", pallet: "PAL-01", caja: "CAJA-2", codigo_producto: "PROD-003", codigo_proveedor: "", descripcion: "Tercer producto", unidad: "UND", cantidad_esperada: 20 },
     ];
     const ws = XLSX.utils.json_to_sheet(data);
     XLSX.utils.book_append_sheet(wb, ws, "Cajas");
@@ -153,6 +154,7 @@ export default function V3ScanPage() {
           palletNumber: row.pallet || row.palletNumber || row.numero_pallet || "",
           boxNumber: row.caja || row.boxNumber || row.numero_caja || "",
           productCode: row.codigo_producto || row.productCode || row.codigo || "",
+          supplierCode: row.codigo_proveedor || row.supplierCode || row.proveedor || "",
           productDescription: row.descripcion || row.description || "",
           productUnit: row.unidad || row.unit || "UND",
           expectedQty: row.cantidad_esperada || row.expectedQty || row.cantidad || 0,
@@ -613,43 +615,31 @@ export default function V3ScanPage() {
                 <label className="mb-1 block text-xs font-medium text-slate-500">
                   Importación
                 </label>
-                <select
-                  className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                <SearchableSelect
+                  options={imports.map((imp) => ({
+                    value: imp.id,
+                    label: `${imp.code}${imp.description ? ` — ${imp.description}` : ""}`,
+                  }))}
                   value={selectedBoxImportId}
-                  onChange={(e) => void handleImportSelect(e.target.value)}
+                  onChange={(val) => void handleImportSelect(val)}
+                  placeholder={loadingImports ? "Cargando..." : "Seleccionar importación..."}
+                  searchPlaceholder="Filtrar importaciones..."
                   disabled={loadingImports}
-                >
-                  <option value="">
-                    {loadingImports ? "Cargando..." : "Seleccionar importación..."}
-                  </option>
-                  {imports.map((imp) => (
-                    <option key={imp.id} value={imp.id}>
-                      {imp.code}
-                      {imp.description ? ` — ${imp.description}` : ""}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
               {selectedBoxImportId && !skipPallet && pallets.length > 0 && (
                 <div>
                   <label className="mb-1 block text-xs font-medium text-slate-500">
                     Pallet
                   </label>
-                  <select
-                    className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                  <SearchableSelect
+                    options={pallets.map((p) => ({ value: p.id, label: p.number }))}
                     value={selectedBoxPalletId}
-                    onChange={(e) => void handlePalletSelect(e.target.value)}
+                    onChange={(val) => void handlePalletSelect(val)}
+                    placeholder={loadingPallets ? "Cargando..." : "Seleccionar pallet..."}
+                    searchPlaceholder="Filtrar pallets..."
                     disabled={loadingPallets}
-                  >
-                    <option value="">
-                      {loadingPallets ? "Cargando..." : "Seleccionar pallet..."}
-                    </option>
-                    {pallets.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.number}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               )}
               {selectedBoxImportId &&
@@ -663,18 +653,13 @@ export default function V3ScanPage() {
                         <LoaderCircle className="animate-spin" size={14} /> Cargando...
                       </div>
                     ) : (
-                      <select
-                        className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                      <SearchableSelect
+                        options={boxes.map((b) => ({ value: b.id, label: `Caja ${b.number}` }))}
                         value={selectedBoxId}
-                        onChange={(e) => void handleBoxSelect(e.target.value)}
-                      >
-                        <option value="">Seleccionar caja...</option>
-                        {boxes.map((b) => (
-                          <option key={b.id} value={b.id}>
-                            Caja {b.number}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(val) => void handleBoxSelect(val)}
+                        placeholder="Seleccionar caja..."
+                        searchPlaceholder="Filtrar cajas..."
+                      />
                     )}
                   </div>
                 )}
