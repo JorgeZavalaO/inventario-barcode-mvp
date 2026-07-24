@@ -123,8 +123,9 @@ export function useOfflineQueue() {
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     window.addEventListener("offline-queue-changed", onQueueChanged);
-    void loadItems();
+    const initialLoad = window.setTimeout(() => void loadItems(), 0);
     return () => {
+      window.clearTimeout(initialLoad);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("offline-queue-changed", onQueueChanged);

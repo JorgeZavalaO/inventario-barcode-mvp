@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useOfflineQueue } from "@/hooks/use-offline-queue";
 import { useOfflineData } from "@/hooks/use-offline-data";
 import {
@@ -14,11 +14,17 @@ import {
   CloudOff,
   AlertTriangle,
   CheckCircle2,
-  Package,
   HardDrive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDateTimeLima, formatTimeLima } from "@/lib/date-time";
+
+type QueueBody = {
+  boxIdentity?: {
+    importCode?: string;
+    boxNumber?: string;
+  };
+};
 
 export function OfflineBanner() {
   const queue = useOfflineQueue();
@@ -166,8 +172,8 @@ export function OfflineBanner() {
                       .filter((i) => i.status !== "SYNCED")
                       .slice(0, 5)
                       .map((item) => {
-                        let body: any = {};
-                        try { body = JSON.parse(item.body); } catch { /* silent */ }
+                        let body: QueueBody = {};
+                        try { body = JSON.parse(item.body) as QueueBody; } catch { /* silent */ }
                         const label = body?.boxIdentity
                           ? `${body.boxIdentity.importCode} / ${body.boxIdentity.boxNumber}`
                           : item.endpoint.split("/").slice(-2).join("/");
