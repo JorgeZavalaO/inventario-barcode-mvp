@@ -2,6 +2,11 @@ const CACHE = "stockscan-v3";
 const API_CACHE = "stockscan-api-v3";
 const STATIC_CACHE = "stockscan-static-v3";
 
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
 const PRECACHE_URLS = [
   "/",
   "/sessions",
@@ -12,12 +17,25 @@ const PRECACHE_URLS = [
 ];
 
 self.addEventListener("install", (event) => {
+  if (!isMobileDevice()) {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener("activate", (event) => {
+  if (!isMobileDevice()) {
+    event.waitUntil(
+      caches.keys().then((names) => Promise.all(names
+        .filter((name) => name.startsWith("stockscan-"))
+        .map((name) => caches.delete(name)))
+      ).then(() => self.registration.unregister()).then(() => clients.claim())
+    );
+    return;
+  }
   event.waitUntil(
     caches.keys().then((names) =>
       Promise.all(
@@ -28,6 +46,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  if (!isMobileDevice()) return;
   const { request } = event;
   const url = new URL(request.url);
 

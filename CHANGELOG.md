@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.69.0 (2026-07-24)
+
+### Changed
+
+- **Offline solo móvil:** La descarga de datos, la cola y el service worker offline se activan únicamente en dispositivos móviles; en PC la aplicación usa siempre el servidor.
+
 ## 0.68.0 (2026-07-24)
 
 ### Changed

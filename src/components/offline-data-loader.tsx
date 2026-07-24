@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { offlineStore } from "@/lib/offline-store";
+import { isMobileDevice } from "@/lib/device";
 import { Database, LoaderCircle, CheckCircle2, WifiOff } from "lucide-react";
 
 type SyncStage = {
@@ -18,6 +19,7 @@ const STAGES: SyncStage[] = [
 ];
 
 export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
+  const [mobileDevice, setMobileDevice] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState("Verificando datos...");
@@ -113,7 +115,13 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
   }, [hasCachedOfflineData]);
 
   useEffect(() => {
-    void downloadData();
+    const mobile = isMobileDevice();
+    const timer = window.setTimeout(() => {
+      setMobileDevice(mobile);
+      if (mobile) void downloadData();
+      else setLoading(false);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [downloadData]);
 
   useEffect(() => {
@@ -127,7 +135,7 @@ export function OfflineDataLoader({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  if (!loading) {
+  if (mobileDevice !== true || !loading) {
     return <>{children}</>;
   }
 

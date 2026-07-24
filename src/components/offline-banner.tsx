@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDateTimeLima, formatTimeLima } from "@/lib/date-time";
+import { isMobileDevice } from "@/lib/device";
 
 type QueueBody = {
   boxIdentity?: {
@@ -36,6 +37,18 @@ function queueErrorMessage(error: string) {
 }
 
 export function OfflineBanner() {
+  const [mobileDevice, setMobileDevice] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setMobileDevice(isMobileDevice()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (mobileDevice !== true) return null;
+  return <MobileOfflineBanner />;
+}
+
+function MobileOfflineBanner() {
   const queue = useOfflineQueue();
   const data = useOfflineData();
   const [open, setOpen] = useState(false);
