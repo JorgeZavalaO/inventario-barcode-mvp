@@ -61,6 +61,33 @@ export default function V2ScanPage() {
   const [importBusy, setImportBusy] = useState(false);
   const [importResult, setImportResult] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [operator, setOperator] = useState<{ id: string; name: string } | null>(null);
+  const [operatorName, setOperatorName] = useState("");
+  const [joining, setJoining] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("stockscan_operator_v2");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setOperator(parsed);
+      } catch { localStorage.removeItem("stockscan_operator_v2"); }
+    }
+  }, []);
+
+  async function handleJoin() {
+    if (!operatorName.trim()) return;
+    setJoining(true);
+    try {
+      const result = await apiFetch<{ operator: { id: string; name: string } }>(`/api/sessions/v2/${id}/join`, {
+        method: "POST",
+        body: JSON.stringify({ name: operatorName.trim() }),
+      });
+      setOperator(result.operator);
+      localStorage.setItem("stockscan_operator_v2", JSON.stringify(result.operator));
+    } catch { setToast("Error al identificar"); }
+    finally { setJoining(false); }
+  }
 
   function downloadBoxTemplate() {
     const wb = XLSX.utils.book_new();
@@ -293,6 +320,26 @@ export default function V2ScanPage() {
   const occupiedCount = session.sessionPositions.filter(sp => sp.rounds.length > 0).length;
   const totalPos = session.sessionPositions.length;
   const availablePositions = session.sessionPositions.filter(sp => sp.status !== "COMPLETED");
+
+  if (!operator) {
+    return (
+      <div className="mx-auto max-w-sm space-y-4 p-4">
+        <div className="text-center">
+          <p className="mb-1 text-sm font-medium text-slate-500">{session.name}</p>
+          <h1 className="text-xl font-bold">Identifícate</h1>
+          <p className="mt-1 text-sm text-slate-400">Tu nombre quedará registrado en cada lectura.</p>
+        </div>
+        <Card><CardContent className="p-3 space-y-3">
+          <Input placeholder="Tu nombre" className="h-11 text-center text-lg" value={operatorName} onChange={(e) => setOperatorName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void handleJoin(); }} autoFocus />
+          <Button className="h-12 w-full" onClick={() => void handleJoin()} disabled={joining || !operatorName.trim()}>
+            {joining ? <LoaderCircle className="animate-spin" size={16} /> : null}
+            Ingresar a la sesión
+          </Button>
+          <p className="text-center text-xs text-slate-400">O <Link href="/login" className="text-teal-600 underline">inicia sesión</Link> con tu cuenta</p>
+        </CardContent></Card>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-4 pb-24">

@@ -34,6 +34,13 @@ test.describe("Sesión V2 — Flujo de escaneo", () => {
 
     await page.waitForURL("**/scan", { timeout: 15_000 });
 
+    // Primero identificar operador anónimo
+    const joinInput = page.locator('input[placeholder="Tu nombre"]');
+    await expect(joinInput).toBeVisible({ timeout: 10_000 });
+    await joinInput.fill("Test Operator");
+    await page.locator("button", { hasText: "Ingresar a la sesión" }).click();
+    await page.waitForTimeout(1000);
+
     const identifyLabel = page.locator("text=Identificar caja");
     await expect(identifyLabel).toBeVisible({ timeout: 10_000 });
   });

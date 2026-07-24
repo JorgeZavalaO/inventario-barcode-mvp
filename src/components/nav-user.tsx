@@ -1,5 +1,7 @@
 "use client";
 
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -97,7 +99,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={async () => { await signOut({ callbackUrl: "/login" }); }}>
               <LogOutIcon />
               Log out
             </DropdownMenuItem>
