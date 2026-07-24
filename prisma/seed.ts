@@ -93,9 +93,9 @@ async function main() {
   console.log(`  Zona: ${zone.code} - ${zone.name}\n`);
 
   // ============================================================
-  // PASO 4: RACKS Y COMPARTIMENTOS
+  // PASO 5: RACKS Y COMPARTIMENTOS
   // ============================================================
-  console.log("PASO 4: Creando racks y compartimentos...");
+  console.log("PASO 5: Creando racks y compartimentos...");
 
   const rack = await prisma.rack.upsert({
     where: { zoneId_code: { zoneId: zone.id, code: "R001" } },
