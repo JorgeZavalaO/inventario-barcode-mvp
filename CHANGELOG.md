@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.67.0 (2026-07-24)
+
+### Fixed
+
+- **Sincronización de invitados:** Los conteos V3 pendientes se procesan sin sesión de usuario y muestran el error exacto cuando el servidor rechaza un registro.
+
 ## 0.66.0 (2026-07-24)
 
 ### Fixed

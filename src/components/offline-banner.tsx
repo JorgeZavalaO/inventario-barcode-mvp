@@ -26,6 +26,15 @@ type QueueBody = {
   };
 };
 
+function queueErrorMessage(error: string) {
+  try {
+    const payload = JSON.parse(error) as { error?: string };
+    return payload.error ?? error;
+  } catch {
+    return error;
+  }
+}
+
 export function OfflineBanner() {
   const queue = useOfflineQueue();
   const data = useOfflineData();
@@ -186,31 +195,36 @@ export function OfflineBanner() {
                           ? `${body.boxIdentity.importCode} / ${body.boxIdentity.boxNumber}`
                           : item.endpoint.split("/").slice(-2).join("/");
 
-                        return (
-                          <div key={item.id} className="flex items-center gap-2 text-xs">
-                            {item.status === "PENDING" && <div className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />}
-                            {item.status === "SYNCING" && <LoaderCircle size={12} className="animate-spin text-blue-500 shrink-0" />}
-                            {item.status === "ERROR" && <AlertTriangle size={12} className="text-red-500 shrink-0" />}
-                            <span className="flex-1 truncate text-slate-600">{label}</span>
-                           <span className="text-slate-400">
-                             {formatTimeLima(item.createdAt)}
-                           </span>
-                           <button
-                             type="button"
-                             className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
-                             title="Eliminar registro local"
-                             aria-label={`Eliminar registro local ${label}`}
-                             onClick={() => void handleRemoveQueueItem(item.id)}
-                             disabled={item.status === "SYNCING" || deletingQueueItem === item.id}
-                           >
-                             {deletingQueueItem === item.id ? (
-                               <LoaderCircle size={12} className="animate-spin" />
-                             ) : (
-                               <Trash2 size={12} />
+                         return (
+                           <div key={item.id} className="space-y-0.5">
+                             <div className="flex items-center gap-2 text-xs">
+                               {item.status === "PENDING" && <div className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />}
+                               {item.status === "SYNCING" && <LoaderCircle size={12} className="animate-spin text-blue-500 shrink-0" />}
+                               {item.status === "ERROR" && <AlertTriangle size={12} className="text-red-500 shrink-0" />}
+                               <span className="flex-1 truncate text-slate-600">{label}</span>
+                               <span className="text-slate-400">
+                                 {formatTimeLima(item.createdAt)}
+                               </span>
+                               <button
+                                 type="button"
+                                 className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                 title="Eliminar registro local"
+                                 aria-label={`Eliminar registro local ${label}`}
+                                 onClick={() => void handleRemoveQueueItem(item.id)}
+                                 disabled={item.status === "SYNCING" || deletingQueueItem === item.id}
+                               >
+                                 {deletingQueueItem === item.id ? (
+                                   <LoaderCircle size={12} className="animate-spin" />
+                                 ) : (
+                                   <Trash2 size={12} />
+                                 )}
+                               </button>
+                             </div>
+                             {item.status === "ERROR" && item.error && (
+                               <p className="pl-5 text-[11px] text-red-600">{queueErrorMessage(item.error)}</p>
                              )}
-                           </button>
-                         </div>
-                        );
+                           </div>
+                         );
                       })}
                   </div>
 

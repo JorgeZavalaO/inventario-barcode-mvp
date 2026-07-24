@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { apiError } from "@/lib/http";
-import { requireAuth } from "@/server/guards";
 import { prisma } from "@/lib/prisma";
 
 const boxItemSchema = z.object({
@@ -13,7 +12,7 @@ const boxItemSchema = z.object({
 
 const boxCountSchema = z.object({
   operationId: z.string().uuid(),
-  operatorId: z.string().uuid().optional(),
+  operatorId: z.string().uuid(),
   countedByOperatorId: z.string().uuid().optional(),
   inputMethod: z.enum(["CAMERA", "MANUAL", "USB"]).default("MANUAL"),
   boxIdentity: z.object({
@@ -151,7 +150,6 @@ async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any,
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireAuth();
     const { id: sessionId } = await context.params;
 
     const raw = await request.json();
@@ -169,7 +167,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         throw new Error("Sesión no está disponible para conteos");
       }
 
-       const operatorId = body.operatorId ?? (auth.authorized ? auth.session.user.id : undefined);
+       const operatorId = body.operatorId;
        if (!operatorId) throw new Error("Digitador no identificado. Ingresa nuevamente a la sesión.");
        const operator = await tx.operator.findUnique({ where: { id: operatorId } });
        if (!operator) throw new Error("Digitador no identificado. Ingresa nuevamente a la sesión.");
