@@ -140,9 +140,9 @@ async function main() {
   console.log();
 
   // ============================================================
-  // PASO 5: GENERAR POSICIONES FÍSICAS
+  // PASO 6: GENERAR POSICIONES FÍSICAS
   // ============================================================
-  console.log("PASO 5: Generando posiciones físicas...");
+  console.log("PASO 6: Generando posiciones físicas...");
 
   const allCompartments = await prisma.rackCompartment.findMany({
     where: { rackId: rack.id, active: true },
@@ -174,9 +174,9 @@ async function main() {
   console.log(`  ${totalPositions} posiciones creadas\n`);
 
   // ============================================================
-  // PASO 6: IMPORTACIONES, PALLETS Y CAJAS
+  // PASO 7: IMPORTACIONES, PALLETS Y CAJAS
   // ============================================================
-  console.log("PASO 6: Creando importaciones, pallets y cajas...");
+  console.log("PASO 7: Creando importaciones, pallets y cajas...");
 
   const importsData = [
     {
@@ -269,9 +269,9 @@ async function main() {
   console.log();
 
   // ============================================================
-  // PASO 7: STOCK TEÓRICO POR POSICIÓN
+  // PASO 8: STOCK TEÓRICO POR POSICIÓN
   // ============================================================
-  console.log("PASO 7: Asignando stock teórico por posición...");
+  console.log("PASO 8: Asignando stock teórico por posición...");
 
   const allPositions = await prisma.storagePosition.findMany({
     where: { rackId: rack.id, active: true },
@@ -308,6 +308,7 @@ async function main() {
   // ============================================================
   console.log("=== RESUMEN ===");
   console.log(`  Usuarios: 1 (admin@stockscan.app / admin123)`);
+  console.log(`  Operarios: ${operatorNames.length}`);
   console.log(`  Productos: ${products.length}`);
   console.log(`  Almacenes: 1 (${warehouse.code})`);
   console.log(`  Pisos: 1 (${floor.code})`);
