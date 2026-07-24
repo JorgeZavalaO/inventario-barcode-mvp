@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
                   where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
                 });
                 const existingLinks = await prisma.boxProduct.count({ where: { boxId: box.id } });
-                if (existingLink || existingLinks < 3) {
+                if (existingLink || existingLinks < 5) {
                   await prisma.boxProduct.upsert({
                     where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
                      update: { expectedQty: product.expectedQty ?? null, supplierCode: product.supplierCode || null },

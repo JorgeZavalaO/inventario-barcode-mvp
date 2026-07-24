@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.58.0 (2026-07-24)
+
+### Changed
+
+- **Productos por caja:** El límite de productos por caja aumentó de 3 a 5 en la carga y conteo V3.
+
 ## 0.57.0 (2026-07-24)
 
 ### Changed
