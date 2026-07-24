@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.70.0 (2026-07-24)
+
+### Fixed
+
+- **Guardado V3:** Se eliminó la recarga completa de la sesión después de registrar una caja, evitando la espera adicional online y offline.
+
 ## 0.69.0 (2026-07-24)
 
 ### Changed

@@ -598,7 +598,6 @@ export default function V3ScanPage() {
         setToast("Conteos registrados");
       }
       setCountsRegistered(items.length > 0);
-      await load();
       return items.length > 0;
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Error al registrar");
@@ -1061,6 +1060,7 @@ export default function V3ScanPage() {
               onClick={() => void saveAndNextBox()}
               disabled={busy}
             >
+              {busy && <LoaderCircle className="mr-1 animate-spin" size={16} />}
               Guardar y siguiente caja
             </Button>
             <Button
