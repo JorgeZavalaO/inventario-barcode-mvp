@@ -20,7 +20,7 @@ const boxCountSchema = z.object({
     palletNumber: z.string().trim().optional(),
     boxNumber: z.string().trim().min(1),
   }),
-  items: z.array(boxItemSchema).min(1).max(3),
+  items: z.array(boxItemSchema).min(1),
   notes: z.string().max(500).optional(),
 }).strict();
 

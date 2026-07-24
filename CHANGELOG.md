@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.60.0 (2026-07-24)
+
+### Changed
+
+- **Productos por caja:** Se eliminó el límite de cantidad de productos por caja en la importación y en los conteos V2/V3.
+
 ## 0.59.0 (2026-07-24)
 
 ### Changed

@@ -104,21 +104,19 @@ export async function POST(request: NextRequest) {
                   where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
                 });
                 const existingLinks = await prisma.boxProduct.count({ where: { boxId: box.id } });
-                if (existingLink || existingLinks < 10) {
-                  await prisma.boxProduct.upsert({
-                    where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
-                     update: { expectedQty: product.expectedQty ?? null, supplierCode: product.supplierCode || null },
-                    create: {
-                      id: randomUUID(),
-                      boxId: box.id,
-                      productId: productRecord.id,
-                      orderIndex: existingLinks,
-                       expectedQty: product.expectedQty ?? null,
-                       supplierCode: product.supplierCode || null,
-                    },
-                  });
-                  createdBoxes.links++;
-                }
+                await prisma.boxProduct.upsert({
+                  where: { boxId_productId: { boxId: box.id, productId: productRecord.id } },
+                  update: { expectedQty: product.expectedQty ?? null, supplierCode: product.supplierCode || null },
+                  create: {
+                    id: randomUUID(),
+                    boxId: box.id,
+                    productId: productRecord.id,
+                    orderIndex: existingLink?.orderIndex ?? existingLinks,
+                    expectedQty: product.expectedQty ?? null,
+                    supplierCode: product.supplierCode || null,
+                  },
+                });
+                createdBoxes.links++;
               }
             }
           }

@@ -21,7 +21,7 @@ const boxCountSchema = z.object({
     palletNumber: z.string().trim().optional(),
     boxNumber: z.string().trim().min(1),
   }),
-  items: z.array(boxItemSchema).min(1).max(10),
+  items: z.array(boxItemSchema).min(1),
 }).strict();
 
 async function resolveBoxWithOptionalPallet(tx: any, importCode: string, palletNumber: string | undefined, boxNumber: string) {

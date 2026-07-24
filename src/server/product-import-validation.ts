@@ -184,19 +184,6 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
     }
   }
 
-  const candidateBoxKeys = new Set(Array.from(newLinkKeys).map((key) => key.split("::").slice(0, 3).join("::")));
-  for (const boxKey of candidateBoxKeys) {
-    const [importKey, palletNumber, boxNumber] = boxKey.split("::");
-    const importRecord = importsByCode.get(importKey);
-    const pallet = importRecord?.pallets.find((item) => normalized(item.number) === palletNumber);
-    const box = pallet?.boxes.find((item) => normalized(item.number) === boxNumber);
-    const existingCount = box?.boxProducts.length ?? 0;
-    const incomingCount = Array.from(newLinkKeys).filter((key) => key.startsWith(`${boxKey}::`)).length;
-    if (existingCount + incomingCount > 3) {
-      errors.push(`La caja ${importKey}/${palletNumber}/${boxNumber} superaría el máximo de 10 productos.`);
-    }
-  }
-
   return {
     valid: errors.length === 0,
     errors,
