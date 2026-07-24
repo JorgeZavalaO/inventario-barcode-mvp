@@ -522,10 +522,6 @@ export default function V3ScanPage() {
     }
   }
 
-  function correctProducts() {
-    return confirmedProducts.filter((p) => p.correct && p.lines.length > 0);
-  }
-
   function resetIdentify() {
     setSelectedBoxImportId("");
     setSelectedBoxPalletId("");
@@ -548,13 +544,23 @@ export default function V3ScanPage() {
     }
     setBusy(true);
     try {
-      const items = correctProducts().flatMap((cp) =>
-        cp.lines.map((line) => ({
-          productId: cp.product.productId,
-          quantity: line.quantity,
-          notes: line.notes || cp.notes || undefined,
-        })),
-      );
+       const items = confirmedProducts.flatMap((cp) => {
+         const lines = cp.correct ? cp.lines.filter((line) => line.quantity > 0) : [];
+         if (lines.length === 0) {
+           return [{
+             productId: cp.product.productId,
+             quantity: 0,
+             notes: cp.notes || undefined,
+             correct: cp.correct,
+           }];
+         }
+         return lines.map((line) => ({
+           productId: cp.product.productId,
+           quantity: line.quantity,
+           notes: line.notes || cp.notes || undefined,
+           correct: cp.correct,
+         }));
+       });
 
       if (items.length > 0) {
           const payload = {

@@ -47,29 +47,45 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       const palletNumber = box.pallet.number;
       const boxNumber = box.number;
 
-      const productMap = new Map<string, { expected: number; counted: number; product: any }>();
+       const productMap = new Map<string, {
+         expected: number;
+         counted: number;
+         product: any;
+         hasEvent: boolean;
+         isCorrect: boolean;
+         comments: string[];
+       }>();
 
       for (const bp of box.boxProducts) {
         productMap.set(bp.productId, {
-          expected: Number(bp.expectedQty ?? 0),
-          counted: 0,
-          product: bp.product,
-        });
+           expected: Number(bp.expectedQty ?? 0),
+           counted: 0,
+           product: bp.product,
+           hasEvent: false,
+           isCorrect: true,
+           comments: [],
+         });
       }
 
       let totalEvents = 0;
       for (const event of latestEntry.countEvents) {
         totalEvents++;
         const existing = productMap.get(event.productId);
-        if (existing) {
-          existing.counted += Number(event.quantity);
-        } else {
-          productMap.set(event.productId, {
-            expected: 0,
-            counted: Number(event.quantity),
-            product: event.product,
-          });
-        }
+         if (existing) {
+           existing.counted += Number(event.quantity);
+           existing.hasEvent = true;
+           existing.isCorrect = existing.isCorrect && event.isCorrect;
+           if (event.notes?.trim()) existing.comments.push(event.notes.trim());
+         } else {
+           productMap.set(event.productId, {
+             expected: 0,
+             counted: Number(event.quantity),
+             product: event.product,
+             hasEvent: true,
+             isCorrect: event.isCorrect,
+             comments: event.notes?.trim() ? [event.notes.trim()] : [],
+           });
+         }
       }
 
       const products = Array.from(productMap.values()).map((p) => ({
@@ -79,9 +95,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         productUnit: p.product.unit,
         expectedQty: p.expected,
         countedQty: p.counted,
-        difference: p.counted - p.expected,
-        diffType: p.counted - p.expected > 0 ? "sobrante" : p.counted - p.expected < 0 ? "faltante" : "coincide",
-      }));
+         difference: p.counted - p.expected,
+         diffType: p.counted - p.expected > 0 ? "sobrante" : p.counted - p.expected < 0 ? "faltante" : "coincide",
+         reviewStatus: !p.hasEvent ? "NO_REGISTRATION" : p.isCorrect ? "CORRECT" : "INCORRECT",
+         comment: Array.from(new Set(p.comments)).join(" · "),
+       }));
 
       const totalExpected = products.reduce((s, p) => s + p.expectedQty, 0);
       const totalCounted = products.reduce((s, p) => s + p.countedQty, 0);

@@ -8,6 +8,7 @@ const boxItemSchema = z.object({
   productId: z.string().uuid(),
   quantity: z.coerce.number().max(999999),
   notes: z.string().max(500).optional(),
+  correct: z.boolean().default(true),
 });
 
 const boxCountSchema = z.object({
@@ -251,6 +252,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
             id: eventId, operationId: `${body.operationId}-${index}`,
             sessionId, positionId: sessionPosition.positionId, countRoundId: round.id,
              productId: item.productId, operatorId, quantity: item.quantity,
+             isCorrect: item.correct,
              countedByOperatorId,
             inputMethod: body.inputMethod, boxCountEntryId: entryId,
             notes: item.notes ?? null,

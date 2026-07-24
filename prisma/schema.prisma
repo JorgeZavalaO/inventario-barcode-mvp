@@ -328,6 +328,7 @@ model CountEvent {
   operatorId          String      @map("operator_id")
   countedByOperatorId String?     @map("counted_by_operator_id")
   quantity        Decimal     @db.Decimal(14, 3)
+  isCorrect       Boolean     @default(true) @map("is_correct")
   inputMethod     InputMethod @default(CAMERA) @map("input_method")
   createdAt       DateTime    @default(now()) @map("created_at")
   reversedAt      DateTime?   @map("reversed_at")

@@ -320,6 +320,7 @@ export const CountEventScalarFieldEnum = {
   operatorId: 'operatorId',
   countedByOperatorId: 'countedByOperatorId',
   quantity: 'quantity',
+  isCorrect: 'isCorrect',
   inputMethod: 'inputMethod',
   createdAt: 'createdAt',
   reversedAt: 'reversedAt',

@@ -51,9 +51,11 @@ type BoxDifference = {
     productUnit: string;
     expectedQty: number;
     countedQty: number;
-    difference: number;
-    diffType: string;
-  }[];
+     difference: number;
+     diffType: string;
+     reviewStatus: "CORRECT" | "INCORRECT" | "NO_REGISTRATION";
+     comment: string;
+   }[];
   eventCount: number;
   countedAt: string;
   digitizerName: string;
@@ -211,6 +213,16 @@ export default function V3ReviewPage() {
     return <Badge className="bg-slate-100 text-slate-600">{status}</Badge>;
   }
 
+  function productStatusBadge(status: BoxDifference["products"][number]["reviewStatus"]) {
+    if (status === "CORRECT") {
+      return <Badge className="bg-green-50 text-green-700">Correcto</Badge>;
+    }
+    if (status === "INCORRECT") {
+      return <Badge className="bg-red-50 text-red-700">Incorrecto</Badge>;
+    }
+    return <Badge className="bg-slate-100 text-slate-600">Sin registro</Badge>;
+  }
+
   type FlatRow = BoxDifference & { product: BoxDifference["products"][number] };
 
   const allRows = useMemo<FlatRow[]>(
@@ -361,7 +373,9 @@ export default function V3ReviewPage() {
                   <TableHead className="text-right">Esperado</TableHead>
                   <TableHead className="text-right">Contado</TableHead>
                   <TableHead className="text-right">Diferencia</TableHead>
-                  <TableHead>Estado</TableHead>
+                   <TableHead>Estado producto</TableHead>
+                   <TableHead>Comentario</TableHead>
+                   <TableHead>Revisión</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -399,7 +413,11 @@ export default function V3ReviewPage() {
                             : row.product.difference}
                       </span>
                     </TableCell>
-                    <TableCell>{statusBadge(row.status)}</TableCell>
+                     <TableCell>{productStatusBadge(row.product.reviewStatus)}</TableCell>
+                     <TableCell className="max-w-[220px] text-xs text-slate-600">
+                       {row.product.comment || <span className="text-slate-300">Sin comentario</span>}
+                     </TableCell>
+                     <TableCell>{statusBadge(row.status)}</TableCell>
                     <TableCell className="text-right">
                       {row.status === "SUBMITTED" && (
                         <div className="flex justify-end gap-1">
@@ -409,6 +427,8 @@ export default function V3ReviewPage() {
                             className="h-7 px-2 text-green-600"
                             onClick={() => void handleApprove(row)}
                             disabled={busy}
+                            title="Aprobar registro"
+                            aria-label={`Aprobar ${row.product.productCode}`}
                           >
                             <CheckCircle2 size={14} />
                           </Button>
@@ -418,6 +438,8 @@ export default function V3ReviewPage() {
                             className="h-7 px-2 text-red-600"
                             onClick={() => void handleReject(row)}
                             disabled={busy}
+                            title="Solicitar reconteo"
+                            aria-label={`Solicitar reconteo de ${row.product.productCode}`}
                           >
                             <XCircle size={14} />
                           </Button>

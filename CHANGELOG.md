@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.68.0 (2026-07-24)
+
+### Changed
+
+- **Revisión V3:** La tabla de productos ahora muestra comentario, estado marcado en el formulario (Correcto/Incorrecto) y acciones por registro.
+- **Conteo V3:** Se conserva el estado del producto y también se registra un producto marcado como incorrecto aunque su cantidad sea cero.
+
 ## 0.67.0 (2026-07-24)
 
 ### Fixed
