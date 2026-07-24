@@ -4,6 +4,7 @@ import { RotateCcw, Lock, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { SessionDetail } from "@/lib/types";
+import { formatDateTimeLima } from "@/lib/date-time";
 
 type Operator = { id: string; name: string };
 
@@ -48,10 +49,7 @@ export function SessionHero({
           </div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{detail.session.name}</h1>
           <p className="mt-2 text-sm text-slate-400">
-            {detail.session.warehouse} · Creada el{" "}
-            {new Intl.DateTimeFormat("es-PE", { dateStyle: "medium", timeStyle: "short" }).format(
-              new Date(detail.session.created_at),
-            )}
+             {detail.session.warehouse} · Creada el {formatDateTimeLima(detail.session.created_at)}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

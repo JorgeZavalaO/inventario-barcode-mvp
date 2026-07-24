@@ -13,6 +13,7 @@ const boxItemSchema = z.object({
 
 const boxCountSchema = z.object({
   operationId: z.string().uuid(),
+  operatorId: z.string().uuid().optional(),
   inputMethod: z.enum(["CAMERA", "MANUAL", "USB"]).default("MANUAL"),
   boxIdentity: z.object({
     importCode: z.string().trim().min(1),
@@ -45,116 +46,171 @@ async function resolveBoxWithOptionalPallet(tx: any, importCode: string, palletN
   return { imp, pallet, box };
 }
 
+function virtualColumnIndex(boxId: string) {
+  let hash = 0;
+  for (const character of boxId) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  return 100000 + (hash % 900000);
+}
+
+async function ensureVirtualLocation(tx: any) {
+  const warehouse = await tx.warehouse.upsert({
+    where: { code: "VIRTUAL-V3" },
+    update: { active: false },
+    create: { id: randomUUID(), code: "VIRTUAL-V3", name: "Registros virtuales V3", active: false },
+  });
+  const floor = await tx.floor.upsert({
+    where: { warehouseId_code: { warehouseId: warehouse.id, code: "V3" } },
+    update: { active: false },
+    create: { id: randomUUID(), warehouseId: warehouse.id, code: "V3", name: "Sesiones V3", orderIndex: 0, active: false },
+  });
+  const zone = await tx.warehouseZone.upsert({
+    where: { floorId_code: { floorId: floor.id, code: "VIRTUAL" } },
+    update: { active: false },
+    create: { id: randomUUID(), floorId: floor.id, code: "VIRTUAL", name: "Registros sin ubicación", orderIndex: 0, active: false },
+  });
+  const rack = await tx.rack.upsert({
+    where: { zoneId_code: { zoneId: zone.id, code: "V3" } },
+    update: { active: false },
+    create: { id: randomUUID(), zoneId: zone.id, code: "V3", name: "Contenedores virtuales V3", orderIndex: 0, active: false },
+  });
+  const compartment = await tx.rackCompartment.upsert({
+    where: { rackId_code: { rackId: rack.id, code: "VIRTUAL" } },
+    update: { active: false },
+    create: {
+      id: randomUUID(), rackId: rack.id, code: "VIRTUAL", name: "Contenedores V3",
+      x: 0, y: 0, width: 10000, height: 10000, columnCount: 1, stackLevels: 1, orderIndex: 0, active: false,
+    },
+  });
+  const depthSlot = await tx.rackDepthSlot.upsert({
+    where: { compartmentId_code: { compartmentId: compartment.id, code: "VIRTUAL" } },
+    update: { active: false },
+    create: {
+      id: randomUUID(), compartmentId: compartment.id, code: "VIRTUAL", name: "Registro virtual",
+      kind: "CUSTOM", depthIndex: 0, active: false,
+    },
+  });
+  return { rack, compartment, depthSlot };
+}
+
+async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any, userId: string) {
+  const code = `VIRTUAL-V3-${box.id}`;
+  let position = await tx.storagePosition.findFirst({ where: { code } });
+
+  if (!position) {
+    let rack = await tx.rack.findFirst({ where: { active: true } });
+    let compartment = rack
+      ? await tx.rackCompartment.findFirst({ where: { rackId: rack.id, active: true } })
+      : null;
+    let depthSlot = compartment
+      ? await tx.rackDepthSlot.findFirst({ where: { compartmentId: compartment.id, active: true } })
+      : null;
+
+    if (!rack || !compartment || !depthSlot) {
+      const virtualLocation = await ensureVirtualLocation(tx);
+      rack = virtualLocation.rack;
+      compartment = virtualLocation.compartment;
+      depthSlot = virtualLocation.depthSlot;
+    }
+
+    position = await tx.storagePosition.create({
+      data: {
+        id: randomUUID(),
+        rackId: rack.id,
+        compartmentId: compartment.id,
+        depthSlotId: depthSlot.id,
+        columnIndex: virtualColumnIndex(box.id),
+        stackIndex: 0,
+        code,
+        qrValue: `LOC:v3:virtual:${box.id}`,
+        active: false,
+        countable: false,
+      },
+    });
+  }
+
+  let sessionPosition = await tx.sessionPosition.findUnique({
+    where: { sessionId_positionId: { sessionId, positionId: position.id } },
+  });
+
+  if (!sessionPosition) {
+    sessionPosition = await tx.sessionPosition.create({
+      data: {
+        id: randomUUID(),
+        sessionId,
+        positionId: position.id,
+        status: "IN_PROGRESS",
+        assignedToId: userId,
+        startedAt: new Date(),
+      },
+    });
+  }
+
+  return sessionPosition;
+}
+
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuth();
     if (!auth.authorized) return auth.response;
-    const userId = auth.session!.user.id;
     const { id: sessionId } = await context.params;
 
     const raw = await request.json();
     const body = boxCountSchema.parse(raw);
 
     const result = await prisma.$transaction(async (tx) => {
-      const existing = await tx.countEvent.findUnique({ where: { operationId: body.operationId } });
+      const existing = await tx.countEvent.findFirst({
+        where: { sessionId, operationId: { startsWith: `${body.operationId}-` } },
+      });
       if (existing) return { duplicate: true, eventId: existing.id };
 
       const session = await tx.inventorySession.findUnique({ where: { id: sessionId } });
       if (!session) throw new Error("Sesión no existe");
-      if (session.status !== "OPEN") throw new Error("Sesión no está abierta");
+      if (session.status !== "OPEN" && session.status !== "REVIEW") {
+        throw new Error("Sesión no está disponible para conteos");
+      }
+
+      const operatorId = body.operatorId ?? auth.session!.user.id;
+      const operator = await tx.operator.findUnique({ where: { id: operatorId } });
+      if (!operator) throw new Error("Operador no identificado. Ingresa nuevamente a la sesión.");
 
       const { imp, pallet, box } = await resolveBoxWithOptionalPallet(tx, body.boxIdentity.importCode, body.boxIdentity.palletNumber, body.boxIdentity.boxNumber);
 
+      const itemProductIds = [...new Set(body.items.map((item) => item.productId))];
       const boxProducts = await tx.boxProduct.findMany({
-        where: { boxId: box.id, active: true, productId: { in: body.items.map((item) => item.productId) } },
+        where: { boxId: box.id, active: true, productId: { in: itemProductIds } },
       });
-      if (boxProducts.length !== body.items.length) throw new Error("Uno o más productos no pertenecen a esta caja");
+      if (boxProducts.length !== itemProductIds.length) throw new Error("Uno o más productos no pertenecen a esta caja");
 
-      let sessionPosition = await tx.sessionPosition.findFirst({
-        where: { sessionId, positionId: box.expectedPositionId ?? undefined },
+      const sessionPosition = await ensureSessionPositionForBox(tx, sessionId, box, operatorId);
+      if (sessionPosition.status === "APPROVED" || sessionPosition.status === "EXCLUDED") {
+        throw new Error("Esta caja ya fue aprobada y no requiere otro conteo");
+      }
+
+      let round = await tx.countRound.findFirst({
+        where: { sessionPositionId: sessionPosition.id, status: "OPEN" },
       });
 
-      let round;
-
-      if (sessionPosition) {
-        round = await tx.countRound.findFirst({
-          where: { sessionPositionId: sessionPosition.id, status: "OPEN" },
+      if (!round) {
+        const latestRound = await tx.countRound.findFirst({
+          where: { sessionPositionId: sessionPosition.id },
+          orderBy: { roundNumber: "desc" },
         });
-
-        if (!round) {
-          const existingRounds = await tx.countRound.count({ where: { sessionPositionId: sessionPosition.id } });
-          round = await tx.countRound.create({
-            data: {
-              id: randomUUID(),
-              sessionPositionId: sessionPosition.id,
-              roundNumber: existingRounds + 1,
-              operatorId: userId,
-              status: "OPEN",
-            },
-          });
-        }
-
-        if (sessionPosition.status === "PENDING" || sessionPosition.status === "ASSIGNED") {
-          await tx.sessionPosition.update({
-            where: { id: sessionPosition.id },
-            data: { status: "IN_PROGRESS", assignedToId: userId, startedAt: new Date() },
-          });
-        }
-      } else {
-        const virtualPosition = await tx.storagePosition.findFirst({
-          where: { code: "VIRTUAL-V3" },
-        });
-
-        let positionId: string;
-        if (virtualPosition) {
-          positionId = virtualPosition.id;
-        } else {
-          const rack = await tx.rack.findFirst({ where: { active: true } });
-          if (!rack) throw new Error("No hay racks disponibles");
-
-          const compartment = await tx.rackCompartment.findFirst({ where: { rackId: rack.id, active: true } });
-          if (!compartment) throw new Error("No hay compartimentos disponibles");
-
-          const depthSlot = await tx.rackDepthSlot.findFirst({ where: { compartmentId: compartment.id, active: true } });
-          if (!depthSlot) throw new Error("No hay depth slots disponibles");
-
-          const newPosition = await tx.storagePosition.create({
-            data: {
-              id: randomUUID(),
-              rackId: rack.id,
-              compartmentId: compartment.id,
-              depthSlotId: depthSlot.id,
-              columnIndex: 0,
-              stackIndex: 0,
-              code: "VIRTUAL-V3",
-              qrValue: `LOC:v3:virtual:${randomUUID()}`,
-              active: true,
-              countable: false,
-            },
-          });
-          positionId = newPosition.id;
-        }
-
-        sessionPosition = await tx.sessionPosition.create({
-          data: {
-            id: randomUUID(),
-            sessionId,
-            positionId,
-            status: "IN_PROGRESS",
-            assignedToId: userId,
-            startedAt: new Date(),
-          },
-        });
-
-        const existingRounds = await tx.countRound.count({ where: { sessionPositionId: sessionPosition.id } });
+        if (latestRound?.status === "APPROVED") throw new Error("Esta caja ya fue aprobada y no requiere otro conteo");
         round = await tx.countRound.create({
           data: {
             id: randomUUID(),
             sessionPositionId: sessionPosition.id,
-            roundNumber: existingRounds + 1,
-            operatorId: userId,
+            roundNumber: (latestRound?.roundNumber ?? 0) + 1,
+            operatorId,
             status: "OPEN",
           },
+        });
+      }
+
+      if (sessionPosition.status !== "IN_PROGRESS") {
+        await tx.sessionPosition.update({
+          where: { id: sessionPosition.id },
+          data: { status: "IN_PROGRESS", assignedToId: operatorId, startedAt: new Date() },
         });
       }
 
@@ -165,19 +221,19 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       await tx.boxCountEntry.create({
         data: {
           id: entryId, sessionId, countRoundId: round.id, boxId: box.id,
-          positionId: sessionPosition.positionId, operatorId: userId,
+          positionId: sessionPosition.positionId, operatorId,
         },
       });
 
       const eventIds: string[] = [];
-      for (const item of body.items) {
+      for (const [index, item] of body.items.entries()) {
         const eventId = randomUUID();
         eventIds.push(eventId);
         await tx.countEvent.create({
           data: {
-            id: eventId, operationId: `${body.operationId}-${item.productId}`,
+            id: eventId, operationId: `${body.operationId}-${index}`,
             sessionId, positionId: sessionPosition.positionId, countRoundId: round.id,
-            productId: item.productId, operatorId: userId, quantity: item.quantity,
+            productId: item.productId, operatorId, quantity: item.quantity,
             inputMethod: body.inputMethod, boxCountEntryId: entryId,
             notes: item.notes ?? null,
           },
@@ -190,7 +246,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     return NextResponse.json(result, { status: result.duplicate ? 200 : 201 });
   } catch (error) {
     if (error instanceof z.ZodError) return NextResponse.json({ error: error.issues[0]?.message }, { status: 400 });
-    if (error instanceof Error && /Sesión|Posición|Ronda|Producto|Importación|Pallet|Caja|productos no pertenecen|ya fue contada/.test(error.message)) {
+    if (error instanceof Error && /Sesión|Posición|Ronda|Producto|Importación|Pallet|Caja|Operador|productos no pertenecen|ya fue contada|aprobada/.test(error.message)) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return apiError(error);

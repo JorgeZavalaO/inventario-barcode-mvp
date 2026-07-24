@@ -1,5 +1,62 @@
 # Changelog
 
+## 0.49.1 (2026-07-24)
+
+### Changed
+
+- **Zona horaria de registros:** Las fechas y horas visibles en sesiones, actividad, participantes, cola offline y exportaciones Excel ahora se muestran en `America/Lima`.
+- **Persistencia:** Los timestamps continúan almacenándose como instantes UTC; solo se convierten a hora de Lima al presentarlos.
+
+## 0.49.0 (2026-07-24)
+
+### Added (Revisión V3 — tabla y paginación)
+
+- **Tabla de revisión:** La vista de revisión de sesiones V3 ahora muestra todos los registros de productos en una tabla plana con columnas: Importación, Pallet, Caja, Producto, Esperado, Contado, Diferencia, Estado y Acciones.
+- **Paginación:** La tabla de revisión incluye paginación con 25 registros por página, controles Anterior/Siguiente y números de página con elipsis para rangos grandes.
+- **Selects filtrables en V3:** Los tres selects del flujo de cajas (Importación, Pallet, Caja) en la página de escaneo V3 ahora usan `SearchableSelect` con búsqueda por texto.
+
+### Fixed
+
+- **Navegación offline V3:** El Service Worker ahora devuelve la página cacheada más cercana (`/sessions/v3`) para rutas de V3 en vez del dashboard (`/`). Versión del caché incrementada a `v3` para forzar actualización.
+
+### Changed
+
+- **Etiquetas sin fallback:** Las etiquetas de productos ya no generan barcode/QR a partir del código interno cuando no hay `barcode` asignado. El componente `BarcodeLabel` muestra "Sin código de barras" en su lugar.
+
+## 0.48.8 (2026-07-24)
+
+### Fixed
+
+- **Conteo de invitados V3:** Los conteos ahora usan el `operatorId` generado al ingresar como invitado, evitando errores al crear `BoxCountEntry`.
+- **Estructura virtual V3:** Los registros técnicos virtuales se mantienen ocultos como ubicaciones inactivas y no requieren configuración física.
+
+## 0.48.7 (2026-07-24)
+
+### Fixed
+
+- **Sesiones V3 sin racks:** El registro de conteos ya no depende de que existan racks, compartimentos o posiciones físicas. Si no hay estructura física, crea automáticamente una estructura técnica virtual para mantener la relación interna de las rondas, sin pedir posiciones al usuario.
+
+## 0.48.6 (2026-07-24)
+
+### Changed
+
+- **Flujo de invitados V3:** Los contadores invitados ya no envían sesiones a revisión; solo guardan la información de cada caja.
+- **Guardado antes de continuar:** `Guardar y siguiente caja` registra primero la caja actual y solo después permite pasar a la siguiente.
+- **Avances consolidados:** Se agregó el botón `Avances` en el listado de sesiones V3 para consultar el progreso conjunto.
+- **Envío administrativo:** El administrador puede enviar la captura completa a revisión desde la vista de avances.
+- **Continuidad después de revisión:** Los contadores pueden seguir registrando cajas pendientes o rechazadas; las cajas aprobadas quedan protegidas.
+
+## 0.48.5 (2026-07-24)
+
+### Fixed
+
+- **Revisión V3:** Al enviar una sesión a revisión, las rondas abiertas ahora se marcan como `SUBMITTED` y aparecen correctamente para el supervisor.
+- **Revisión por caja:** El tablero usa únicamente la última ronda de cada caja, evitando sumar nuevamente conteos anteriores durante un reconteo.
+- **Continuar conteo:** Las sesiones en `REVIEW` pueden recibir nuevos conteos para cajas pendientes o rechazadas; las cajas aprobadas quedan bloqueadas.
+- **Reingreso del contador:** Las sesiones V3 en revisión ahora muestran la opción `Continuar` para volver al flujo de conteo.
+- **Registro automático:** `Enviar a revisión` registra primero los conteos actuales si aún no se había presionado `Registrar todo`.
+- **División de cantidades:** Se permiten varias líneas para el mismo producto sin producir duplicados ni rechazar la caja.
+
 ## 0.48.4 (2026-07-24)
 
 ### Changed

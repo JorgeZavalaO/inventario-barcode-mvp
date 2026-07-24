@@ -3,13 +3,14 @@
 import { Users } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import type { Participant } from "@/lib/types";
+import { formatTimeLima } from "@/lib/date-time";
 
 function formatNumber(value: number) {
   return Number(value).toLocaleString("es-PE", { maximumFractionDigits: 3 });
 }
 
 function formatTime(value: string) {
-  return new Intl.DateTimeFormat("es-PE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(value));
+  return formatTimeLima(value);
 }
 
 export function SessionParticipants({

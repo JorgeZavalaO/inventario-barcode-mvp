@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatDateOnlyLima } from "@/lib/date-time";
 
 type V3Session = {
   id: string;
@@ -143,6 +144,8 @@ export default function V3SessionsPage() {
               onClick={() => {
                 if (session.status === "OPEN" || session.status === "PAUSED")
                   router.push(`/sessions/v3/${session.id}/scan`);
+                else if (session.status === "REVIEW")
+                  router.push(`/sessions/v3/${session.id}/scan`);
                 else router.push(`/sessions/v3/${session.id}/review`);
               }}
             >
@@ -154,13 +157,23 @@ export default function V3SessionsPage() {
                   </div>
                   <p className="mt-0.5 text-xs text-slate-500">
                     {session.code} ·{" "}
-                    {new Date(session.createdAt).toLocaleDateString("es-PE")}
+                    {formatDateOnlyLima(session.createdAt)}
                   </p>
                 </div>
                 <div className="text-right text-sm">
                   <p className="font-medium">{session._count.boxCountEntries}</p>
                   <p className="text-xs text-slate-400">cajas</p>
                 </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/sessions/v3/${session.id}/review`);
+                  }}
+                >
+                  Avances
+                </Button>
                 {(session.status === "OPEN" || session.status === "PAUSED") && (
                   <Button
                     size="sm"
@@ -174,16 +187,28 @@ export default function V3SessionsPage() {
                   </Button>
                 )}
                 {session.status === "REVIEW" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/sessions/v3/${session.id}/review`);
-                    }}
-                  >
-                    Revisar
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/sessions/v3/${session.id}/scan`);
+                      }}
+                    >
+                      Continuar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/sessions/v3/${session.id}/review`);
+                      }}
+                    >
+                      Revisar
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

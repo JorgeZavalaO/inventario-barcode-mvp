@@ -83,6 +83,7 @@ export default function V3ScanPage() {
   const [productLines, setProductLines] = useState<ProductLine[]>([{ quantity: 0, notes: "" }]);
   const [productNotes, setProductNotes] = useState("");
   const [confirmedProducts, setConfirmedProducts] = useState<ConfirmedProduct[]>([]);
+  const [countsRegistered, setCountsRegistered] = useState(false);
 
   const [importBusy, setImportBusy] = useState(false);
   const [importResult, setImportResult] = useState<string>("");
@@ -348,6 +349,7 @@ export default function V3ScanPage() {
     setProductLines([{ quantity: firstQty, notes: "" }]);
     setProductNotes("");
     setConfirmedProducts([]);
+    setCountsRegistered(false);
     setStep("CONFIRM");
   }
 
@@ -412,8 +414,8 @@ export default function V3ScanPage() {
     setProductLines([{ quantity: 0, notes: "" }]);
   }
 
-  async function registerAllCounts() {
-    if (!session || confirmedProducts.length === 0) return;
+  async function registerAllCounts(): Promise<boolean> {
+    if (!session || confirmedProducts.length === 0) return false;
     setBusy(true);
     try {
       const items = correctProducts().flatMap((cp) =>
@@ -427,6 +429,7 @@ export default function V3ScanPage() {
       if (items.length > 0) {
         const payload = {
           operationId: crypto.randomUUID(),
+          operatorId: operator?.id,
           inputMethod: "MANUAL" as const,
           boxIdentity: {
             importCode: boxImport.trim(),
@@ -457,28 +460,24 @@ export default function V3ScanPage() {
       } else {
         setToast("Conteos registrados");
       }
+      setCountsRegistered(items.length > 0);
       await load();
+      return items.length > 0;
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Error al registrar");
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
-  async function sendToReview() {
-    setBusy(true);
-    try {
-      await apiFetch(`/api/sessions/v3/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "REVIEW" }),
-      });
-      setToast("Sesión enviada a revisión");
-      await load();
-    } catch (error) {
-      setToast(error instanceof Error ? error.message : "Error");
-    } finally {
-      setBusy(false);
+  async function saveAndNextBox() {
+    if (!countsRegistered) {
+      const registered = await registerAllCounts();
+      if (!registered) return;
     }
+    resetIdentify();
+    setStep("IDENTIFY");
   }
 
   if (loading)
@@ -886,34 +885,26 @@ export default function V3ScanPage() {
             <Button
               variant="outline"
               className="flex-1 h-12"
-              onClick={() => {
-                resetIdentify();
-                setStep("IDENTIFY");
-              }}
+              onClick={() => void saveAndNextBox()}
+              disabled={busy}
             >
-              Siguiente caja
+              Guardar y siguiente caja
             </Button>
             <Button
               className="flex-1 h-12"
               onClick={() => void registerAllCounts()}
-              disabled={busy}
+              disabled={busy || countsRegistered}
             >
               {busy ? (
                 <LoaderCircle className="animate-spin" size={16} />
+              ) : countsRegistered ? (
+                <CheckCircle2 size={16} />
               ) : (
                 <Package size={16} />
               )}{" "}
-              Registrar todo
+              {countsRegistered ? "Información guardada" : "Guardar información"}
             </Button>
           </div>
-          <Button
-            className="w-full h-12"
-            variant="destructive"
-            onClick={() => void sendToReview()}
-            disabled={busy}
-          >
-            Enviar a revisión
-          </Button>
         </div>
       )}
     </div>

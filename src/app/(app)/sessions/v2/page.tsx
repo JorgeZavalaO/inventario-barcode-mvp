@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatDateOnlyLima } from "@/lib/date-time";
 
 type V2Session = {
   id: string;
@@ -153,7 +154,7 @@ export default function V2SessionsPage() {
                   </div>
                   <p className="mt-0.5 text-xs text-slate-500">
                     {session.code} ·{" "}
-                    {new Date(session.createdAt).toLocaleDateString("es-PE")}
+                    {formatDateOnlyLima(session.createdAt)}
                   </p>
                 </div>
                 <div className="text-right text-sm">

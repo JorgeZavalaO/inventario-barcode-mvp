@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireRole("SUPERVISOR", "ADMIN");
+    const auth = await requireRole("ADMIN", "SUPERVISOR", "COUNTER", "VIEWER");
     if (!auth.authorized) return auth.response;
 
     const { id } = await context.params;
@@ -36,8 +36,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     }
 
     const differences = Array.from(boxMap.entries()).map(([boxId, entries]) => {
-      const firstEntry = entries[0];
-      const box = firstEntry.box;
+      const latestEntry = [...entries].sort((a, b) => {
+        const roundDifference = b.countRound.roundNumber - a.countRound.roundNumber;
+        return roundDifference || b.createdAt.getTime() - a.createdAt.getTime();
+      })[0];
+      const box = latestEntry.box;
       const importCode = box.pallet.import.code;
       const palletNumber = box.pallet.number;
       const boxNumber = box.number;
@@ -53,19 +56,17 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       }
 
       let totalEvents = 0;
-      for (const entry of entries) {
-        for (const event of entry.countEvents) {
-          totalEvents++;
-          const existing = productMap.get(event.productId);
-          if (existing) {
-            existing.counted += Number(event.quantity);
-          } else {
-            productMap.set(event.productId, {
-              expected: 0,
-              counted: Number(event.quantity),
-              product: event.product,
-            });
-          }
+      for (const event of latestEntry.countEvents) {
+        totalEvents++;
+        const existing = productMap.get(event.productId);
+        if (existing) {
+          existing.counted += Number(event.quantity);
+        } else {
+          productMap.set(event.productId, {
+            expected: 0,
+            counted: Number(event.quantity),
+            product: event.product,
+          });
         }
       }
 
@@ -88,15 +89,16 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         importCode,
         palletNumber,
         boxNumber,
-        status: firstEntry.countRound?.status ?? "OPEN",
-        roundId: firstEntry.countRoundId,
+        status: latestEntry.countRound.status,
+        roundId: latestEntry.countRoundId,
+        boxCountEntryId: latestEntry.id,
         totalExpected,
         totalCounted,
         difference: totalCounted - totalExpected,
         diffType: totalCounted - totalExpected > 0 ? "sobrante" : totalCounted - totalExpected < 0 ? "faltante" : "coincide",
         products,
         eventCount: totalEvents,
-        countedAt: firstEntry.createdAt,
+        countedAt: latestEntry.createdAt,
       };
     });
 
@@ -135,6 +137,14 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       });
       if (!round || round.sessionPosition.sessionId !== sessionId) {
         throw new Error("Ronda inválida");
+      }
+
+      const entry = await tx.boxCountEntry.findUnique({ where: { id: boxCountEntryId } });
+      if (!entry || entry.sessionId !== sessionId || entry.countRoundId !== roundId) {
+        throw new Error("Registro de caja inválido");
+      }
+      if (round.status !== "SUBMITTED") {
+        throw new Error("La ronda debe estar enviada a revisión");
       }
 
       await tx.countRound.update({

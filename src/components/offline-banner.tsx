@@ -18,6 +18,7 @@ import {
   HardDrive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatDateTimeLima, formatTimeLima } from "@/lib/date-time";
 
 export function OfflineBanner() {
   const queue = useOfflineQueue();
@@ -104,7 +105,7 @@ export function OfflineBanner() {
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Datos offline</p>
                   {data.lastSync && (
                     <p className="text-xs text-slate-400">
-                      {new Date(data.lastSync).toLocaleString("es-PE", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      {formatDateTimeLima(data.lastSync)}
                     </p>
                   )}
                 </div>
@@ -162,7 +163,7 @@ export function OfflineBanner() {
                             {item.status === "ERROR" && <AlertTriangle size={12} className="text-red-500 shrink-0" />}
                             <span className="flex-1 truncate text-slate-600">{label}</span>
                             <span className="text-slate-400">
-                              {new Date(item.createdAt).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}
+                              {formatTimeLima(item.createdAt)}
                             </span>
                           </div>
                         );

@@ -61,12 +61,27 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       return NextResponse.json({ error: "La sesión debe estar en REVIEW para cerrarse" }, { status: 400 });
     }
 
-    const updated = await prisma.inventorySession.update({
-      where: { id },
-      data: {
-        status,
-        closedAt: status === "CLOSED" ? new Date() : undefined,
-      },
+    const updated = await prisma.$transaction(async (tx) => {
+      if (status === "REVIEW") {
+        await tx.countRound.updateMany({
+          where: {
+            sessionPosition: { sessionId: id },
+            status: "OPEN",
+          },
+          data: {
+            status: "SUBMITTED",
+            submittedAt: new Date(),
+          },
+        });
+      }
+
+      return tx.inventorySession.update({
+        where: { id },
+        data: {
+          status,
+          closedAt: status === "CLOSED" ? new Date() : undefined,
+        },
+      });
     });
 
     return NextResponse.json({ session: updated });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
@@ -14,9 +14,27 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 
 type BoxDifference = {
   boxId: string;
+  boxCountEntryId: string;
   importCode: string;
   palletNumber: string;
   boxNumber: string;
@@ -59,6 +77,8 @@ export default function V3ReviewPage() {
   const [toast, setToast] = useState("");
   const [sessionName, setSessionName] = useState("");
   const [sessionStatus, setSessionStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const perPage = 25;
 
   const load = useCallback(async () => {
     try {
@@ -97,7 +117,7 @@ export default function V3ReviewPage() {
       await apiFetch(`/api/sessions/v3/${id}/review`, {
         method: "POST",
         body: JSON.stringify({
-          boxCountEntryId: boxDiff.boxId,
+          boxCountEntryId: boxDiff.boxCountEntryId,
           roundId: boxDiff.roundId,
           action: "approve",
         }),
@@ -117,7 +137,7 @@ export default function V3ReviewPage() {
       await apiFetch(`/api/sessions/v3/${id}/review`, {
         method: "POST",
         body: JSON.stringify({
-          boxCountEntryId: boxDiff.boxId,
+          boxCountEntryId: boxDiff.boxCountEntryId,
           roundId: boxDiff.roundId,
           action: "reject",
         }),
@@ -147,6 +167,22 @@ export default function V3ReviewPage() {
     }
   }
 
+  async function handleSendToReview() {
+    setBusy(true);
+    try {
+      await apiFetch(`/api/sessions/v3/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "REVIEW" }),
+      });
+      setToast("Captura enviada a revisión");
+      await load();
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "No tienes permisos para enviar a revisión");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleExport() {
     try {
       const response = await fetch(`/api/sessions/v3/${id}/export`);
@@ -171,6 +207,53 @@ export default function V3ReviewPage() {
     if (status === "SUBMITTED")
       return <Badge className="bg-purple-50 text-purple-700">Enviada</Badge>;
     return <Badge className="bg-slate-100 text-slate-600">{status}</Badge>;
+  }
+
+  type FlatRow = BoxDifference & { product: BoxDifference["products"][number] };
+
+  const allRows = useMemo<FlatRow[]>(
+    () => differences.flatMap((diff) => diff.products.map((product) => ({ ...diff, product }))),
+    [differences],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(allRows.length / perPage));
+  const paginatedRows = allRows.slice((page - 1) * perPage, page * perPage);
+
+  function goToPage(p: number) {
+    setPage(Math.max(1, Math.min(p, totalPages)));
+  }
+
+  function renderPageNumbers() {
+    const pages: React.ReactNode[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+    const end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
+
+    if (start > 1) {
+      pages.push(
+        <PaginationItem key="1">
+          <PaginationLink onClick={() => goToPage(1)} href="#">1</PaginationLink>
+        </PaginationItem>,
+      );
+      if (start > 2) pages.push(<PaginationItem key="e1"><PaginationEllipsis /></PaginationItem>);
+    }
+    for (let i = start; i <= end; i++) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink isActive={i === page} onClick={() => goToPage(i)} href="#">{i}</PaginationLink>
+        </PaginationItem>,
+      );
+    }
+    if (end < totalPages) {
+      if (end < totalPages - 1) pages.push(<PaginationItem key="e2"><PaginationEllipsis /></PaginationItem>);
+      pages.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink onClick={() => goToPage(totalPages)} href="#">{totalPages}</PaginationLink>
+        </PaginationItem>,
+      );
+    }
+    return pages;
   }
 
   if (loading)
@@ -238,6 +321,11 @@ export default function V3ReviewPage() {
         <Button variant="outline" size="sm" onClick={() => void handleExport()}>
           <Download size={14} className="mr-1" /> Exportar Excel
         </Button>
+        {sessionStatus === "OPEN" && (
+          <Button size="sm" onClick={() => void handleSendToReview()} disabled={busy}>
+            Enviar captura a revisión
+          </Button>
+        )}
         {sessionStatus === "REVIEW" && (
           <Button
             variant="destructive"
@@ -250,104 +338,121 @@ export default function V3ReviewPage() {
         )}
       </div>
 
-      {differences.length === 0 ? (
+      {allRows.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-slate-400">
             No hay cajas contadas aún.
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {differences.map((diff) => (
-            <Card
-              key={diff.boxId}
-              className={
-                diff.diffType === "coincide"
-                  ? "border-green-200"
-                  : "border-red-200"
-              }
-            >
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-bold">
-                      {diff.importCode} / {diff.palletNumber} / {diff.boxNumber}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Esperado: {diff.totalExpected} · Contado: {diff.totalCounted} ·
-                      Diferencia:{" "}
+        <Card>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Importación</TableHead>
+                  <TableHead>Pallet</TableHead>
+                  <TableHead>Caja</TableHead>
+                  <TableHead>Producto</TableHead>
+                  <TableHead className="text-right">Esperado</TableHead>
+                  <TableHead className="text-right">Contado</TableHead>
+                  <TableHead className="text-right">Diferencia</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedRows.map((row) => (
+                  <TableRow
+                    key={`${row.boxId}-${row.product.productId}`}
+                    className={row.diffType === "coincide" ? "bg-green-50/50" : ""}
+                  >
+                    <TableCell className="text-xs">{row.importCode}</TableCell>
+                    <TableCell className="text-xs">{row.palletNumber}</TableCell>
+                    <TableCell className="text-xs font-medium">{row.boxNumber}</TableCell>
+                    <TableCell>
+                      <p className="text-sm font-medium">{row.product.productDescription}</p>
+                      <p className="text-xs text-slate-400">{row.product.productCode}</p>
+                    </TableCell>
+                    <TableCell className="text-right text-sm">{row.product.expectedQty}</TableCell>
+                    <TableCell className="text-right text-sm font-medium">{row.product.countedQty}</TableCell>
+                    <TableCell className="text-right">
                       <span
-                        className={
-                          diff.difference > 0
-                            ? "text-blue-600"
-                            : diff.difference < 0
-                              ? "text-red-600"
-                              : "text-green-600"
-                        }
+                        className={`text-sm font-medium ${
+                          row.product.diffType === "coincide"
+                            ? "text-green-600"
+                            : row.product.diffType === "sobrante"
+                              ? "text-blue-600"
+                              : "text-red-600"
+                        }`}
                       >
-                        {diff.difference > 0 ? "+" : ""}
-                        {diff.difference}
+                        {row.product.diffType === "coincide"
+                          ? "0"
+                          : row.product.diffType === "sobrante"
+                            ? `+${row.product.difference}`
+                            : row.product.difference}
                       </span>
-                    </p>
-                  </div>
-                  {statusBadge(diff.status)}
-                </div>
-
-                <div className="space-y-2">
-                  {diff.products.map((prod) => (
-                    <div
-                      key={prod.productId}
-                      className="flex items-center justify-between rounded bg-slate-50 px-3 py-2"
-                    >
-                      <div>
-                        <p className="text-sm font-medium">
-                          {prod.productDescription}
-                        </p>
-                        <p className="text-xs text-slate-400">{prod.productCode}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm">
-                          {prod.countedQty} / {prod.expectedQty} unds
-                        </p>
-                        <p
-                          className={`text-xs ${prod.diffType === "coincide" ? "text-green-600" : prod.diffType === "sobrante" ? "text-blue-600" : "text-red-600"}`}
-                        >
-                          {prod.diffType === "coincide"
-                            ? "Coincide"
-                            : prod.diffType === "sobrante"
-                              ? `+${prod.difference} sobrante`
-                              : `${prod.difference} faltante`}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {diff.status === "SUBMITTED" && (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => void handleApprove(diff)}
-                      disabled={busy}
-                    >
-                      <CheckCircle2 size={14} className="mr-1" /> Aprobar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => void handleReject(diff)}
-                      disabled={busy}
-                    >
-                      <XCircle size={14} className="mr-1" /> Rechazar
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    </TableCell>
+                    <TableCell>{statusBadge(row.status)}</TableCell>
+                    <TableCell className="text-right">
+                      {row.status === "SUBMITTED" && (
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-green-600"
+                            onClick={() => void handleApprove(row)}
+                            disabled={busy}
+                          >
+                            <CheckCircle2 size={14} />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-red-600"
+                            onClick={() => void handleReject(row)}
+                            disabled={busy}
+                          >
+                            <XCircle size={14} />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+          <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-xs text-slate-500">
+            <p>
+              {allRows.length} registro{allRows.length !== 1 ? "s" : ""}
+              {totalPages > 1 && ` · Página ${page} de ${totalPages}`}
+            </p>
+            {totalPages > 1 && (
+              <Pagination className="mx-0 w-auto">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => goToPage(page - 1)}
+                      href="#"
+                      text="Anterior"
+                      className={page <= 1 ? "pointer-events-none opacity-40" : ""}
+                    />
+                  </PaginationItem>
+                  {renderPageNumbers()}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => goToPage(page + 1)}
+                      href="#"
+                      text="Siguiente"
+                      className={page >= totalPages ? "pointer-events-none opacity-40" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
+        </Card>
       )}
     </div>
   );

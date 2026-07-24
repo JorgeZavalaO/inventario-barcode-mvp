@@ -50,7 +50,7 @@ export function AppSessions() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: `Inventario ${new Intl.DateTimeFormat("es-PE", { month: "long", year: "numeric" }).format(new Date())}`,
+    name: `Inventario ${new Intl.DateTimeFormat("es-PE", { month: "long", year: "numeric", timeZone: "America/Lima" }).format(new Date())}`,
     warehouse: "Almacén principal",
   });
 

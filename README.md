@@ -44,13 +44,14 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Soporte para conteo por cajas + unidades sueltas.
 - Vista lateral de profundidad del rack (Frente/Centro/Fondo) con productos.
 - Búsqueda "Dónde está" que muestra todas las posiciones de un producto.
-- Tablero de revisión de diferencias con aprobación/rechazo de rondas.
+- Tablero de revisión de diferencias con aprobación/rechazo de rondas, tabla plana de registros y paginación.
 - Exportación a Excel de resultados de inventario.
 - Movimientos de stock entre posiciones.
 - Health endpoint y Service Worker para resiliencia.
 - Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
 - Escáner inteligente: acceso directo con selector de sesión activa.
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
+- Navegación offline correcta: el Service Worker devuelve la página de sesiones correspondiente para rutas de V1/V2/V3 en vez del dashboard.
 - **Sesiones V3 — Inventario por cajas sin posiciones físicas:** Flujo simplificado de 3 pasos (Identificar caja → Confirmar cantidades → Registrar) sin necesidad de asignar posiciones físicas. Soporta división de líneas de cantidad por producto.
 - **Modo offline completo:** Descarga productos, importaciones, pallets, cajas a IndexedDB. El flujo V3 funciona 100% offline: selección de importación → pallet → caja → confirmar cantidades → registrar (se encola para sincronizar). Botón flotante para sincronizar datos y ver estado de la cola.
 

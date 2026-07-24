@@ -3,6 +3,7 @@ import { apiError } from "@/lib/http";
 import { requireRole } from "@/server/guards";
 import { prisma } from "@/lib/prisma";
 import * as XLSX from "xlsx";
+import { formatDateLima, formatTimeLima } from "@/lib/date-time";
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
@@ -67,8 +68,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
             Cantidad: Number(event.quantity),
             "Método ingreso": event.inputMethod,
             Operador: operatorName,
-            "Fecha conteo": event.createdAt.toISOString().split("T")[0],
-            "Hora conteo": event.createdAt.toISOString().split("T")[1].slice(0, 8),
+            "Fecha conteo": formatDateLima(event.createdAt),
+            "Hora conteo": formatTimeLima(event.createdAt),
           });
         }
 
@@ -84,7 +85,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
             "Código producto": "—",
             "Descripción producto": "SIN EVENTOS",
             Cantidad: 0,
-            "Fecha conteo": round.createdAt.toISOString().split("T")[0],
+            "Fecha conteo": formatDateLima(round.createdAt),
           });
         }
       }
@@ -122,7 +123,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     return new NextResponse(buf, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="inventario-${session.code}-${new Date().toISOString().split("T")[0]}.xlsx"`,
+        "Content-Disposition": `attachment; filename="inventario-${session.code}-${formatDateLima(new Date())}.xlsx"`,
       },
     });
   } catch (error) {
