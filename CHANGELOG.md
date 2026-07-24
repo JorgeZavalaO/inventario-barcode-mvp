@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.56.0 (2026-07-24)
+
+### Changed
+
+- **Validación de productos:** Los conflictos por códigos repetidos ahora muestran la importación, pallet y caja exactos, evitando mensajes duplicados y aclarando cuándo falta una ubicación.
+
 ## 0.55.0 (2026-07-24)
 
 ### Changed

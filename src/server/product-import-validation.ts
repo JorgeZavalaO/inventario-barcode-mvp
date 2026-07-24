@@ -46,7 +46,6 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
   const warnings: string[] = [];
   const codes = new Map<string, { row: number; product: ProductImportRow; locationKey: string }>();
   const barcodes = new Map<string, { row: number; code: string }>();
-  const locations = new Map<string, number>();
 
   for (const [index, product] of products.entries()) {
     const row = index + 2;
@@ -57,6 +56,7 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
     const locationKey = hasImport && hasBox
       ? `${normalized(product.importCode)}::${normalized(product.palletNumber?.trim() || "SIN_PALLET")}::${normalized(product.boxNumber)}`
       : "";
+    const locationLabel = `${product.importCode?.trim() || "SIN_IMPORTACION"} / ${product.palletNumber?.trim() || "SIN_PALLET"} / ${product.boxNumber?.trim() || "SIN_CAJA"}`;
 
     const previousCode = codes.get(code);
     if (previousCode) {
@@ -67,7 +67,7 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
         && normalized(previousCode.product.barcode) === barcode
         && (previousCode.product.theoreticalStock ?? 0) === (product.theoreticalStock ?? 0);
       if (!previousCode.locationKey || !locationKey || previousCode.locationKey === locationKey) {
-        errors.push(`Fila ${row}: el código ${product.code} está repetido en la misma ubicación o sin ubicación (fila ${previousCode.row}).`);
+        errors.push(`Fila ${row}: el código ${product.code} está repetido en ${locationLabel} (fila ${previousCode.row}). Elimina la fila duplicada o consolida su cantidad esperada.`);
       } else if (!sameCatalogData) {
         errors.push(`Fila ${row}: el código ${product.code} aparece en otra ubicación con datos maestros diferentes (fila ${previousCode.row}).`);
       }
@@ -90,15 +90,6 @@ export async function validateProductImport(products: ProductImportRow[]): Promi
     }
     if (hasPallet && !hasImport) {
       errors.push(`Fila ${row}: el pallet requiere una importación y una caja.`);
-    }
-    if (hasImport && hasBox) {
-      const pallet = product.palletNumber?.trim() || "SIN_PALLET";
-      const key = `${normalized(product.importCode)}::${normalized(pallet)}::${normalized(product.boxNumber)}::${code}`;
-      if (locations.has(key)) {
-        errors.push(`Fila ${row}: el producto ${product.code} está repetido en la misma caja (fila ${locations.get(key)}).`);
-      } else {
-        locations.set(key, row);
-      }
     }
   }
 
