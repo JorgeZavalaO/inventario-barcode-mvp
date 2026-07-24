@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.44.0 (2026-07-24)
+
+### Added (Código proveedor + flujo anónimo V2 + logout)
+
+- **Código proveedor:** Nuevo campo `supplierCode` en Productos (columna `codigo_proveedor` en Excel). Se muestra en la lista de productos, en la resolución de cajas y en el flujo de confirmación.
+- **Flujo anónimo V2:** Las sesiones V2 ahora permiten participar sin login, solo ingresando el nombre (como V1). El nombre se guarda en localStorage y en BD como Operator.
+- **Logout funcional:** El botón "Log out" del menú de usuario ahora llama a `signOut()` y redirige a `/login`.
+- **Plantilla Excel actualizada:** Incluye `codigo_proveedor`, `importacion`, `pallet`, `caja` y `cantidad_esperada`.
+
 ## 0.43.0 (2026-07-23)
 
 ### Changed (Flujo producto → ubicación)

@@ -13,6 +13,7 @@ const importSchema = z.object({
       description: z.string().trim().min(1),
       unit: z.string().trim().optional(),
       category: z.string().trim().optional(),
+      supplierCode: z.string().trim().optional(),
       theoreticalStock: z.coerce.number().min(0).optional(),
       importCode: z.string().trim().optional(),
       palletNumber: z.string().trim().optional(),
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
             description: product.description,
             unit: product.unit || "UND",
             category: product.category || null,
+            supplierCode: product.supplierCode || null,
             theoreticalStock: product.theoreticalStock ?? 0,
             active: true,
           },
@@ -55,6 +57,7 @@ export async function POST(request: NextRequest) {
             description: product.description,
             unit: product.unit || "UND",
             category: product.category || null,
+            supplierCode: product.supplierCode || null,
             theoreticalStock: product.theoreticalStock ?? 0,
           },
         });

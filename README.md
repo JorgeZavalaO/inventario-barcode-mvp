@@ -36,10 +36,11 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Etiquetas de ubicación imprimibles con QR y código legible (individuales o masivas).
 - Stock teórico por ubicación física (producto → múltiples posiciones).
 - Productos con múltiples códigos de barras y presentaciones (cajas, paquetes).
-- Sesiones de inventario V2 con alcance por posición (piso, rack o posiciones específicas).
-- Conteo por posición con rondas independientes (reconteo no suma).
-- Conteo por caja: identifica productos por importación, pallet y número de caja, con selects en cascada para evitar errores de digitación.
-- Flujo operativo: iniciar posición → escanear producto → registrar cantidad → completar.
+- Sesiones de inventario V2 con alcance por piso, zona, rack o posiciones específicas.
+- Código proveedor por producto para identificar el código de compra del proveedor.
+- Conteo por caja: identifica productos por importación, pallet y número de caja (pallet opcional), con selects en cascada para evitar errores de digitación.
+- Flujo producto → ubicación: confirmar producto, asignar a una o varias posiciones con cantidades.
+- Participación anónima: cualquier persona puede unirse a una sesión V2 solo con su nombre (sin login).
 - Soporte para conteo por cajas + unidades sueltas.
 - Vista lateral de profundidad del rack (Frente/Centro/Fondo) con productos.
 - Búsqueda "Dónde está" que muestra todas las posiciones de un producto.
@@ -170,13 +171,15 @@ No uses SQLite en Vercel para este caso: la concurrencia y la persistencia multi
 ## Formato de importación (CSV o Excel)
 
 ```csv
-codigo,codigo_barra,descripcion,unidad,categoria,stock_teorico
-PROD-001,7751234567890,Producto de prueba,UND,Categoría,25
+codigo,codigo_barra,descripcion,unidad,categoria,codigo_proveedor,stock_teorico,importacion,pallet,caja,cantidad_esperada
+PROD-001,7751234567890,Producto de prueba,UND,Categoría,PROV-001,25,IMP-001,PAL-01,CAJA-1,10
 ```
 
 La columna `codigo_barra` (barcode) es **opcional**. Si se deja vacía, el código de barras se generará a partir del código interno del producto usando CODE128 (soporta alfanumérico).
 
-También se reconocen encabezados equivalentes como `code`, `barcode`, `description`, `unit`, `category` y `stock`.
+Las columnas `codigo_proveedor`, `importacion`, `pallet`, `caja` y `cantidad_esperada` son **opcionales**. Si se completan, el sistema crea automáticamente la estructura Importación → Pallet → Caja y vincula los productos a la caja correspondiente.
+
+También se reconocen encabezados equivalentes como `code`, `barcode`, `description`, `unit`, `category`, `supplierCode`, `stock`, `import`, `importCode`, `boxNumber`, `expectedQty`.
 
 Para Excel (.xlsx / .xls), la primera hoja se lee automáticamente. Las columnas deben tener los mismos nombres en la primera fila. Máximo **6500 filas** por lote.
 

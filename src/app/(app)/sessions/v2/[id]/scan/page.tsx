@@ -19,7 +19,7 @@ type SessionData = {
   }[];
 };
 
-type BoxProduct = { productId: string; productCode: string; productDescription: string; productUnit: string; expectedQty: number | null };
+type BoxProduct = { productId: string; productCode: string; productDescription: string; productUnit: string; supplierCode?: string; expectedQty: number | null };
 type ConfirmedProduct = { product: BoxProduct; correct: boolean; quantity: number; notes: string; locations: LocationAssignment[] };
 type LocationAssignment = { positionId: string; positionCode: string; quantity: number };
 type Step = "IDENTIFY" | "CONFIRM" | "ASSIGN" | "SUMMARY";
@@ -203,7 +203,7 @@ export default function V2ScanPage() {
       setResolvedBox(data.box);
       setBoxProducts(data.box.products.map((pr: any) => ({
         productId: pr.productId, productCode: pr.productCode, productDescription: pr.productDescription,
-        productUnit: pr.productUnit, expectedQty: pr.expectedQty,
+        productUnit: pr.productUnit, supplierCode: pr.supplierCode || undefined, expectedQty: pr.expectedQty,
       })));
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Caja no encontrada");
@@ -407,7 +407,7 @@ export default function V2ScanPage() {
               <div className="space-y-2">
                 {boxProducts.map((bp) => (
                   <div key={bp.productId} className="flex items-center justify-between rounded bg-slate-50 px-3 py-2">
-                    <div><p className="text-sm font-medium">{bp.productDescription}</p><p className="text-xs text-slate-400">{bp.productCode} · {bp.productUnit}</p></div>
+                    <div><p className="text-sm font-medium">{bp.productDescription}</p><p className="text-xs text-slate-400">{bp.productCode}{bp.supplierCode ? ` · Prov: ${bp.supplierCode}` : ""} · {bp.productUnit}</p></div>
                     <span className="text-xs text-slate-500">{bp.expectedQty ?? "?"} unds</span>
                   </div>
                 ))}
@@ -424,7 +424,7 @@ export default function V2ScanPage() {
           <Card><CardContent className="p-3 space-y-3">
             <div className="rounded-lg bg-blue-50 p-3">
               <p className="text-base font-bold text-blue-800">{boxProducts[currentProductIdx].productDescription}</p>
-              <p className="text-sm text-blue-600">{boxProducts[currentProductIdx].productCode}</p>
+              <p className="text-sm text-blue-600">{boxProducts[currentProductIdx].productCode}{boxProducts[currentProductIdx].supplierCode ? ` · Prov: ${boxProducts[currentProductIdx].supplierCode}` : ""}</p>
               <p className="text-xs text-slate-500 mt-1">Unidad: {boxProducts[currentProductIdx].productUnit} · Esperado: {boxProducts[currentProductIdx].expectedQty ?? "?"} unds</p>
             </div>
             <div className="flex gap-2">

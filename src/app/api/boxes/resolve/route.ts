@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       include: {
         boxProducts: {
           where: { active: true },
-          include: { product: { select: { id: true, code: true, description: true, unit: true } } },
+          include: { product: { select: { id: true, code: true, description: true, unit: true, supplierCode: true } } },
           orderBy: { orderIndex: "asc" },
         },
         expectedPosition: { select: { id: true, code: true } },
@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
       productCode: bp.product.code,
       productDescription: bp.product.description,
       productUnit: bp.product.unit,
+      supplierCode: bp.product.supplierCode,
       orderIndex: bp.orderIndex,
       expectedQty: bp.expectedQty ? Number(bp.expectedQty) : null,
     }));

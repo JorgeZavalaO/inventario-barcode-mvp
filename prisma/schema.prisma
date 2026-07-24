@@ -109,6 +109,7 @@ model Product {
   description      String
   unit             String          @default("UND")
   category         String?
+  supplierCode     String?         @map("supplier_code")
   theoreticalStock Decimal         @default(0) @map("theoretical_stock") @db.Decimal(14, 3)
   active           Boolean         @default(true)
   createdAt        DateTime        @default(now()) @map("created_at")

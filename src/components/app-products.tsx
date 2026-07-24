@@ -275,6 +275,7 @@ export function AppProducts() {
               lower.existencia ||
               0,
           ),
+          supplierCode: lower.codigo_proveedor || lower.suppliercode || lower.proveedor || "",
           importCode: lower.importacion || lower.import || lower.importcode || "",
           palletNumber: lower.pallet || lower.palletnumber || lower.numero_pallet || "",
           boxNumber: lower.caja || lower.boxnumber || lower.numero_caja || "",
@@ -318,6 +319,7 @@ export function AppProducts() {
         descripcion: "Producto de ejemplo",
         unidad: "UND",
         categoria: "Categoría",
+        codigo_proveedor: "PROV-001",
         stock_teorico: 25,
         importacion: "IMP-001",
         pallet: "PAL-01",
@@ -566,6 +568,7 @@ export function AppProducts() {
                         </p>
                         <p className="mt-1 font-mono text-xs text-slate-500">
                           {product.code} · {product.category || "Sin categoría"}
+                          {product.supplierCode && <span className="ml-1 text-teal-600">· Prov: {product.supplierCode}</span>}
                         </p>
                       </TableCell>
                       <TableCell className="font-mono text-xs text-slate-600">

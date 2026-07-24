@@ -7,6 +7,7 @@ export type Product = {
   description: string;
   unit: string;
   category: string | null;
+  supplierCode?: string | null;
   theoretical_stock: number;
   active: boolean;
 };

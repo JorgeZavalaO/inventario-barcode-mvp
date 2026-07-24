@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const products = ids.length > 0
       ? await sql`
           SELECT
-            id, code, barcode, description, unit, category,
+            id, code, barcode, description, unit, category, supplier_code AS "supplierCode",
             theoretical_stock::float8 AS theoretical_stock,
             active
           FROM products
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         `
       : await sql`
           SELECT
-            id, code, barcode, description, unit, category,
+            id, code, barcode, description, unit, category, supplier_code AS "supplierCode",
             theoretical_stock::float8 AS theoretical_stock,
             active
           FROM products
