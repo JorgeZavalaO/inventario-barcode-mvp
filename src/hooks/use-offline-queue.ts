@@ -151,9 +151,9 @@ export function useOfflineQueue() {
         tx.onerror = () => reject(tx.error);
       });
       setItems((prev) => [...prev, item]);
-      if (navigator.onLine) void syncFnRef.current();
+      if (navigator.onLine) void sync();
     } catch { /* silent */ }
-  }, []);
+  }, [sync]);
 
   const clearSynced = useCallback(async () => {
     try {
