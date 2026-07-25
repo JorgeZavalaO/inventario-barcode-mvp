@@ -355,7 +355,7 @@ export default function V3ReviewPage() {
         <Button variant="outline" size="sm" onClick={() => void handleExport()}>
           <Download size={14} className="mr-1" /> Exportar Excel
         </Button>
-        {sessionStatus === "OPEN" && (
+        {(sessionStatus === "OPEN" || sessionStatus === "REVIEW") && (
           <Button size="sm" onClick={() => void handleSendToReview()} disabled={busy}>
             Enviar captura a revisión
           </Button>

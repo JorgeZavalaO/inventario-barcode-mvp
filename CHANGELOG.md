@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.72.0 (2026-07-25)
+
+### Changed
+
+- **Reenviar a revisión V3:** El botón "Enviar captura a revisión" ahora está disponible también cuando la sesión ya está en estado REVIEW, permitiendo enviar conteos nuevos realizados después del primer envío.
+
 ## 0.71.0 (2026-07-25)
 
 ### Added
