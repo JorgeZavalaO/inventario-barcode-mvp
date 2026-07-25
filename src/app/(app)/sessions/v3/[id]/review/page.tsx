@@ -31,6 +31,7 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 type BoxDifference = {
   boxId: string;
@@ -82,6 +83,8 @@ export default function V3ReviewPage() {
   const [sessionName, setSessionName] = useState("");
   const [sessionStatus, setSessionStatus] = useState("");
   const [page, setPage] = useState(1);
+  const [filterDigitizer, setFilterDigitizer] = useState("");
+  const [filterCounter, setFilterCounter] = useState("");
   const perPage = 25;
 
   const load = useCallback(async () => {
@@ -230,8 +233,25 @@ export default function V3ReviewPage() {
     [differences],
   );
 
-  const totalPages = Math.max(1, Math.ceil(allRows.length / perPage));
-  const paginatedRows = allRows.slice((page - 1) * perPage, page * perPage);
+  const digitizerOptions = useMemo(
+    () => [...new Set(allRows.map((r) => r.digitizerName).filter(Boolean))].sort().map((n) => ({ value: n, label: n })),
+    [allRows],
+  );
+
+  const counterOptions = useMemo(
+    () => [...new Set(allRows.map((r) => r.countedByName).filter(Boolean))].sort().map((n) => ({ value: n, label: n })),
+    [allRows],
+  );
+
+  const filteredRows = useMemo(() => {
+    let rows = allRows;
+    if (filterDigitizer) rows = rows.filter((r) => r.digitizerName === filterDigitizer);
+    if (filterCounter) rows = rows.filter((r) => r.countedByName === filterCounter);
+    return [...rows].sort((a, b) => new Date(b.countedAt).getTime() - new Date(a.countedAt).getTime());
+  }, [allRows, filterDigitizer, filterCounter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
+  const paginatedRows = filteredRows.slice((page - 1) * perPage, page * perPage);
 
   function goToPage(p: number) {
     setPage(Math.max(1, Math.min(p, totalPages)));
@@ -352,10 +372,41 @@ export default function V3ReviewPage() {
         )}
       </div>
 
+      {allRows.length > 0 && (
+        <div className="flex gap-3 flex-wrap">
+          <div className="w-56">
+            <label className="mb-1 block text-xs font-medium text-slate-500">Digitador</label>
+            <SearchableSelect
+              options={digitizerOptions}
+              value={filterDigitizer}
+              onChange={(v) => { setFilterDigitizer(v); setPage(1); }}
+              placeholder="Todos"
+              searchPlaceholder="Buscar digitador..."
+            />
+          </div>
+          <div className="w-56">
+            <label className="mb-1 block text-xs font-medium text-slate-500">Operario contador</label>
+            <SearchableSelect
+              options={counterOptions}
+              value={filterCounter}
+              onChange={(v) => { setFilterCounter(v); setPage(1); }}
+              placeholder="Todos"
+              searchPlaceholder="Buscar operario..."
+            />
+          </div>
+        </div>
+      )}
+
       {allRows.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-slate-400">
             No hay cajas contadas aún.
+          </CardContent>
+        </Card>
+      ) : filteredRows.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center text-sm text-slate-400">
+            No hay registros que coincidan con los filtros seleccionados.
           </CardContent>
         </Card>
       ) : (
@@ -370,13 +421,13 @@ export default function V3ReviewPage() {
                   <TableHead>Producto</TableHead>
                   <TableHead>Digitador</TableHead>
                   <TableHead>Operario contador</TableHead>
-                  <TableHead className="text-right">Esperado</TableHead>
+                  <TableHead className="text-right hidden md:table-cell">Esperado</TableHead>
                   <TableHead className="text-right">Contado</TableHead>
                   <TableHead className="text-right">Diferencia</TableHead>
                    <TableHead>Estado producto</TableHead>
                    <TableHead>Comentario</TableHead>
-                   <TableHead>Revisión</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                   <TableHead className="hidden md:table-cell">Revisión</TableHead>
+                  <TableHead className="text-right hidden md:table-cell">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -394,7 +445,7 @@ export default function V3ReviewPage() {
                     </TableCell>
                     <TableCell className="text-xs">{row.digitizerName}</TableCell>
                     <TableCell className="text-xs">{row.countedByName}</TableCell>
-                    <TableCell className="text-right text-sm">{row.product.expectedQty}</TableCell>
+                    <TableCell className="text-right text-sm hidden md:table-cell">{row.product.expectedQty}</TableCell>
                     <TableCell className="text-right text-sm font-medium">{row.product.countedQty}</TableCell>
                     <TableCell className="text-right">
                       <span
@@ -417,8 +468,8 @@ export default function V3ReviewPage() {
                      <TableCell className="max-w-[220px] text-xs text-slate-600">
                        {row.product.comment || <span className="text-slate-300">Sin comentario</span>}
                      </TableCell>
-                     <TableCell>{statusBadge(row.status)}</TableCell>
-                    <TableCell className="text-right">
+                      <TableCell className="hidden md:table-cell">{statusBadge(row.status)}</TableCell>
+                    <TableCell className="text-right hidden md:table-cell">
                       {row.status === "SUBMITTED" && (
                         <div className="flex justify-end gap-1">
                           <Button
@@ -453,7 +504,8 @@ export default function V3ReviewPage() {
           </CardContent>
           <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-xs text-slate-500">
             <p>
-              {allRows.length} registro{allRows.length !== 1 ? "s" : ""}
+              {filteredRows.length} registro{filteredRows.length !== 1 ? "s" : ""}
+              {filteredRows.length !== allRows.length && ` de ${allRows.length}`}
               {totalPages > 1 && ` · Página ${page} de ${totalPages}`}
             </p>
             {totalPages > 1 && (

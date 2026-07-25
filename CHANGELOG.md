@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.71.0 (2026-07-25)
+
+### Added
+
+- **Filtros en revisión V3:** Filtros por digitador y operario contador en la vista de revisión de sesión, con orden automático de más reciente a más antiguo.
+
+### Changed
+
+- **Revisión V3 responsive:** Las columnas "Esperado", "Revisión" y "Acciones" se ocultan automáticamente en dispositivos móviles para mejorar la legibilidad de la tabla.
+
 ## 0.70.0 (2026-07-24)
 
 ### Fixed

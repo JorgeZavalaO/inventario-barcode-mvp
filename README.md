@@ -45,6 +45,8 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Vista lateral de profundidad del rack (Frente/Centro/Fondo) con productos.
 - Búsqueda "Dónde está" que muestra todas las posiciones de un producto.
 - Tablero de revisión de diferencias con aprobación/rechazo de rondas, tabla plana de registros y paginación.
+- Filtros por digitador y operario contador en la vista de revisión V3, con orden de más reciente a más antiguo.
+- Columnas "Esperado", "Revisión" y "Acciones" ocultas en móvil para mejor legibilidad.
 - Exportación a Excel de resultados de inventario.
 - Movimientos de stock entre posiciones.
 - Health endpoint y Service Worker para resiliencia.
