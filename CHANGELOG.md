@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.73.0 (2026-07-25)
+
+### Added
+
+- **Búsqueda de cajas en revisión V3:** Campo de búsqueda en tiempo real para filtrar por número de caja, código de importación o número de pallet.
+
 ## 0.72.0 (2026-07-25)
 
 ### Changed

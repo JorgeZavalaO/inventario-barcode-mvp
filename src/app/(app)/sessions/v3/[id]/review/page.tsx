@@ -32,6 +32,7 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { Search } from "lucide-react";
 
 type BoxDifference = {
   boxId: string;
@@ -85,6 +86,7 @@ export default function V3ReviewPage() {
   const [page, setPage] = useState(1);
   const [filterDigitizer, setFilterDigitizer] = useState("");
   const [filterCounter, setFilterCounter] = useState("");
+  const [searchBox, setSearchBox] = useState("");
   const perPage = 25;
 
   const load = useCallback(async () => {
@@ -245,10 +247,19 @@ export default function V3ReviewPage() {
 
   const filteredRows = useMemo(() => {
     let rows = allRows;
+    const term = searchBox.trim().toLowerCase();
+    if (term) {
+      rows = rows.filter(
+        (r) =>
+          r.boxNumber.toLowerCase().includes(term) ||
+          r.importCode.toLowerCase().includes(term) ||
+          r.palletNumber.toLowerCase().includes(term),
+      );
+    }
     if (filterDigitizer) rows = rows.filter((r) => r.digitizerName === filterDigitizer);
     if (filterCounter) rows = rows.filter((r) => r.countedByName === filterCounter);
     return [...rows].sort((a, b) => new Date(b.countedAt).getTime() - new Date(a.countedAt).getTime());
-  }, [allRows, filterDigitizer, filterCounter]);
+  }, [allRows, filterDigitizer, filterCounter, searchBox]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
   const paginatedRows = filteredRows.slice((page - 1) * perPage, page * perPage);
@@ -373,7 +384,7 @@ export default function V3ReviewPage() {
       </div>
 
       {allRows.length > 0 && (
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex gap-3 flex-wrap items-end">
           <div className="w-56">
             <label className="mb-1 block text-xs font-medium text-slate-500">Digitador</label>
             <SearchableSelect
@@ -393,6 +404,19 @@ export default function V3ReviewPage() {
               placeholder="Todos"
               searchPlaceholder="Buscar operario..."
             />
+          </div>
+          <div className="w-56">
+            <label className="mb-1 block text-xs font-medium text-slate-500">Buscar caja</label>
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={searchBox}
+                onChange={(e) => { setSearchBox(e.target.value); setPage(1); }}
+                placeholder="Caja, importación o pallet..."
+                className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm transition-colors placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
       )}
