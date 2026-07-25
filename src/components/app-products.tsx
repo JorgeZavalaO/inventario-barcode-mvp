@@ -62,6 +62,7 @@ const initialProduct = {
   description: "",
   unit: "UND",
   category: "",
+  supplierCode: "",
   theoreticalStock: "0",
 };
 
@@ -128,6 +129,7 @@ export function AppProducts() {
         product.barcode ?? "",
         product.description,
         product.category ?? "",
+        product.supplierCode ?? "",
       ]
         .join(" ")
         .toLowerCase()
@@ -491,6 +493,17 @@ export function AppProducts() {
                   onChange={(e) =>
                     setProductForm({ ...productForm, category: e.target.value })
                   }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-supplier">Código proveedor</Label>
+                <Input
+                  id="p-supplier"
+                  value={productForm.supplierCode}
+                  onChange={(e) =>
+                    setProductForm({ ...productForm, supplierCode: e.target.value })
+                  }
+                  placeholder="Opcional"
                 />
               </div>
               <div className="space-y-2 sm:col-span-2">

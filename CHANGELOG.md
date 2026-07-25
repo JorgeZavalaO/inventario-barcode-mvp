@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.74.0 (2026-07-25)
+
+### Added
+
+- **Código proveedor en formulario:** El formulario de "Registrar producto" ahora incluye el campo "Código proveedor" (opcional), que antes solo estaba disponible en la importación masiva.
+
 ## 0.73.0 (2026-07-25)
 
 ### Added

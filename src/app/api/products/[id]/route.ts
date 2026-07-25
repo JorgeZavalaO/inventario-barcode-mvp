@@ -12,6 +12,7 @@ export async function GET(
     const sql = getDb();
     const [product] = await sql`
       SELECT id, code, barcode, description, unit, category,
+        supplier_code AS "supplierCode",
         theoretical_stock::float8 AS theoretical_stock, active
       FROM products
       WHERE id = ${id}

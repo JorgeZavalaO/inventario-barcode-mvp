@@ -10,6 +10,7 @@ const productSchema = z.object({
   description: z.string().trim().min(2, "La descripción es obligatoria").max(240),
   unit: z.string().trim().min(1).max(20).default("UND"),
   category: z.string().trim().max(100).optional(),
+  supplierCode: z.string().trim().max(80).optional(),
   theoreticalStock: z.coerce.number().min(0).default(0),
 });
 
@@ -65,15 +66,15 @@ export async function POST(request: NextRequest) {
 
     const [product] = await sql`
       INSERT INTO products (
-        id, code, barcode, description, unit, category, theoretical_stock,
+        id, code, barcode, description, unit, category, supplier_code, theoretical_stock,
         created_at, updated_at
       ) VALUES (
         ${id}, ${body.code}, ${barcode}, ${body.description}, ${body.unit},
-        ${body.category || null}, ${body.theoreticalStock},
+        ${body.category || null}, ${body.supplierCode || null}, ${body.theoreticalStock},
         NOW(), NOW()
       )
       RETURNING
-        id, code, barcode, description, unit, category,
+        id, code, barcode, description, unit, category, supplier_code AS "supplierCode",
         theoretical_stock::float8 AS theoretical_stock,
         active
     `;
