@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
+import { Prisma } from "@prisma/client";
 import { apiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 
@@ -113,20 +114,43 @@ async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any,
       depthSlot = virtualLocation.depthSlot;
     }
 
-    position = await tx.storagePosition.create({
-      data: {
-        id: randomUUID(),
-        rackId: rack.id,
-        compartmentId: compartment.id,
-        depthSlotId: depthSlot.id,
-        columnIndex: virtualColumnIndex(box.id),
-        stackIndex: 0,
-        code,
-        qrValue: `LOC:v3:virtual:${box.id}`,
-        active: false,
-        countable: false,
-      },
-    });
+    let columnIndex = virtualColumnIndex(box.id);
+    const MAX_RETRIES = 5;
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        position = await tx.storagePosition.create({
+          data: {
+            id: randomUUID(),
+            rackId: rack.id,
+            compartmentId: compartment.id,
+            depthSlotId: depthSlot.id,
+            columnIndex,
+            stackIndex: 0,
+            code,
+            qrValue: `LOC:v3:virtual:${box.id}`,
+            active: false,
+            countable: false,
+          },
+        });
+        break;
+      } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+          const existing = await tx.storagePosition.findFirst({ where: { code } });
+          if (existing) {
+            position = existing;
+            break;
+          }
+          columnIndex = ((columnIndex + 1 - 100000) % 900000) + 100001;
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (!position) {
+      throw new Error("No se pudo crear la ubicación virtual para esta caja.");
+    }
   }
 
   let sessionPosition = await tx.sessionPosition.findUnique({

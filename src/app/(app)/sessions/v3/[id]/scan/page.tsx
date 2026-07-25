@@ -600,7 +600,15 @@ export default function V3ScanPage() {
       setCountsRegistered(items.length > 0);
       return items.length > 0;
     } catch (error) {
-      setToast(error instanceof Error ? error.message : "Error al registrar");
+      const msg = error instanceof Error ? error.message : "Error al registrar";
+      if (/Digitador no identificado/.test(msg)) {
+        localStorage.removeItem("stockscan_operator_v3");
+        setOperator(null);
+        setSelectedOperatorId("");
+        setOperatorName("");
+        setStep("IDENTIFY");
+      }
+      setToast(msg);
       return false;
     } finally {
       setBusy(false);

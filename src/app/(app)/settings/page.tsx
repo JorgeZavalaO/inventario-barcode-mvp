@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, LoaderCircle, AlertTriangle, CheckCircle2, Sparkles, QrCode, Barcode, Shield } from "lucide-react";
+import { LoaderCircle, CheckCircle2, Sparkles, QrCode, Barcode, Shield } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/lib/client";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -27,7 +27,6 @@ export default function SettingsPage() {
   const [productCount, setProductCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [toast, setToast] = useState("");
   const [users, setUsers] = useState<UserRow[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
@@ -76,25 +75,6 @@ export default function SettingsPage() {
       await load();
     } catch {
       setToast("Error al cargar datos demo");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function deleteAll() {
-    setBusy(true);
-    try {
-      const result = await apiFetch<{ deleted: Record<string, number>; warnings?: string[] }>("/api/admin/reset", { method: "DELETE" });
-      const deleted = Object.values(result.deleted).filter((c) => c > 0);
-      const skipped = Object.entries(result.deleted).filter(([, c]) => c === -1).map(([k]) => k);
-      const total = deleted.reduce((s, c) => s + c, 0);
-      const msg = `Sistema reiniciado: ${total} registros eliminados` + (skipped.length > 0 ? `. Tablas ignoradas: ${skipped.join(", ")}` : "");
-      setToast(msg);
-      if (result.warnings?.length) console.warn("Reset warnings:", result.warnings);
-      setConfirmDelete(false);
-      await load();
-    } catch (error) {
-      setToast(error instanceof Error ? error.message : "Error al reiniciar el sistema");
     } finally {
       setBusy(false);
     }
@@ -228,38 +208,6 @@ export default function SettingsPage() {
                 {busy ? <LoaderCircle className="animate-spin" size={16} /> : <Sparkles size={16} />}
                 Cargar demo
               </Button>
-            </div>
-          )}
-
-          {productCount !== null && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="mt-0.5 shrink-0 text-red-500" size={20} />
-                <div className="flex-1">
-                  <p className="font-semibold text-sm text-red-800">Reiniciar sistema</p>
-                  <p className="text-xs text-red-600">
-                    Borra productos, ubicaciones, sesiones, cajas y operadores. Los usuarios y la configuración se conservan.
-                    Esta acción no se puede deshacer.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4">
-                {!confirmDelete ? (
-                  <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(true)} disabled={busy}>
-                    <Trash2 size={16} /> Reiniciar sistema
-                  </Button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Button variant="destructive" size="sm" onClick={() => void deleteAll()} disabled={busy}>
-                      {busy ? <LoaderCircle className="animate-spin" size={16} /> : <Trash2 size={16} />}
-                      Confirmar reinicio
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)} disabled={busy}>
-                      Cancelar
-                    </Button>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </CardContent>
