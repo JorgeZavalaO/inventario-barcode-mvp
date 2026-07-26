@@ -3,7 +3,7 @@
  * para sesiones V4.
  *
  * Uso:
- *   pnpm tsx scripts/seed-v4-structure.ts
+ *   pnpm tsx __scripts__/seed-v4-structure.ts <archivo.csv>
  *
  * Lee un CSV con columnas: importacion, pallet, cajas
  * - importacion: código de la importación (ej: IMP-001)
@@ -16,7 +16,8 @@
  *   IMP-002,PAL-01,"1,2,3"
  */
 
-import { PrismaClient } from "../src/generated/prisma";
+import "dotenv/config";
+import { PrismaClient } from "../src/generated/prisma/client";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -66,7 +67,7 @@ function parseCsv(filePath: string): Row[] {
 async function main() {
   const csvPath = process.argv[2];
   if (!csvPath) {
-    console.log("Uso: pnpm tsx scripts/seed-v4-structure.ts <archivo.csv>");
+    console.log("Uso: pnpm tsx __scripts__/seed-v4-structure.ts <archivo.csv>");
     console.log("");
     console.log("Formato del CSV (sin header):");
     console.log("  importacion,pallet,cajas");
