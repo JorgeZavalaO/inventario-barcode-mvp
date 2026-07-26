@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
-import { Prisma } from "@prisma/client";
 import { apiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 
@@ -135,7 +134,7 @@ async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any,
         });
         break;
       } catch (err) {
-        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
           const existing = await tx.storagePosition.findFirst({ where: { code } });
           if (existing) {
             position = existing;
