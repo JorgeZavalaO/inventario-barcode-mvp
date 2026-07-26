@@ -38,6 +38,7 @@ export function AppSidebar({
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
     { title: "Productos", url: "/products", icon: Package },
     { title: "Ubicaciones", url: "/locations", icon: Building2 },
+    { title: "Sesiones V4", url: "/sessions/v4", icon: GitBranch },
     { title: "Sesiones V3", url: "/sessions/v3", icon: GitBranch },
     { title: "Configuración", url: "/settings", icon: Settings },
   ];

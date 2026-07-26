@@ -57,6 +57,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
 - Navegación offline correcta: el Service Worker devuelve la página de sesiones correspondiente para rutas de V1/V2/V3 en vez del dashboard.
 - **Sesiones V3 — Inventario por cajas sin posiciones físicas:** Flujo simplificado de 3 pasos (Identificar caja → Confirmar cantidades → Registrar) sin necesidad de asignar posiciones físicas. Soporta división de líneas de cantidad por producto.
+- **Sesiones V4 — Inventario por cajas con ingreso rápido:** Flujo en una sola pantalla para conteo rápido. Seleccionar importación → marcar cajas (botones toggle 1-10) → digitar código de producto → ver nombre y código proveedor → ingresar cajas × unidades por caja → total automático. Reutiliza tablas Import/Pallet/Box existentes. Script de pre-carga de estructura desde CSV.
 - **Modo offline completo:** Descarga productos, importaciones, pallets, cajas a IndexedDB. El flujo V3 funciona 100% offline: selección de importación → pallet → caja → confirmar cantidades → registrar (se encola para sincronizar). Botón flotante para sincronizar datos y ver estado de la cola.
 
 ## Stack

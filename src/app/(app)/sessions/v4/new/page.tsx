@@ -1,0 +1,159 @@
+"use client";
+
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { apiFetch } from "@/lib/client";
+import { ArrowLeft, LoaderCircle, Package } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+type CreateSessionResponse = { session: { id: string } };
+type Operator = { id: string; name: string };
+
+export default function NewV4SessionPage() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [toast, setToast] = useState("");
+  const [operators, setOperators] = useState<Operator[]>([]);
+  const [operatorId, setOperatorId] = useState("");
+  const [secondOperatorId, setSecondOperatorId] = useState("");
+
+  useEffect(() => {
+    void apiFetch<{ operators: Operator[] }>("/api/operators")
+      .then((data) => setOperators(data.operators))
+      .catch(() => undefined);
+  }, []);
+
+  const create = useCallback(async () => {
+    if (!name.trim()) {
+      setToast("Ingresa un nombre");
+      return;
+    }
+    setCreating(true);
+    setToast("");
+    try {
+      const result = await apiFetch<CreateSessionResponse>("/api/sessions/v4", {
+        method: "POST",
+        body: JSON.stringify({
+          name: name.trim(),
+          operatorId: operatorId || undefined,
+          secondOperatorId: secondOperatorId || undefined,
+        }),
+      });
+      router.push(`/sessions/v4/${result.session.id}/scan`);
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Error al crear");
+    } finally {
+      setCreating(false);
+    }
+  }, [name, operatorId, secondOperatorId, router]);
+
+  return (
+    <div className="mx-auto max-w-xl space-y-4 p-4">
+      <div className="flex items-center gap-3">
+        <Link href="/sessions/v4" className="text-slate-400 hover:text-slate-600">
+          <ArrowLeft size={20} />
+        </Link>
+        <h1 className="text-xl font-bold tracking-tight">Nueva sesión V4</h1>
+      </div>
+
+      <p className="text-sm text-slate-500">
+        Inventario por cajas simplificado. Ingresa un código de producto, ve su
+        información y registra cajas × unidades por caja. Todo en una sola
+        pantalla.
+      </p>
+
+      {toast && (
+        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-600">
+          {toast}
+        </p>
+      )}
+
+      <Card>
+        <CardContent className="space-y-4 pt-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Nombre de la sesión
+            </label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Inventario mensual Julio 2026"
+              className="h-11"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void create();
+              }}
+              autoFocus
+            />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Operario 1</label>
+              <select
+                value={operatorId}
+                onChange={(e) => {
+                  setOperatorId(e.target.value);
+                  if (secondOperatorId === e.target.value) setSecondOperatorId("");
+                }}
+                className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              >
+                <option value="">Seleccionar operario...</option>
+                {operators.map((operator) => <option key={operator.id} value={operator.id}>{operator.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Operario 2 (opcional)</label>
+              <select
+                value={secondOperatorId}
+                onChange={(e) => setSecondOperatorId(e.target.value)}
+                className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              >
+                <option value="">Seleccionar operario...</option>
+                {operators.filter((operator) => operator.id !== operatorId).map((operator) => <option key={operator.id} value={operator.id}>{operator.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-slate-50 p-4 space-y-2">
+            <p className="text-sm font-medium text-slate-700">Flujo de trabajo</p>
+            <ol className="text-sm text-slate-600 space-y-1">
+              <li className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-700">1</span>
+                Seleccionar Importación → Pallet → Marcar cajas
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-700">2</span>
+                Digitar código del producto y ver información
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-700">3</span>
+                Ingresar cajas × unidades por caja → total automático
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-700">4</span>
+                Registrar y pasar a revisión
+              </li>
+            </ol>
+          </div>
+
+          <Button
+            className="h-12 w-full text-base"
+            onClick={() => void create()}
+            disabled={creating || !name.trim()}
+          >
+            {creating ? (
+              <LoaderCircle className="mr-2 animate-spin" size={16} />
+            ) : (
+              <Package size={16} className="mr-2" />
+            )}
+            Crear sesión V4
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

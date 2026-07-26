@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.76.0 (2026-07-26)
+
+### Added
+
+- **Sesiones V4 — Inventario por cajas con ingreso rápido:** Nuevo tipo de sesión (schemaVersion=4) para conteo rápido de productos por código manual. Flujo en una sola pantalla: seleccionar importación → marcar cajas (botones 1-10) → digitar código de producto → ver nombre y código proveedor → ingresar cajas × unidades por caja → total automático.
+- **API de estructura V4** (`/api/sessions/v4/[id]/structure`): Endpoint para crear y buscar importaciones, pallets y cajas en una sola llamada. Crea automáticamente los registros si no existen.
+- **API de productos por código** (`/api/products/by-code`): Búsqueda de productos activos por código interno o código de barras.
+- **Revisión y aprobación V4:** Mismo patrón que V3 — tablero de revisión con aprobación/rechazo de rondas, resumen de diferencias y exportación a Excel.
+- **Script de pre-carga de estructura** (`scripts/seed-v4-structure.ts`): Crea importaciones, pallets y cajas desde un archivo CSV para sesiones V4.
+- **Sidebar V4:** Enlace "Sesiones V4" añadido al sidebar como primer elemento de navegación de sesiones.
+- **Botón V4 en hub:** Nuevo botón "Nueva sesión V4" en la página principal de sesiones.
+
+## 0.75.0 (2026-07-25)
+
+### Added
+
+- **Reintentos en ubicaciones virtuales V3:** La función `ensureSessionPositionForBox` ahora reintenta hasta 5 veces al crear una posición virtual cuando detecta un conflicto de código duplicado (P2002), incrementando el `columnIndex` automáticamente.
+
+### Fixed
+
+- **Detección de errores de Prisma:** Se reemplazó la verificación `instanceof Prisma.PrismaClientKnownRequestError` por una comprobación más robusta del campo `code`, evitando fallos cuando el tipo de error no se reconoce correctamente.
+- **Manejo de error de digitador no identificado en V3:** Cuando el servidor rechaza un registro porque el digitador no está identificado, la interfaz limpia automáticamente el estado del operador en localStorage y reinicia el flujo de identificación, mostrando el error al usuario.
+
+### Changed
+
+- **Eliminada función "Reiniciar sistema" de Configuración:** Se removió el botón y la función de reinicio completo de la página de Settings, junto con los iconos `Trash2` y `AlertTriangle` que ya no se utilizan.
+
 ## 0.74.0 (2026-07-25)
 
 ### Added
