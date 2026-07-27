@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.85.0 (2026-07-27)
+
+### Fixed
+
+- **Operario que contó en V4:** Reemplazado el `<select>` nativo por `SearchableSelect` con búsqueda y posibilidad de crear operarios nuevos al vuelo (mismo comportamiento que V3). Los operarios de V3 y V4 ahora se comparten.
+
 ## 0.84.0 (2026-07-27)
 
 ### Added
