@@ -6,6 +6,7 @@ import * as XLSX from "xlsx";
 import {
   Barcode,
   Boxes,
+  Download,
   FileSpreadsheet,
   LoaderCircle,
   MapPin,
@@ -359,6 +360,22 @@ export function AppProducts() {
     XLSX.writeFile(wb, "plantilla_productos.xlsx");
   }
 
+  async function handleExport() {
+    try {
+      const response = await fetch("/api/products/export");
+      if (!response.ok) throw new Error("Error al exportar");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "productos.xlsx";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Error al exportar productos");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -371,6 +388,9 @@ export function AppProducts() {
             <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={downloadTemplate}>
               <FileSpreadsheet size={16} /> Plantilla
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => void handleExport()}>
+              <Download size={16} /> Exportar Excel
             </Button>
              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={validatingImport}>
                {validatingImport ? <LoaderCircle size={16} className="animate-spin" /> : <Upload size={16} />} {validatingImport ? "Validando..." : "Importar CSV / Excel"}

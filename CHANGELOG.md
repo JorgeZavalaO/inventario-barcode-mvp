@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.84.0 (2026-07-27)
+
+### Added
+
+- **Exportar productos a Excel:** Nuevo botón "Exportar Excel" en la página de productos que descarga todos los productos activos del sistema en un archivo `.xlsx` con columnas: Código, Barcode, Descripción, Unidad, Categoría, Código proveedor y Stock teórico. Endpoint `GET /api/products/export`.
+
 ## 0.83.1 (2026-07-27)
 
 ### Fixed
