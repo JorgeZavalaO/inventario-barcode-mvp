@@ -601,13 +601,15 @@ export function AppProducts() {
                         />
                       </TableCell>
                       <TableCell>
-                        <p className="font-semibold text-slate-900">
-                          {product.description}
-                        </p>
-                        <p className="mt-1 font-mono text-xs text-slate-500">
-                          {product.code} · {product.category || "Sin categoría"}
-                          {product.supplierCode && <span className="ml-1 text-teal-600">· Prov: {product.supplierCode}</span>}
-                        </p>
+                        <Link href={`/products/${product.id}`} className="group">
+                          <p className="font-semibold text-slate-900 group-hover:text-teal-600 transition-colors">
+                            {product.description}
+                          </p>
+                          <p className="mt-1 font-mono text-xs text-slate-500">
+                            {product.code} · {product.category || "Sin categoría"}
+                            {product.supplierCode && <span className="ml-1 text-teal-600">· Prov: {product.supplierCode}</span>}
+                          </p>
+                        </Link>
                       </TableCell>
                       <TableCell className="font-mono text-xs text-slate-600">
                         <span className="inline-flex items-center gap-1">

@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.80.0 (2026-07-27)
+## 0.81.0 (2026-07-27)
+
+### Added
+
+- **Página de detalle de producto** (`/products/[id]`): Nueva vista completa con tres pestañas: Información (datos básicos del producto), Importaciones (importación → pallet → cajas donde aparece el producto), y Ubicaciones (posiciones de almacén con stock). Incluye resumen con conteo de cajas, ubicaciones y stock total. Accesos rápidos a gestión de ubicaciones e etiqueta.
+- **API de detalles de producto** (`GET /api/products/[id]/details`): Endpoint que retorna producto con todas sus asociaciones: importaciones/pallets/cajas (vía BoxProduct) y ubicaciones (vía ProductLocationStock). Incluye resumen de conteos.
+- **Productos enlazados en lista:** Los nombres de productos en la tabla de productos ahora son clickeables y enlazan a la nueva página de detalle.
 
 ### Added
 
