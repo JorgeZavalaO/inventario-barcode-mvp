@@ -6,7 +6,11 @@
 
 - **Lint limpiado (98 errores → 1):** Corregidos 97 errores de ESLint. Eliminados todos los `@typescript-eslint/no-explicit-any` (55 instancias) reemplazando `any` con tipos específicos (`Prisma.TransactionClient`, `Record<string, unknown>`, interfaces tipadas). Eliminados todos los `react-hooks/set-state-in-effect` (27 instancias) usando `startTransition()` para envolver `setState` en effects, e inline de funciones async en `useEffect` para carga inicial. Corregidos `prefer-const` (2) y `no-unescaped-entities` (2). El único error restante es un falso positivo de `rules-of-hooks` en `e2e/helpers.ts` (Playwright `use()`).
 
-## 0.78.0 (2026-07-27)
+## 0.79.0 (2026-07-27)
+
+### Added
+
+- **Autocomplete de productos en V4:** Al escribir en el campo de producto, se muestra una lista desplegable con los productos que coinciden (mínimo 2 caracteres). Soporta navegación con flechas del teclado (↑↓), selección con Enter, y cierre con Escape. Debounce de 250ms para evitar consultas excesivas. Muestra descripción, código y código de proveedor de cada sugerencia.
 
 ### Changed
 

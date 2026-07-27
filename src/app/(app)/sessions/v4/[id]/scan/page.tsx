@@ -136,6 +136,11 @@ export default function V4ScanPage() {
   const [product, setProduct] = useState<ProductData | null>(null);
   const [productLoading, setProductLoading] = useState(false);
   const [productError, setProductError] = useState("");
+  const [productSuggestions, setProductSuggestions] = useState<ProductData[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightIdx, setHighlightIdx] = useState(-1);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const [cajas, setCajas] = useState(1);
   const [unidadesPorCaja, setUnidadesPorCaja] = useState(1);
@@ -307,6 +312,7 @@ export default function V4ScanPage() {
     setProductLoading(true);
     setProductError("");
     setProduct(null);
+    setShowSuggestions(false);
     try {
       const data = await apiFetch<{ product: ProductData }>(`/api/products/by-code?code=${encodeURIComponent(code)}`);
       setProduct(data.product);
@@ -315,6 +321,64 @@ export default function V4ScanPage() {
       setProductError("Producto no encontrado");
     } finally {
       setProductLoading(false);
+    }
+  }
+
+  function handleProductInputChange(value: string) {
+    setProductCode(value);
+    setProduct(null);
+    setProductError("");
+    setHighlightIdx(-1);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (value.trim().length < 2) {
+      setProductSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const data = await apiFetch<{ products: ProductData[] }>(`/api/products?search=${encodeURIComponent(value.trim())}`);
+        setProductSuggestions(data.products.slice(0, 8));
+        setShowSuggestions(data.products.length > 0);
+      } catch {
+        setProductSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 250);
+  }
+
+  function selectProduct(p: ProductData) {
+    setProduct(p);
+    setProductCode(p.code);
+    setShowSuggestions(false);
+    setProductSuggestions([]);
+    setProductError("");
+    setTimeout(() => cajasInputRef.current?.focus(), 100);
+  }
+
+  function handleProductKeyDown(e: React.KeyboardEvent) {
+    if (!showSuggestions || productSuggestions.length === 0) {
+      if (e.key === "Enter") void handleProductSearch();
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIdx((prev) => (prev < productSuggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIdx((prev) => (prev > 0 ? prev - 1 : productSuggestions.length - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightIdx >= 0 && highlightIdx < productSuggestions.length) {
+        selectProduct(productSuggestions[highlightIdx]);
+      } else {
+        void handleProductSearch();
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
     }
   }
 
@@ -386,6 +450,8 @@ export default function V4ScanPage() {
       showToast(`Registrado en ${selectedBoxes.length} caja(s)`, "success");
       setProductCode("");
       setProduct(null);
+      setProductSuggestions([]);
+      setShowSuggestions(false);
       setCajas(1);
       setUnidadesPorCaja(1);
       setNotes("");
@@ -634,19 +700,60 @@ export default function V4ScanPage() {
             </div>
 
             <div className="flex gap-2">
-              <div className="relative flex-1">
+              <div className="relative flex-1" ref={suggestionsRef}>
                 <Input
                   ref={productInputRef}
                   value={productCode}
-                  onChange={(e) => setProductCode(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") void handleProductSearch();
+                  onChange={(e) => handleProductInputChange(e.target.value)}
+                  onKeyDown={handleProductKeyDown}
+                  onFocus={() => {
+                    if (productSuggestions.length > 0 && productCode.trim().length >= 2) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowSuggestions(false), 150);
                   }}
                   placeholder="Código o nombre del producto"
                   className="h-12 rounded-xl pr-10"
                   autoFocus
                 />
-                <Search size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                {productLoading && (
+                  <LoaderCircle size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-teal-500 animate-spin" />
+                )}
+                {!productLoading && (
+                  <Search size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                )}
+
+                {/* Suggestions dropdown */}
+                {showSuggestions && productSuggestions.length > 0 && (
+                  <div className="absolute z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+                    {productSuggestions.map((s, idx) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          selectProduct(s);
+                        }}
+                        className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors ${
+                          idx === highlightIdx
+                            ? "bg-teal-50 text-teal-800"
+                            : "hover:bg-slate-50 text-slate-700"
+                        }`}
+                      >
+                        <Search size={14} className="shrink-0 text-slate-400" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{s.description}</p>
+                          <p className="text-[11px] text-slate-400 truncate">
+                            {s.code}
+                            {s.supplierCode ? ` · Prov: ${s.supplierCode}` : ""}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <Button
                 variant="outline"
