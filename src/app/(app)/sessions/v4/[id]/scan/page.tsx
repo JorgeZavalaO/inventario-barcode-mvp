@@ -698,7 +698,7 @@ export default function V4ScanPage() {
         </Card>
 
         {/* Step 2: Product */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 shadow-sm overflow-visible">
           <CardContent className="p-4 space-y-3">
             <div className="flex items-center gap-2 mb-1">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-[11px] font-bold text-teal-700">2</span>
@@ -733,7 +733,7 @@ export default function V4ScanPage() {
 
                 {/* Suggestions dropdown */}
                 {showSuggestions && productSuggestions.length > 0 && (
-                  <div className="absolute z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden">
+                  <div className="absolute z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg overflow-visible">
                     {productSuggestions.map((s, idx) => (
                       <button
                         key={s.id}
@@ -742,7 +742,7 @@ export default function V4ScanPage() {
                           e.preventDefault();
                           selectProduct(s);
                         }}
-                        className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors ${
+                        className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors first:rounded-t-xl last:rounded-b-xl ${
                           idx === highlightIdx
                             ? "bg-teal-50 text-teal-800"
                             : "hover:bg-slate-50 text-slate-700"

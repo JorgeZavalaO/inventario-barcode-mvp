@@ -12,6 +12,10 @@
 
 - **Campo "Cajas" auto-calculado en V4:** El campo "Cajas" del formulario de conteo V4 ahora se auto-llena con la cantidad de cajas seleccionadas en el input de rangos. Si seleccionas cajas 1-10, el campo muestra automáticamente 10. El usuario solo necesita digitar las unidades por caja.
 
+### Fixed
+
+- **Dropdown de autocomplete cortándose:** Corregido el overflow del dropdown de sugerencias de productos en V4. El Card component tenía `overflow-hidden` que cortaba el texto. Ahora usa `overflow-visible` para que el dropdown se muestre completo.
+
 ## 0.79.0 (2026-07-27)
 
 ### Changed
