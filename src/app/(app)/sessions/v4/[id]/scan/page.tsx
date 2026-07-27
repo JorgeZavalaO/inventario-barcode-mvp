@@ -20,6 +20,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 type SessionData = {
   id: string;
@@ -245,6 +246,24 @@ export default function V4ScanPage() {
       showToast("Error al identificar", "error");
     } finally {
       setJoining(false);
+    }
+  }
+
+  async function createCountedOperator(name: string) {
+    try {
+      const result = await apiFetch<{ operator: Operator }>("/api/operators", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      });
+      if (result.operator.id === operator?.id) {
+        showToast("El operario contador debe ser diferente del digitador", "error");
+        return;
+      }
+      setOperators((current) => current.some((item) => item.id === result.operator.id) ? current : [...current, result.operator]);
+      setCountedByOperatorId(result.operator.id);
+      showToast("Operario agregado", "success");
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "No se pudo crear el operario", "error");
     }
   }
 
@@ -848,18 +867,19 @@ export default function V4ScanPage() {
                 <label className="mb-1.5 block text-xs font-medium text-slate-500">
                   Operario que contó
                 </label>
-                <select
-                  value={countedByOperatorId}
-                  onChange={(e) => setCountedByOperatorId(e.target.value)}
-                  className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none"
-                >
-                  <option value="">Seleccionar operario...</option>
-                  {operators
+                <SearchableSelect
+                  options={operators
                     .filter((item) => item.id !== operator?.id)
-                    .map((item) => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
-                </select>
+                    .map((item) => ({ value: item.id, label: item.name }))}
+                  value={countedByOperatorId}
+                  onChange={setCountedByOperatorId}
+                  placeholder="Seleccionar operario..."
+                  searchPlaceholder="Filtrar operarios..."
+                  disabled={!operator}
+                  emptyMessage="No hay otro operario disponible"
+                  allowCustom
+                  onCreateOption={createCountedOperator}
+                />
               </div>
             </CardContent>
           </Card>
