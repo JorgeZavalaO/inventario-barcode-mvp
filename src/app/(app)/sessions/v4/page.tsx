@@ -11,6 +11,7 @@ import {
   LoaderCircle,
   CheckCircle2,
   Package,
+  Upload,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,11 +84,18 @@ export default function V4SessionsPage() {
             Inventario por cajas simplificado — ingreso rápido por código de producto.
           </p>
         </div>
-        <Link href="/sessions/v4/new">
-          <Button size="sm">
-            <Package size={14} /> Nueva sesión V4
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/sessions/v4/import">
+            <Button size="sm" variant="outline">
+              <Upload size={14} /> Importar estructura
+            </Button>
+          </Link>
+          <Link href="/sessions/v4/new">
+            <Button size="sm">
+              <Package size={14} /> Nueva sesión V4
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex gap-2">

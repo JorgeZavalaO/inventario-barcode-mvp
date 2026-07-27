@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.80.0 (2026-07-27)
+
+### Added
+
+- **Importación de estructura V4 vía web:** Nueva página `/sessions/v4/import` para cargar la estructura de Importación → Pallet → Cajas desde un archivo CSV o Excel. Incluye drag & drop, vista previa con conteos (importaciones, pallets, cajas), descarga de plantilla Excel con ejemplos, y confirmación antes de importar.
+- **API de importación de estructura V4** (`POST /api/sessions/v4/structure/import`): Endpoint que recibe filas con `{ importCode, palletNumber, boxNumbers }` y crea automáticamente las importaciones, pallets y cajas en la BD. Soporta hasta 5000 filas por request.
+- **Botón "Importar estructura" en lista V4:** Nuevo botón en la página de sesiones V4 que enlaza directamente a la página de importación.
+
 ## 0.79.0 (2026-07-27)
 
 ### Changed
