@@ -11,11 +11,11 @@ import {
   Search,
   Boxes,
   Hash,
+  X,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 
 type SessionData = {
   id: string;
@@ -40,6 +40,7 @@ type StructureData = {
   import: { id: string; code: string } | null;
   pallets: { id: string; number: string }[];
   boxes: { id: string; number: string }[];
+  countedBoxes: string[];
 };
 
 type RegisterEntry = {
@@ -53,6 +54,45 @@ type RegisterEntry = {
   notes: string;
   createdAt: Date;
 };
+
+function parseBoxRange(input: string): number[] {
+  if (!input.trim()) return [];
+  const parts = input.split(",");
+  const result: number[] = [];
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    if (trimmed.includes("-")) {
+      const [startStr, endStr] = trimmed.split("-");
+      const start = parseInt(startStr.trim(), 10);
+      const end = parseInt(endStr.trim(), 10);
+      if (isNaN(start) || isNaN(end) || start < 1 || end < start) continue;
+      for (let i = start; i <= end; i++) result.push(i);
+    } else {
+      const num = parseInt(trimmed, 10);
+      if (!isNaN(num) && num >= 1) result.push(num);
+    }
+  }
+  return [...new Set(result)].sort((a, b) => a - b);
+}
+
+function compressBoxes(boxes: number[]): string {
+  if (boxes.length === 0) return "";
+  const ranges: string[] = [];
+  let start = boxes[0];
+  let end = boxes[0];
+  for (let i = 1; i < boxes.length; i++) {
+    if (boxes[i] === end + 1) {
+      end = boxes[i];
+    } else {
+      ranges.push(start === end ? `${start}` : `${start}-${end}`);
+      start = boxes[i];
+      end = boxes[i];
+    }
+  }
+  ranges.push(start === end ? `${start}` : `${start}-${end}`);
+  return ranges.join(", ");
+}
 
 export default function V4ScanPage() {
   const params = useParams();
@@ -74,7 +114,8 @@ export default function V4ScanPage() {
   const [importCode, setImportCode] = useState("");
   const [palletNumber, setPalletNumber] = useState("");
   const [selectedBoxes, setSelectedBoxes] = useState<number[]>([]);
-
+  const [boxRangeInput, setBoxRangeInput] = useState("");
+  const [countedBoxes, setCountedBoxes] = useState<string[]>([]);
 
   const [existingImports, setExistingImports] = useState<{ id: string; code: string; description: string | null }[]>([]);
   const [existingPallets, setExistingPallets] = useState<{ id: string; number: string }[]>([]);
@@ -92,6 +133,7 @@ export default function V4ScanPage() {
 
   const productInputRef = useRef<HTMLInputElement>(null);
   const cajasInputRef = useRef<HTMLInputElement>(null);
+  const boxRangeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("stockscan_operator_v4");
@@ -191,6 +233,8 @@ export default function V4ScanPage() {
     setImportCode(value);
     setPalletNumber("");
     setSelectedBoxes([]);
+    setBoxRangeInput("");
+    setCountedBoxes([]);
     setExistingPallets([]);
     if (!value.trim()) return;
     try {
@@ -201,14 +245,39 @@ export default function V4ScanPage() {
     }
   }
 
-  function toggleBox(num: number) {
-    setSelectedBoxes((prev) =>
-      prev.includes(num) ? prev.filter((b) => b !== num) : [...prev, num].sort((a, b) => a - b)
-    );
+  async function handlePalletChange(value: string) {
+    setPalletNumber(value);
+    setSelectedBoxes([]);
+    setBoxRangeInput("");
+    setCountedBoxes([]);
+    if (!value.trim() || !importCode.trim()) return;
+    try {
+      const data = await apiFetch<StructureData>(
+        `/api/sessions/v4/${id}/structure?importCode=${encodeURIComponent(importCode.trim())}&palletId=${encodeURIComponent(value.trim())}`,
+      );
+      setCountedBoxes(data.countedBoxes);
+      if (data.boxes.length > 0) {
+        const maxBox = Math.max(...data.boxes.map((b) => parseInt(b.number, 10)).filter((n) => !isNaN(n)));
+        setBoxRangeInput(`1-${maxBox}`);
+        const parsed = parseBoxRange(`1-${maxBox}`);
+        setSelectedBoxes(parsed.filter((n) => !data.countedBoxes.includes(String(n))));
+      }
+    } catch {
+      /* silent */
+    }
   }
 
-  function selectAllBoxes() {
-    setSelectedBoxes([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  function handleBoxRangeInputChange(value: string) {
+    setBoxRangeInput(value);
+    const parsed = parseBoxRange(value);
+    setSelectedBoxes(parsed.filter((n) => !countedBoxes.includes(String(n))));
+  }
+
+  function applyPreset(range: string) {
+    setBoxRangeInput(range);
+    const parsed = parseBoxRange(range);
+    setSelectedBoxes(parsed.filter((n) => !countedBoxes.includes(String(n))));
+    setTimeout(() => boxRangeInputRef.current?.focus(), 50);
   }
 
   async function handleProductSearch() {
@@ -285,12 +354,22 @@ export default function V4ScanPage() {
       };
       setEntries((prev) => [entry, ...prev]);
 
+      const newCounted = selectedBoxes.map((n) => String(n));
+      setCountedBoxes((prev) => [...prev, ...newCounted].sort((a, b) => {
+        const na = parseInt(a, 10);
+        const nb = parseInt(b, 10);
+        if (!isNaN(na) && !isNaN(nb)) return na - nb;
+        return a.localeCompare(b);
+      }));
+
       setToast(`Registrado en ${selectedBoxes.length} caja(s)`);
       setProductCode("");
       setProduct(null);
       setCajas(1);
       setUnidadesPorCaja(1);
       setNotes("");
+      setSelectedBoxes([]);
+      setBoxRangeInput("");
       setTimeout(() => productInputRef.current?.focus(), 100);
     } catch (error) {
       setToast(error instanceof Error ? error.message : "Error al registrar");
@@ -360,6 +439,10 @@ export default function V4ScanPage() {
     );
   }
 
+  const countedNums = countedBoxes.map((s) => parseInt(s, 10)).filter((n) => !isNaN(n));
+  const availableCount = selectedBoxes.length;
+  const countedCount = countedBoxes.length;
+
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 pb-24">
       <div className="flex items-center gap-3">
@@ -394,12 +477,7 @@ export default function V4ScanPage() {
 
           <Card>
             <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-700">Estructura</p>
-                <p className="text-xs text-slate-400">
-                  Cajas seleccionadas: {selectedBoxes.length > 0 ? selectedBoxes.join(", ") : "ninguna"}
-                </p>
-              </div>
+              <p className="text-sm font-medium text-slate-700">Estructura</p>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
@@ -426,7 +504,7 @@ export default function V4ScanPage() {
                   <input
                     list="pallet-options-v4"
                     value={palletNumber}
-                    onChange={(e) => setPalletNumber(e.target.value)}
+                    onChange={(e) => void handlePalletChange(e.target.value)}
                     placeholder="Ej: PAL-01"
                     className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm transition-colors placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:outline-none"
                   />
@@ -438,36 +516,73 @@ export default function V4ScanPage() {
                 </div>
               </div>
 
+              {countedCount > 0 && (
+                <div className="rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+                  <p className="text-xs font-medium text-green-700 mb-1.5">
+                    Cajas ya contadas en esta sesión ({countedCount}):
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {countedNums.map((num) => (
+                      <span key={num} className="inline-flex h-6 min-w-[24px] items-center justify-center rounded bg-green-100 px-1.5 text-xs font-medium text-green-700">
+                        {num}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-medium text-slate-500">
-                    Cajas (seleccionar las que existen)
+                    Seleccionar cajas
                   </label>
-                  <button
-                    type="button"
-                    onClick={selectAllBoxes}
-                    className="text-xs text-teal-600 hover:text-teal-700"
-                  >
-                    Seleccionar 1-10
-                  </button>
+                  {availableCount > 0 && (
+                    <span className="text-xs text-teal-600 font-medium">
+                      {availableCount} seleccionada{availableCount !== 1 ? "s" : ""}
+                    </span>
+                  )}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[
+                    { label: "1-10", range: "1-10" },
+                    { label: "1-50", range: "1-50" },
+                    { label: "1-100", range: "1-100" },
+                    { label: "1-200", range: "1-200" },
+                  ].map((preset) => (
                     <button
-                      key={num}
+                      key={preset.range}
                       type="button"
-                      onClick={() => toggleBox(num)}
-                      className={`flex h-10 w-10 items-center justify-center rounded-lg border-2 text-sm font-bold transition-all ${
-                        selectedBoxes.includes(num)
-                          ? "border-teal-500 bg-teal-50 text-teal-700 shadow-sm"
-                          : "border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600"
-                      }`}
+                      onClick={() => applyPreset(preset.range)}
+                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:border-teal-400 hover:text-teal-700 transition-colors"
                     >
-                      {num}
+                      {preset.label}
                     </button>
                   ))}
                 </div>
+
+                <input
+                  ref={boxRangeInputRef}
+                  value={boxRangeInput}
+                  onChange={(e) => handleBoxRangeInputChange(e.target.value)}
+                  placeholder="Ej: 1-50, 55, 60-70, 100-150"
+                  className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm transition-colors placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:outline-none"
+                />
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Formato: rangos (1-50), individuales (55), o mixto (1-10, 15, 20-30)
+                </p>
               </div>
+
+              {availableCount > 0 && (
+                <div className="rounded-lg bg-teal-50 border border-teal-200 px-3 py-2 max-h-24 overflow-y-auto">
+                  <p className="text-xs font-medium text-teal-700 mb-1">
+                    Seleccionadas ({availableCount}):
+                  </p>
+                  <p className="text-xs text-teal-600 break-all leading-relaxed">
+                    {compressBoxes(selectedBoxes)}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -612,7 +727,7 @@ export default function V4ScanPage() {
                 Registros ({entries.length})
               </p>
               <Button variant="ghost" size="sm" className="text-xs text-slate-400" onClick={() => setEntries([])}>
-                Limpiar todo
+                <X size={12} className="mr-1" /> Limpiar todo
               </Button>
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">

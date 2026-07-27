@@ -142,7 +142,57 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       totalCounted: differences.reduce((s, d) => s + d.totalCounted, 0),
     };
 
-    return NextResponse.json({ differences, summary });
+    const productMapGlobal = new Map<string, {
+      productId: string;
+      productCode: string;
+      productDescription: string;
+      productUnit: string;
+      countedQty: number;
+      expectedQty: number;
+      cajasSet: Set<string>;
+      comments: string[];
+    }>();
+
+    for (const diff of differences) {
+      for (const p of diff.products) {
+        const existing = productMapGlobal.get(p.productId);
+        if (existing) {
+          existing.countedQty += p.countedQty;
+          existing.expectedQty += p.expectedQty;
+          existing.cajasSet.add(diff.boxId);
+          if (p.comment) existing.comments.push(p.comment);
+        } else {
+          productMapGlobal.set(p.productId, {
+            productId: p.productId,
+            productCode: p.productCode,
+            productDescription: p.productDescription,
+            productUnit: p.productUnit,
+            countedQty: p.countedQty,
+            expectedQty: p.expectedQty,
+            cajasSet: new Set([diff.boxId]),
+            comments: p.comment ? [p.comment] : [],
+          });
+        }
+      }
+    }
+
+    const productSummary = Array.from(productMapGlobal.values()).map((p) => {
+      const diff = p.countedQty - p.expectedQty;
+      return {
+        productId: p.productId,
+        productCode: p.productCode,
+        productDescription: p.productDescription,
+        productUnit: p.productUnit,
+        totalCajas: p.cajasSet.size,
+        countedQty: p.countedQty,
+        expectedQty: p.expectedQty,
+        difference: diff,
+        diffType: diff > 0 ? "sobrante" : diff < 0 ? "faltante" : "coincide",
+        comment: Array.from(new Set(p.comments)).join(" · "),
+      };
+    }).sort((a, b) => a.productDescription.localeCompare(b.productDescription));
+
+    return NextResponse.json({ differences, summary, productSummary });
   } catch (error) {
     return apiError(error);
   }

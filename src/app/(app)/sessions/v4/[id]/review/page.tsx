@@ -10,6 +10,8 @@ import {
   CheckCircle2,
   XCircle,
   Download,
+  BarChart3,
+  Table2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,26 +67,42 @@ type ReviewSummary = {
   totalCounted: number;
 };
 
+type ProductSummaryRow = {
+  productId: string;
+  productCode: string;
+  productDescription: string;
+  productUnit: string;
+  totalCajas: number;
+  countedQty: number;
+  expectedQty: number;
+  difference: number;
+  diffType: string;
+  comment: string;
+};
+
 export default function V4ReviewPage() {
   const params = useParams();
   const id = params.id as string;
 
   const [differences, setDifferences] = useState<BoxDifference[]>([]);
   const [summary, setSummary] = useState<ReviewSummary | null>(null);
+  const [productSummary, setProductSummary] = useState<ProductSummaryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState("");
   const [sessionName, setSessionName] = useState("");
   const [sessionStatus, setSessionStatus] = useState("");
+  const [activeTab, setActiveTab] = useState<"summary" | "detail">("summary");
 
   const load = useCallback(async () => {
     try {
       const [reviewData, sessionData] = await Promise.all([
-        apiFetch<{ differences: BoxDifference[]; summary: ReviewSummary }>(`/api/sessions/v4/${id}/review`),
+        apiFetch<{ differences: BoxDifference[]; summary: ReviewSummary; productSummary: ProductSummaryRow[] }>(`/api/sessions/v4/${id}/review`),
         apiFetch<{ session: { name: string; status: string } }>(`/api/sessions/v4/${id}`),
       ]);
       setDifferences(reviewData.differences);
       setSummary(reviewData.summary);
+      setProductSummary(reviewData.productSummary);
       setSessionName(sessionData.session.name);
       setSessionStatus(sessionData.session.status);
     } catch {
@@ -202,12 +220,22 @@ export default function V4ReviewPage() {
     return <Badge className="bg-slate-100 text-slate-600">{status}</Badge>;
   }
 
+  function diffBadge(diffType: string, difference: number) {
+    if (diffType === "coincide")
+      return <span className="text-sm font-medium text-green-600">0</span>;
+    if (diffType === "sobrante")
+      return <span className="text-sm font-medium text-blue-600">+{difference}</span>;
+    return <span className="text-sm font-medium text-red-600">{difference}</span>;
+  }
+
   if (loading)
     return (
       <div className="flex items-center justify-center py-16 text-slate-500">
         <LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...
       </div>
     );
+
+  const hasData = differences.length > 0;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4">
@@ -276,11 +304,86 @@ export default function V4ReviewPage() {
         </Link>
       </div>
 
-      {differences.length === 0 ? (
+      {hasData && (
+        <div className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+          <button
+            onClick={() => setActiveTab("summary")}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all ${
+              activeTab === "summary"
+                ? "bg-white text-teal-700 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <BarChart3 size={16} />
+            Resumen por producto
+            <span className="text-xs opacity-60">({productSummary.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("detail")}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all ${
+              activeTab === "detail"
+                ? "bg-white text-teal-700 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <Table2 size={16} />
+            Detalle por caja
+            <span className="text-xs opacity-60">({summary?.totalBoxes ?? 0})</span>
+          </button>
+        </div>
+      )}
+
+      {!hasData ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-slate-400">
             No hay cajas contadas aún.
           </CardContent>
+        </Card>
+      ) : activeTab === "summary" ? (
+        <Card>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Producto</TableHead>
+                  <TableHead className="text-center">Cajas</TableHead>
+                  <TableHead className="text-center hidden md:table-cell">Unidad</TableHead>
+                  <TableHead className="text-right">Esperado</TableHead>
+                  <TableHead className="text-right">Contado</TableHead>
+                  <TableHead className="text-right">Diferencia</TableHead>
+                  <TableHead className="hidden md:table-cell">Comentario</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {productSummary.map((p) => (
+                  <TableRow
+                    key={p.productId}
+                    className={p.diffType === "coincide" ? "bg-green-50/50" : ""}
+                  >
+                    <TableCell>
+                      <p className="text-sm font-medium">{p.productDescription}</p>
+                      <p className="text-xs text-slate-400">{p.productCode}</p>
+                    </TableCell>
+                    <TableCell className="text-center text-sm font-medium">{p.totalCajas}</TableCell>
+                    <TableCell className="text-center text-xs text-slate-500 hidden md:table-cell">{p.productUnit}</TableCell>
+                    <TableCell className="text-right text-sm">{p.expectedQty}</TableCell>
+                    <TableCell className="text-right text-sm font-medium">{p.countedQty}</TableCell>
+                    <TableCell className="text-right">
+                      {diffBadge(p.diffType, p.difference)}
+                    </TableCell>
+                    <TableCell className="max-w-[220px] text-xs text-slate-600 hidden md:table-cell">
+                      {p.comment || <span className="text-slate-300">—</span>}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+          <div className="border-t border-slate-200 px-4 py-2 text-xs text-slate-500">
+            {productSummary.length} producto{productSummary.length !== 1 ? "s" : ""} · {" "}
+            {summary?.totalBoxes ?? 0} caja{summary?.totalBoxes !== 1 ? "s" : ""} · {" "}
+            {summary?.totalCounted ?? 0} unidades totales
+          </div>
         </Card>
       ) : (
         <Card>
@@ -292,8 +395,8 @@ export default function V4ReviewPage() {
                   <TableHead>Pallet</TableHead>
                   <TableHead>Caja</TableHead>
                   <TableHead>Producto</TableHead>
-                  <TableHead>Cajas</TableHead>
-                  <TableHead>Unds/caja</TableHead>
+                  <TableHead className="text-center hidden md:table-cell">Cajas</TableHead>
+                  <TableHead className="text-center hidden md:table-cell">Unds/caja</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead className="text-right hidden md:table-cell">Esperado</TableHead>
                   <TableHead className="text-right">Diferencia</TableHead>
@@ -315,26 +418,12 @@ export default function V4ReviewPage() {
                         <p className="text-sm font-medium">{product.productDescription}</p>
                         <p className="text-xs text-slate-400">{product.productCode}</p>
                       </TableCell>
-                      <TableCell className="text-xs">{product.cajas}</TableCell>
-                      <TableCell className="text-xs">{product.unidadesPorCaja}</TableCell>
+                      <TableCell className="text-center text-xs hidden md:table-cell">{product.cajas}</TableCell>
+                      <TableCell className="text-center text-xs hidden md:table-cell">{product.unidadesPorCaja}</TableCell>
                       <TableCell className="text-right text-sm font-medium">{product.countedQty}</TableCell>
                       <TableCell className="text-right text-sm hidden md:table-cell">{product.expectedQty}</TableCell>
                       <TableCell className="text-right">
-                        <span
-                          className={`text-sm font-medium ${
-                            product.diffType === "coincide"
-                              ? "text-green-600"
-                              : product.diffType === "sobrante"
-                                ? "text-blue-600"
-                                : "text-red-600"
-                          }`}
-                        >
-                          {product.diffType === "coincide"
-                            ? "0"
-                            : product.diffType === "sobrante"
-                              ? `+${product.difference}`
-                              : product.difference}
-                        </span>
+                        {diffBadge(product.diffType, product.difference)}
                       </TableCell>
                       <TableCell>{statusBadge(diff.status)}</TableCell>
                       <TableCell className="text-right hidden md:table-cell">

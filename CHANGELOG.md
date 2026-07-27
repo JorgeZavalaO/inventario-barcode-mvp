@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.77.0 (2026-07-27)
+
+### Added
+
+- **Selector de cajas escalable V4:** Reemplazado el toggle buttons 1-10 por un input de texto con parsing inteligente de rangos. Soporta rangos (`1-50`), individuales (`55`) y mixtos (`1-10, 15, 20-30, 50`). Presets rápidos: 1-10, 1-50, 1-100, 1-200. Preview comprimido de la selección. Soporta hasta 900+ cajas.
+- **Cajas ya contadas en V4:** El selector de cajas muestra en verde las cajas de un pallet que ya fueron contadas en la sesión, excluyéndolas automáticamente de la selección.
+- **Resumen por producto en revisión V4:** Nueva pestaña "Resumen por producto" en la vista de revisión que agrega los datos por producto (total cajas, cantidad total, diferencia). Mucho más compacto que la vista detallada.
+- **Tabs en revisión V4:** La vista de revisión ahora tiene dos pestañas: "Resumen por producto" (vista agregada) y "Detalle por caja" (vista detallada original).
+
+### Changed
+
+- **API structure V4:** El endpoint GET ahora devuelve `countedBoxes` — las cajas de un pallet que ya fueron contadas en la sesión.
+- **Script de seed V4 movido:** Movido de `scripts/` a `__scripts__/seed-v4-structure.ts` para evitar errores de typecheck en build de Vercel.
+- **tsconfig exclude:** Añadidos `__scripts__` y `scripts` al exclude de TypeScript para evitar typecheck en build.
+
 ## 0.76.0 (2026-07-26)
 
 ### Added

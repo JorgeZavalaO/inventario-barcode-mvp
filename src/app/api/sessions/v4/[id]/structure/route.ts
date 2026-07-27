@@ -105,15 +105,22 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     });
 
     const palletId = url.searchParams.get("palletId");
+    const sessionId = context.params.then((p) => p.id);
+    const resolvedSessionId = await sessionId;
     let boxes: { id: string; number: string }[] = [];
+    let countedBoxes: string[] = [];
+
+    let targetPalletId: string | null = null;
 
     if (palletId) {
+      targetPalletId = palletId;
       const palletBoxes = await prisma.box.findMany({
         where: { palletId, active: true },
         orderBy: { number: "asc" },
       });
       boxes = palletBoxes.map((b) => ({ id: b.id, number: b.number }));
     } else if (pallets.length === 1) {
+      targetPalletId = pallets[0].id;
       const palletBoxes = await prisma.box.findMany({
         where: { palletId: pallets[0].id, active: true },
         orderBy: { number: "asc" },
@@ -121,10 +128,30 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       boxes = palletBoxes.map((b) => ({ id: b.id, number: b.number }));
     }
 
+    if (targetPalletId && boxes.length > 0) {
+      const boxIds = boxes.map((b) => b.id);
+      const countedEntries = await prisma.boxCountEntry.findMany({
+        where: {
+          sessionId: resolvedSessionId,
+          boxId: { in: boxIds },
+          countRound: { status: { not: "REJECTED" } },
+        },
+        select: { box: { select: { number: true } } },
+        distinct: ["boxId"],
+      });
+      countedBoxes = countedEntries.map((e) => e.box.number).sort((a, b) => {
+        const na = parseInt(a, 10);
+        const nb = parseInt(b, 10);
+        if (!isNaN(na) && !isNaN(nb)) return na - nb;
+        return a.localeCompare(b);
+      });
+    }
+
     return NextResponse.json({
       import: { id: imp.id, code: imp.code },
       pallets: pallets.map((p) => ({ id: p.id, number: p.number })),
       boxes,
+      countedBoxes,
     });
   } catch (error) {
     return apiError(error);
