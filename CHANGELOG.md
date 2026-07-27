@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.86.1 (2026-07-27)
+
+### Fixed
+
+- **`setState` dentro de `useEffect` en V4:** Eliminado el efecto que sincronizaba `cajas` con `selectedBoxes`, evitando renders en cascada. La sincronización ahora ocurre al actualizar la selección.
+
 ## 0.86.0 (2026-07-27)
 
 ### Changed

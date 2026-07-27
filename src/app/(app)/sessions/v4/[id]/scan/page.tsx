@@ -224,15 +224,14 @@ export default function V4ScanPage() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  useEffect(() => {
-    if (selectedBoxes.length > 0) {
-      setCajas(selectedBoxes.length);
-    }
-  }, [selectedBoxes]);
-
   function showToast(message: string, type: "success" | "error" | "info" = "info") {
     setToast(message);
     setToastType(type);
+  }
+
+  function updateSelectedBoxes(boxes: number[]) {
+    setSelectedBoxes(boxes);
+    if (boxes.length > 0) setCajas(boxes.length);
   }
 
   async function handleJoin() {
@@ -316,7 +315,7 @@ export default function V4ScanPage() {
         const maxBox = Math.max(...data.boxes.map((b) => parseInt(b.number, 10)).filter((n) => !isNaN(n)));
         setBoxRangeInput(`1-${maxBox}`);
         const parsed = parseBoxRange(`1-${maxBox}`);
-        setSelectedBoxes(parsed.filter((n) => !data.countedBoxes.includes(String(n))));
+        updateSelectedBoxes(parsed.filter((n) => !data.countedBoxes.includes(String(n))));
       }
     } catch {
       /* silent */
@@ -325,13 +324,13 @@ export default function V4ScanPage() {
 
   function handleBoxRangeInputChange(value: string) {
     setBoxRangeInput(value);
-    setSelectedBoxes(parseBoxRange(value));
+    updateSelectedBoxes(parseBoxRange(value));
   }
 
   function applyPreset(range: string) {
     setBoxRangeInput(range);
     const parsed = parseBoxRange(range);
-    setSelectedBoxes(parsed.filter((n) => !countedBoxes.includes(String(n))));
+    updateSelectedBoxes(parsed.filter((n) => !countedBoxes.includes(String(n))));
     setTimeout(() => boxRangeInputRef.current?.focus(), 50);
   }
 
