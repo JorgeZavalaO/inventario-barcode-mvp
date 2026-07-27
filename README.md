@@ -51,14 +51,12 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Búsqueda en tiempo real por caja, importación o pallet en la tabla de revisión V3.
 - Exportación a Excel de resultados de inventario.
 - Movimientos de stock entre posiciones.
-- Health endpoint y Service Worker para resiliencia.
+- Health endpoint.
 - Vista de sesión rediseñada con navegación por tabs (Resumen, Escanear, Resultados, Actividad).
 - Escáner inteligente: acceso directo con selector de sesión activa.
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
-- Navegación offline correcta: el Service Worker devuelve la página de sesiones correspondiente para rutas de V1/V2/V3 en vez del dashboard.
 - **Sesiones V3 — Inventario por cajas sin posiciones físicas:** Flujo simplificado de 3 pasos (Identificar caja → Confirmar cantidades → Registrar) sin necesidad de asignar posiciones físicas. Soporta división de líneas de cantidad por producto.
-- **Sesiones V4 — Inventario por cajas con ingreso rápido:** Flujo en una sola pantalla para conteo rápido. Seleccionar importación → seleccionar cajas con input de rangos (ej: `1-50, 55, 60-70`) → digitar código de producto → ver nombre y código proveedor → ingresar cajas × unidades por caja → total automático. Soporta hasta 900+ cajas con presets rápidos (1-10, 1-50, 1-100, 1-200). Muestra cajas ya contadas en verde. Revisión con dos pestañas: resumen por producto y detalle por caja. Reutiliza tablas Import/Pallet/Box existentes.
-- **Modo offline completo:** Descarga productos, importaciones, pallets, cajas a IndexedDB. El flujo V3 funciona 100% offline: selección de importación → pallet → caja → confirmar cantidades → registrar (se encola para sincronizar). Botón flotante para sincronizar datos y ver estado de la cola.
+- **Sesiones V4 — Inventario por cajas con ingreso rápido:** Flujo en una sola pantalla para conteo rápido. Seleccionar importación → seleccionar cajas con input de rangos (ej: `1-50, 55, 60-70`) → digitar código o nombre de producto (búsqueda case-insensitive) → ver nombre y código proveedor → ingresar cajas × unidades por caja → total automático. Soporta hasta 900+ cajas con presets rápidos (1-10, 1-50, 1-100, 1-200). Muestra cajas ya contadas en verde. Revisión con dos pestañas: resumen por producto y detalle por caja. Reutiliza tablas Import/Pallet/Box existentes.
 
 ## Stack
 
@@ -207,14 +205,12 @@ Esto permite que varias personas registren cantidades al mismo tiempo sin sobres
 
 - La identificación de operadores dentro de una sesión V1 es por nombre (independiente de la autenticación del sistema).
 - La sincronización utiliza polling cada 2 segundos, no WebSockets.
-- El modo offline completo está disponible solo para sesiones V3. V1 y V2 requieren conexión.
-- Para usar offline, primero debe sincronizar datos desde el botón flotante (requiere internet la primera vez).
 - No actualiza automáticamente el stock de un ERP después de cerrar el conteo.
 - La impresión está orientada a etiquetas del navegador; no incluye integración directa con Zebra/ZPL.
 
 ## Siguiente etapa recomendada
 
-WebSockets o Supabase Realtime para sincronización en tiempo real; modo offline para V2; reconteos independientes; conexión con el ERP.
+WebSockets o Supabase Realtime para sincronización en tiempo real; reconteos independientes; conexión con el ERP.
 
 ## Validación realizada
 

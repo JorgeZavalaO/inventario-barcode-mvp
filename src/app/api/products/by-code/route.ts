@@ -18,8 +18,9 @@ export async function GET(request: NextRequest) {
       where: {
         active: true,
         OR: [
-          { code: code.trim() },
-          { barcode: code.trim() },
+          { code: { equals: code.trim(), mode: "insensitive" } },
+          { barcode: { equals: code.trim(), mode: "insensitive" } },
+          { description: { contains: code.trim(), mode: "insensitive" } },
         ],
       },
       select: {

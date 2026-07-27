@@ -65,21 +65,9 @@ export type OfflineQueueResult<T> = T & { queued?: boolean };
 export async function apiFetchOffline<T>(
   endpoint: string,
   init: RequestInit,
-  offlinePayload: { endpoint: string; method: string; body: object },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  offlinePayload?: { endpoint: string; method: string; body: object },
 ): Promise<OfflineQueueResult<T>> {
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
-    await addToQueue(offlinePayload.endpoint, offlinePayload.method, offlinePayload.body);
-    return { queued: true } as OfflineQueueResult<T>;
-  }
-
-  try {
-    const result = await apiFetch<T>(endpoint, init);
-    return result as OfflineQueueResult<T>;
-  } catch (error: any) {
-    if (error?.message === "Failed to fetch" || error?.name === "TypeError") {
-      await addToQueue(offlinePayload.endpoint, offlinePayload.method, offlinePayload.body);
-      return { queued: true } as OfflineQueueResult<T>;
-    }
-    throw error;
-  }
+  const result = await apiFetch<T>(endpoint, init);
+  return result as OfflineQueueResult<T>;
 }

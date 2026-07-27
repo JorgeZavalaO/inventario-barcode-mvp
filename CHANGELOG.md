@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.78.0 (2026-07-27)
+
+### Changed
+
+- **Modo offline desactivado:** Se desactiva temporalmente todo el sistema offline (service worker, cola de sincronización, descarga de datos a IndexedDB, banner flotante). La aplicación funciona 100% en línea. `isMobileDevice()` retorna `false` y `apiFetchOffline` delega directamente a `apiFetch` sin encolar. Se mantiene el código offline para futura reactivación.
+
+### Fixed
+
+- **Búsqueda de productos case-insensitive en V4:** La ruta `/api/products/by-code` ahora usa `mode: "insensitive"` en Prisma para que `"mang-001"` encuentre `"MANG-001"`, igual que el resto de la aplicación.
+- **Búsqueda por descripción en V4:** La ruta `/api/products/by-code` ahora también busca por descripción parcial (contiene), no solo por código o código de barras exacto. Ej: escribir `"manguera"` encuentra `"Manguera hidráulica 1/2 pulgada"`.
+
 ## 0.77.0 (2026-07-27)
 
 ### Added
