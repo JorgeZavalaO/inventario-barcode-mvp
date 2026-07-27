@@ -218,6 +218,12 @@ export default function V4ScanPage() {
     return () => clearTimeout(t);
   }, [toast]);
 
+  useEffect(() => {
+    if (selectedBoxes.length > 0) {
+      setCajas(selectedBoxes.length);
+    }
+  }, [selectedBoxes]);
+
   function showToast(message: string, type: "success" | "error" | "info" = "info") {
     setToast(message);
     setToastType(type);
