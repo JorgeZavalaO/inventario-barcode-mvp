@@ -811,7 +811,7 @@ export default function V4ScanPage() {
 
         {/* Step 3: Quantity */}
         {product && (
-          <Card className="border-0 shadow-sm border-t-2 border-t-teal-500">
+          <Card className="border-0 shadow-sm border-t-2 border-t-teal-500 overflow-visible">
             <CardContent className="p-4 space-y-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-[11px] font-bold text-teal-700">3</span>

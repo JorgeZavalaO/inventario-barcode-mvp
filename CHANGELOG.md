@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.85.1 (2026-07-27)
+
+### Fixed
+
+- **Dropdown de operarios V4 oculto:** Corregido el Card del paso 3 (Cantidad) que no tenía `overflow-visible`, lo que recortaba el dropdown del `SearchableSelect` de "Operario que contó".
+
 ## 0.85.0 (2026-07-27)
 
 ### Fixed
