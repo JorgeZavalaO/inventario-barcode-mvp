@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
@@ -21,28 +21,30 @@ type StockWithPosition = {
   };
 };
 
+type Product = { id: string; code: string; description: string; unit: string };
+
 export default function ProductWherePage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [stocks, setStocks] = useState<StockWithPosition[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"all" | "theoretical" | "counted">("all");
 
-  const load = useCallback(async () => {
-    try {
-      const [prodData, stockData] = await Promise.all([
-        apiFetch<any>(`/api/products/${id}`),
-        apiFetch<{ stocks: StockWithPosition[] }>(`/api/product-locations?productId=${id}`),
-      ]);
-      setProduct(prodData.product);
-      setStocks(stockData.stocks);
-    } catch { /* silent */ }
-    finally { setLoading(false); }
+  useEffect(() => {
+    void (async () => {
+      try {
+        const [prodData, stockData] = await Promise.all([
+          apiFetch<{ product: Product }>(`/api/products/${id}`),
+          apiFetch<{ stocks: StockWithPosition[] }>(`/api/product-locations?productId=${id}`),
+        ]);
+        setProduct(prodData.product);
+        setStocks(stockData.stocks);
+      } catch { /* silent */ }
+      finally { setLoading(false); }
+    })();
   }, [id]);
-
-  useEffect(() => { void load(); }, [load]);
 
   if (loading) return <div className="flex items-center justify-center py-16 text-slate-500"><LoaderCircle className="mr-2 animate-spin" size={20} /> Cargando...</div>;
   if (!product) return <div className="py-16 text-center text-slate-500">Producto no encontrado.</div>;

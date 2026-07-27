@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client";
@@ -32,20 +32,18 @@ export default function V4SessionsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "active" | "closed">("all");
 
-  const load = useCallback(async () => {
-    try {
-      const data = await apiFetch<{ sessions: V4Session[] }>("/api/sessions/v4");
-      setSessions(data.sessions);
-    } catch {
-      /* silent */
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    void load();
-  }, [load]);
+    void (async () => {
+      try {
+        const data = await apiFetch<{ sessions: V4Session[] }>("/api/sessions/v4");
+        setSessions(data.sessions);
+      } catch {
+        /* silent */
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const active = sessions.filter(
     (s) => s.status === "OPEN" || s.status === "PAUSED",

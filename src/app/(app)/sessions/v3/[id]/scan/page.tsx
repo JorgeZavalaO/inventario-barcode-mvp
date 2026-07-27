@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useTransition } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import * as XLSX from "xlsx";
@@ -55,6 +55,21 @@ type ConfirmedProduct = {
 
 type Step = "IDENTIFY" | "CONFIRM" | "SUMMARY";
 
+type ResolvedBox = {
+  id: string;
+  number: string;
+  import: string;
+  pallet: string | null;
+  products: {
+    productId: string;
+    productCode: string;
+    productDescription: string;
+    productUnit: string;
+    supplierCode?: string;
+    expectedQty: number | null;
+  }[];
+};
+
 export default function V3ScanPage() {
   const params = useParams();
   const id = params.id as string;
@@ -79,7 +94,7 @@ export default function V3ScanPage() {
   const [loadingPallets, setLoadingPallets] = useState(false);
   const [loadingBoxes, setLoadingBoxes] = useState(false);
 
-  const [resolvedBox, setResolvedBox] = useState<any>(null);
+  const [resolvedBox, setResolvedBox] = useState<ResolvedBox | null>(null);
   const [boxProducts, setBoxProducts] = useState<BoxProduct[]>([]);
   const [currentProductIdx, setCurrentProductIdx] = useState(0);
   const [productCorrect, setProductCorrect] = useState(true);
@@ -97,6 +112,7 @@ export default function V3ScanPage() {
   const [operators, setOperators] = useState<Operator[]>([]);
   const [countedByOperatorId, setCountedByOperatorId] = useState("");
   const [joining, setJoining] = useState(false);
+  const [, startTransition] = useTransition();
 
   const offlineData = useOfflineData();
   const hasOfflineData = offlineData.counts.products > 0;
@@ -106,9 +122,11 @@ export default function V3ScanPage() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setOperator(parsed);
-        setSelectedOperatorId(parsed.id);
-        setOperatorName(parsed.name);
+        startTransition(() => {
+          setOperator(parsed);
+          setSelectedOperatorId(parsed.id);
+          setOperatorName(parsed.name);
+        });
       } catch {
         localStorage.removeItem("stockscan_operator_v3");
       }
@@ -119,14 +137,14 @@ export default function V3ScanPage() {
     const cached = localStorage.getItem("stockscan_operators_v3");
     if (cached) {
       try {
-        setOperators(JSON.parse(cached) as Operator[]);
+        startTransition(() => { setOperators(JSON.parse(cached) as Operator[]); });
       } catch {
         localStorage.removeItem("stockscan_operators_v3");
       }
     }
     void apiFetch<{ operators: Operator[] }>("/api/operators")
       .then((data) => {
-        setOperators(data.operators);
+        startTransition(() => { setOperators(data.operators); });
         localStorage.setItem("stockscan_operators_v3", JSON.stringify(data.operators));
       })
       .catch(() => undefined);
@@ -134,20 +152,24 @@ export default function V3ScanPage() {
 
   useEffect(() => {
     if (offlineData.operators.length === 0) return;
-    setOperators((current) => {
-      const merged = new Map(current.map((item) => [item.id, item]));
-      for (const item of offlineData.operators) merged.set(item.id, item);
-      return Array.from(merged.values());
+    startTransition(() => {
+      setOperators((current) => {
+        const merged = new Map(current.map((item) => [item.id, item]));
+        for (const item of offlineData.operators) merged.set(item.id, item);
+        return Array.from(merged.values());
+      });
     });
   }, [offlineData.operators]);
 
   useEffect(() => {
     const participants = session?.sessionParticipants?.map(({ operator: participant }) => participant) ?? [];
     if (participants.length === 0) return;
-    setOperators((current) => {
-      const merged = new Map(current.map((item) => [item.id, item]));
-      for (const participant of participants) merged.set(participant.id, participant);
-      return Array.from(merged.values());
+    startTransition(() => {
+      setOperators((current) => {
+        const merged = new Map(current.map((item) => [item.id, item]));
+        for (const participant of participants) merged.set(participant.id, participant);
+        return Array.from(merged.values());
+      });
     });
   }, [session]);
 
@@ -236,24 +258,24 @@ export default function V3ScanPage() {
       const buffer = await file.arrayBuffer();
       const wb = XLSX.read(buffer, { type: "buffer" });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(ws);
+      const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws);
       const rows = jsonData
-        .map((row: any) => ({
-          importCode: row.importacion || row.importCode || row.import || "",
-          palletNumber: row.pallet || row.palletNumber || row.numero_pallet || "",
-          boxNumber: row.caja || row.boxNumber || row.numero_caja || "",
-          productCode: row.codigo_producto || row.productCode || row.codigo || "",
-          supplierCode: row.codigo_proveedor || row.supplierCode || row.proveedor || "",
-          productDescription: row.descripcion || row.description || "",
-          productUnit: row.unidad || row.unit || "UND",
-          expectedQty: row.cantidad_esperada || row.expectedQty || row.cantidad || 0,
+        .map((row) => ({
+          importCode: String(row.importacion || row.importCode || row.import || ""),
+          palletNumber: String(row.pallet || row.palletNumber || row.numero_pallet || ""),
+          boxNumber: String(row.caja || row.boxNumber || row.numero_caja || ""),
+          productCode: String(row.codigo_producto || row.productCode || row.codigo || ""),
+          supplierCode: String(row.codigo_proveedor || row.supplierCode || row.proveedor || ""),
+          productDescription: String(row.descripcion || row.description || ""),
+          productUnit: String(row.unidad || row.unit || "UND"),
+          expectedQty: Number(row.cantidad_esperada || row.expectedQty || row.cantidad || 0),
         }))
-        .filter((r: any) => r.importCode && r.boxNumber && r.productCode);
+        .filter((r) => r.importCode && r.boxNumber && r.productCode);
       if (rows.length === 0) {
         setImportResult("No se encontraron filas válidas");
         return;
       }
-      const result = await apiFetch<any>("/api/boxes/import", {
+      const result = await apiFetch<{ created: { imports: number; pallets: number; boxes: number; links: number } }>("/api/boxes/import", {
         method: "POST",
         body: JSON.stringify({ rows }),
       });
@@ -289,15 +311,15 @@ export default function V3ScanPage() {
 
   const load = useCallback(async () => {
     try {
-      const data = await apiFetch<any>(`/api/sessions/v3/${id}`);
-      setSession(data.session);
+      const data = await apiFetch<{ session: SessionData }>(`/api/sessions/v3/${id}`);
+      startTransition(() => { setSession(data.session); });
       localStorage.setItem(`stockscan_session_v3_${id}`, JSON.stringify(data.session));
     } catch {
       const cached = localStorage.getItem(`stockscan_session_v3_${id}`);
       let restored = false;
       if (cached) {
         try {
-          setSession(JSON.parse(cached) as SessionData);
+          startTransition(() => { setSession(JSON.parse(cached) as SessionData); });
           restored = true;
         } catch {
           localStorage.removeItem(`stockscan_session_v3_${id}`);
@@ -308,7 +330,7 @@ export default function V3ScanPage() {
         if (cachedSessions) {
           try {
             const summary = (JSON.parse(cachedSessions) as SessionData[]).find((item) => item.id === id);
-            if (summary) setSession(summary);
+            if (summary) startTransition(() => { setSession(summary); });
           } catch {
             localStorage.removeItem("stockscan_sessions_v3");
           }
@@ -317,7 +339,7 @@ export default function V3ScanPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, startTransition]);
 
   useEffect(() => {
     void load();
@@ -428,7 +450,7 @@ export default function V3ScanPage() {
         if (resolved) {
           setResolvedBox(resolved);
           setBoxProducts(
-            resolved.products.map((pr: any) => ({
+            resolved.products.map((pr: ResolvedBox["products"][number]) => ({
               productId: pr.productId,
               productCode: pr.productCode,
               productDescription: pr.productDescription,
@@ -445,10 +467,10 @@ export default function V3ScanPage() {
       } else {
         const p = new URLSearchParams({ import: boxImport.trim(), box: bx.number });
         if (boxPallet.trim()) p.set("pallet", boxPallet.trim());
-        const data = await apiFetch<any>(`/api/boxes/resolve?${p.toString()}`);
+        const data = await apiFetch<{ box: ResolvedBox }>(`/api/boxes/resolve?${p.toString()}`);
         setResolvedBox(data.box);
         setBoxProducts(
-          data.box.products.map((pr: any) => ({
+          data.box.products.map((pr) => ({
             productId: pr.productId,
             productCode: pr.productCode,
             productDescription: pr.productDescription,
@@ -576,7 +598,7 @@ export default function V3ScanPage() {
           items,
         };
 
-        const result = await apiFetchOffline<any>(
+        const result = await apiFetchOffline<Record<string, unknown>>(
           `/api/sessions/v3/${id}/counts`,
           {
             method: "POST",

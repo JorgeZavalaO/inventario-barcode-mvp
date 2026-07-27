@@ -1,7 +1,7 @@
-import { test as base, expect } from "@playwright/test";
+import { test as base, expect, type Page } from "@playwright/test";
 
-export const test = base.extend<{ adminPage: any }>({
-  adminPage: async ({ page }: { page: any }, use: any) => {
+export const test = base.extend<{ adminPage: Page }>({
+  adminPage: async ({ page }, use) => {
     await page.goto("http://localhost:3000/login");
     await page.fill('input[name="email"]', "admin@stockscan.app");
     await page.fill('input[name="password"]', "admin123");

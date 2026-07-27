@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
@@ -9,11 +9,19 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+type Floor = { id: string; code: string; name: string; orderIndex: number; zones: { id: string; name: string }[] };
+type WarehouseData = {
+  warehouse: {
+    id: string; code: string; name: string;
+    floors: Floor[];
+  };
+};
+
 export default function WarehouseDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [warehouse, setWarehouse] = useState<any>(null);
+  const [warehouse, setWarehouse] = useState<WarehouseData["warehouse"] | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFloorForm, setShowFloorForm] = useState(false);
   const [floorCode, setFloorCode] = useState("");
@@ -22,15 +30,22 @@ export default function WarehouseDetailPage() {
   const [creating, setCreating] = useState(false);
   const [deletingFloor, setDeletingFloor] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      const data = await apiFetch<any>(`/api/warehouses/${id}`);
-      setWarehouse(data.warehouse);
-    } catch { /* silent */ }
-    finally { setLoading(false); }
+  useEffect(() => {
+    void (async () => {
+      try {
+        const data = await apiFetch<WarehouseData>(`/api/warehouses/${id}`);
+        setWarehouse(data.warehouse);
+      } catch { /* silent */ }
+      finally { setLoading(false); }
+    })();
   }, [id]);
 
-  useEffect(() => { void load(); }, [load]);
+  async function load() {
+    try {
+      const data = await apiFetch<WarehouseData>(`/api/warehouses/${id}`);
+      setWarehouse(data.warehouse);
+    } catch { /* silent */ }
+  }
 
   function generateFloorItems() {
     const count = Math.max(1, floorCantidad);
@@ -101,13 +116,13 @@ export default function WarehouseDetailPage() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {(warehouse.floors ?? []).map((floor: any) => (
+        {(warehouse.floors ?? []).map((floor: Floor) => (
           <Card key={floor.id} className="relative">
             <Link href={`/locations/floors/${floor.id}`} className="block cursor-pointer transition hover:shadow-md">
               <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Layers size={16} />{floor.name}</CardTitle></CardHeader>
               <CardContent className="text-sm text-slate-500">
                 <p>{floor.code} · {floor.zones?.length ?? 0} zona{(floor.zones?.length ?? 0) !== 1 ? "s" : ""}</p>
-                {floor.zones?.map((z: any) => <span key={z.id} className="mr-2 inline-flex items-center gap-1 text-xs"><MapPin size={10} />{z.name}</span>)}
+                {floor.zones?.map((z: { id: string; name: string }) => <span key={z.id} className="mr-2 inline-flex items-center gap-1 text-xs"><MapPin size={10} />{z.name}</span>)}
               </CardContent>
             </Link>
             <Button variant="ghost" size="icon" className="absolute right-2 top-2 size-7 text-slate-400 hover:text-red-500" disabled={deletingFloor === floor.id} onClick={() => void handleDeleteFloor(floor.id, floor.name)}>

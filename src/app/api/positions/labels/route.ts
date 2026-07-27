@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const floorId = request.nextUrl.searchParams.get("floorId");
     const positionId = request.nextUrl.searchParams.get("positionId");
 
-    const where: any = { active: true };
+    const where: Record<string, unknown> = { active: true };
     if (rackId) where.rackId = rackId;
     if (floorId) where.rack = { zone: { floorId } };
     if (positionId) where.id = positionId;

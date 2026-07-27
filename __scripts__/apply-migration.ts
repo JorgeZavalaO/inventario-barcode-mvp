@@ -17,8 +17,9 @@ async function main() {
     try {
       await prisma.$executeRawUnsafe(stmt + ";");
       count++;
-    } catch (e: any) {
-      console.error(`Statement ${count + 1} failed:`, e?.meta?.cause || e.message);
+    } catch (e: unknown) {
+      const err = e as Error & { meta?: { cause?: string } };
+      console.error(`Statement ${count + 1} failed:`, err?.meta?.cause || err.message);
       throw e;
     }
   }

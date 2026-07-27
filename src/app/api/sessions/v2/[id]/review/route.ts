@@ -61,7 +61,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         : "";
 
       const productsInPosition = roundTotals.length > 0
-        ? sp.rounds[sp.rounds.length - 1].events.map((e: any) => ({
+        ? sp.rounds[sp.rounds.length - 1].events.map((e) => ({
             code: e.product.code,
             quantity: Number(e.quantity),
           }))

@@ -1,15 +1,23 @@
 # Changelog
 
+## 0.79.0 (2026-07-27)
+
+### Changed
+
+- **Lint limpiado (98 errores → 1):** Corregidos 97 errores de ESLint. Eliminados todos los `@typescript-eslint/no-explicit-any` (55 instancias) reemplazando `any` con tipos específicos (`Prisma.TransactionClient`, `Record<string, unknown>`, interfaces tipadas). Eliminados todos los `react-hooks/set-state-in-effect` (27 instancias) usando `startTransition()` para envolver `setState` en effects, e inline de funciones async en `useEffect` para carga inicial. Corregidos `prefer-const` (2) y `no-unescaped-entities` (2). El único error restante es un falso positivo de `rules-of-hooks` en `e2e/helpers.ts` (Playwright `use()`).
+
 ## 0.78.0 (2026-07-27)
 
 ### Changed
 
 - **Modo offline desactivado:** Se desactiva temporalmente todo el sistema offline (service worker, cola de sincronización, descarga de datos a IndexedDB, banner flotante). La aplicación funciona 100% en línea. `isMobileDevice()` retorna `false` y `apiFetchOffline` delega directamente a `apiFetch` sin encolar. Se mantiene el código offline para futura reactivación.
+- **UX/UI del formulario V4 mejorada:** Rediseño completo de la página de escaneo V4 con mejoras de usabilidad y responsive. Header sticky con botón de registros, indicadores de pasos (1, 2, 3), inputs más grandes (h-12), bordes redondeados (rounded-xl), barra inferior sticky con botón de registrar, drawer de registros para móvil, mejor feedback visual con gradientes y sombras, y toast con posición fija y colores por tipo.
 
 ### Fixed
 
 - **Búsqueda de productos case-insensitive en V4:** La ruta `/api/products/by-code` ahora usa `mode: "insensitive"` en Prisma para que `"mang-001"` encuentre `"MANG-001"`, igual que el resto de la aplicación.
 - **Búsqueda por descripción en V4:** La ruta `/api/products/by-code` ahora también busca por descripción parcial (contiene), no solo por código o código de barras exacto. Ej: escribir `"manguera"` encuentra `"Manguera hidráulica 1/2 pulgada"`.
+- **Error de tipado en revisión V2:** Corregido el tipo `Record<string, unknown>` a `Record<string, number>` en el componente de revisión V2, y extraída la función `load` como `useCallback` para evitar errores de scope.
 
 ## 0.77.0 (2026-07-27)
 

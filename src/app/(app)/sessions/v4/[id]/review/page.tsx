@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
@@ -94,7 +94,27 @@ export default function V4ReviewPage() {
   const [sessionStatus, setSessionStatus] = useState("");
   const [activeTab, setActiveTab] = useState<"summary" | "detail">("summary");
 
-  const load = useCallback(async () => {
+  useEffect(() => {
+    void (async () => {
+      try {
+        const [reviewData, sessionData] = await Promise.all([
+          apiFetch<{ differences: BoxDifference[]; summary: ReviewSummary; productSummary: ProductSummaryRow[] }>(`/api/sessions/v4/${id}/review`),
+          apiFetch<{ session: { name: string; status: string } }>(`/api/sessions/v4/${id}`),
+        ]);
+        setDifferences(reviewData.differences);
+        setSummary(reviewData.summary);
+        setProductSummary(reviewData.productSummary);
+        setSessionName(sessionData.session.name);
+        setSessionStatus(sessionData.session.status);
+      } catch {
+        /* silent */
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  async function load() {
     try {
       const [reviewData, sessionData] = await Promise.all([
         apiFetch<{ differences: BoxDifference[]; summary: ReviewSummary; productSummary: ProductSummaryRow[] }>(`/api/sessions/v4/${id}/review`),
@@ -105,16 +125,8 @@ export default function V4ReviewPage() {
       setProductSummary(reviewData.productSummary);
       setSessionName(sessionData.session.name);
       setSessionStatus(sessionData.session.status);
-    } catch {
-      /* silent */
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+    } catch { /* silent */ }
+  }
 
   useEffect(() => {
     if (!toast) return;

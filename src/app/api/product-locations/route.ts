@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const productId = request.nextUrl.searchParams.get("productId");
     const positionId = request.nextUrl.searchParams.get("positionId");
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (productId) where.productId = productId;
     if (positionId) where.positionId = positionId;
 

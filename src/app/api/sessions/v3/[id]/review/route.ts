@@ -50,7 +50,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
        const productMap = new Map<string, {
          expected: number;
          counted: number;
-         product: any;
+         product: { id: string; code: string; description: string; unit: string };
          hasEvent: boolean;
          isCorrect: boolean;
          comments: string[];

@@ -35,8 +35,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       orderBy: { createdAt: "asc" },
     });
 
-    const rows: any[] = [];
-    const summaryRows: any[] = [];
+    const rows: Record<string, unknown>[] = [];
+    const summaryRows: Record<string, unknown>[] = [];
     const productSummary = new Map<string, { code: string; description: string; unit: string; expected: number; counted: number }>();
 
     const boxMap = new Map<string, typeof boxEntries>();
@@ -74,7 +74,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         }
       }
 
-      const productMap = new Map<string, { expected: number; counted: number; product: any }>();
+      const productMap = new Map<string, { expected: number; counted: number; product: { code: string; description: string; unit: string } }>();
       for (const bp of box.boxProducts) {
         productMap.set(bp.productId, {
           expected: Number(bp.expectedQty ?? 0),

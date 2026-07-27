@@ -101,8 +101,9 @@ async function main() {
     try {
       await prisma.storagePosition.update({ where: { id: pos.id }, data: { code: newCode } });
       updated++;
-    } catch (e: any) {
-      console.error(`Error ${pos.id.slice(0, 8)} (${pos.code} → ${newCode}):`, e?.meta?.cause || e.message);
+    } catch (e: unknown) {
+      const err = e as Error & { meta?: { cause?: string } };
+      console.error(`Error ${pos.id.slice(0, 8)} (${pos.code} → ${newCode}):`, err?.meta?.cause || err.message);
       errors++;
     }
   }

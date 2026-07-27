@@ -3,6 +3,7 @@ import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { apiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 
 const countSchema = z.object({
   operationId: z.string().uuid(),
@@ -17,7 +18,7 @@ const countSchema = z.object({
   notes: z.string().max(500).optional(),
 }).strict();
 
-async function ensureVirtualLocation(tx: any) {
+async function ensureVirtualLocation(tx: Prisma.TransactionClient) {
   const warehouse = await tx.warehouse.upsert({
     where: { code: "VIRTUAL-V4" },
     update: { active: false },
@@ -63,7 +64,7 @@ function virtualColumnIndex(boxId: string) {
   return 100000 + (hash % 900000);
 }
 
-async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any, userId: string) {
+async function ensureSessionPositionForBox(tx: Prisma.TransactionClient, sessionId: string, box: { id: string }, userId: string) {
   const code = `VIRTUAL-V4-${box.id}`;
   let position = await tx.storagePosition.findFirst({ where: { code } });
 
@@ -99,8 +100,8 @@ async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any,
           },
         });
         break;
-      } catch (err: any) {
-        if (err?.code === "P2002") {
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002") {
           const existing = await tx.storagePosition.findFirst({ where: { code } });
           if (existing) { position = existing; break; }
           columnIndex = ((columnIndex + 1 - 100000) % 900000) + 100001;

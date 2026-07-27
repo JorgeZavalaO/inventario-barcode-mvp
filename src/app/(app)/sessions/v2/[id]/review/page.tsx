@@ -28,21 +28,30 @@ export default function V2ReviewPage() {
   const id = params.id as string;
 
   const [differences, setDifferences] = useState<DiffItem[]>([]);
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState<string | null>(null);
   const [toast, setToast] = useState("");
 
-  const load = useCallback(async () => {
+  useEffect(() => {
+    void (async () => {
+      try {
+        const data = await apiFetch<{ differences: DiffItem[]; summary: Record<string, number> }>(`/api/sessions/v2/${id}/review`);
+        setDifferences(data.differences);
+        setSummary(data.summary);
+      } catch { /* silent */ }
+      finally { setLoading(false); }
+    })();
+  }, [id]);
+
+  async function load() {
     try {
-      const data = await apiFetch<any>(`/api/sessions/v2/${id}/review`);
+      const data = await apiFetch<{ differences: DiffItem[]; summary: Record<string, number> }>(`/api/sessions/v2/${id}/review`);
       setDifferences(data.differences);
       setSummary(data.summary);
     } catch { /* silent */ }
-    finally { setLoading(false); }
-  }, [id]);
+  }
 
-  useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2500); return () => clearTimeout(t); }, [toast]);
 
   async function handleAction(spId: string, roundId: string, action: "approve" | "reject") {

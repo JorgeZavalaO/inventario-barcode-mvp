@@ -80,7 +80,7 @@ async function main() {
   console.log(`Procesando ${rows.length} filas...`);
 
   let importsCreated = 0;
-  let palletsCreated = 0;
+  const palletsCreated = 0;
   let boxesCreated = 0;
 
   for (const row of rows) {

@@ -89,7 +89,36 @@ export default function V3ReviewPage() {
   const [searchBox, setSearchBox] = useState("");
   const perPage = 25;
 
-  const load = useCallback(async () => {
+  useEffect(() => {
+    void (async () => {
+      try {
+        const [reviewData, sessionData] = await Promise.all([
+          apiFetch<{ differences: BoxDifference[]; summary: ReviewSummary }>(
+            `/api/sessions/v3/${id}/review`,
+          ),
+          apiFetch<{ session: { name: string; status: string } }>(
+            `/api/sessions/v3/${id}`,
+          ),
+        ]);
+        setDifferences(reviewData.differences);
+        setSummary(reviewData.summary);
+        setSessionName(sessionData.session.name);
+        setSessionStatus(sessionData.session.status);
+      } catch {
+        /* silent */
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 2500);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  async function load() {
     try {
       const [reviewData, sessionData] = await Promise.all([
         apiFetch<{ differences: BoxDifference[]; summary: ReviewSummary }>(
@@ -103,22 +132,8 @@ export default function V3ReviewPage() {
       setSummary(reviewData.summary);
       setSessionName(sessionData.session.name);
       setSessionStatus(sessionData.session.status);
-    } catch {
-      /* silent */
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(""), 2500);
-    return () => clearTimeout(t);
-  }, [toast]);
+    } catch { /* silent */ }
+  }
 
   async function handleApprove(boxDiff: BoxDifference) {
     setBusy(true);

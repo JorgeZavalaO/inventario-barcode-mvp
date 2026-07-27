@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
@@ -23,13 +23,16 @@ type StockItem = {
   };
 };
 
+type Product = { id: string; code: string; description: string; unit: string };
+type Position = { id: string; code: string };
+
 export default function ProductLocationsPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [stocks, setStocks] = useState<StockItem[]>([]);
-  const [allPositions, setAllPositions] = useState<any[]>([]);
+  const [allPositions, setAllPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [selPosition, setSelPosition] = useState("");
@@ -37,21 +40,34 @@ export default function ProductLocationsPage() {
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState("");
 
-  const load = useCallback(async () => {
+  useEffect(() => {
+    void (async () => {
+      try {
+        const [prodData, stockData, posData] = await Promise.all([
+          apiFetch<{ product: Product }>(`/api/products/${id}`),
+          apiFetch<{ stocks: StockItem[] }>(`/api/product-locations?productId=${id}`),
+          apiFetch<{ positions: Position[] }>("/api/positions"),
+        ]);
+        setProduct(prodData.product);
+        setStocks(stockData.stocks);
+        setAllPositions(posData.positions);
+      } catch { /* silent */ }
+      finally { setLoading(false); }
+    })();
+  }, [id]);
+
+  async function load() {
     try {
       const [prodData, stockData, posData] = await Promise.all([
-        apiFetch<any>(`/api/products/${id}`),
+        apiFetch<{ product: Product }>(`/api/products/${id}`),
         apiFetch<{ stocks: StockItem[] }>(`/api/product-locations?productId=${id}`),
-        apiFetch<{ positions: any[] }>("/api/positions"),
+        apiFetch<{ positions: Position[] }>("/api/positions"),
       ]);
       setProduct(prodData.product);
       setStocks(stockData.stocks);
       setAllPositions(posData.positions);
     } catch { /* silent */ }
-    finally { setLoading(false); }
-  }, [id]);
-
-  useEffect(() => { void load(); }, [load]);
+  }
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2500); return () => clearTimeout(t); }, [toast]);
 
   async function addStock() {

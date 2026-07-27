@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   offlineStore,
   type OfflineProduct,
@@ -39,6 +39,7 @@ export function useOfflineData() {
     isOnline: true,
     counts: { products: 0, imports: 0, pallets: 0, boxes: 0 },
   });
+  const [, startTransition] = useTransition();
 
   const loadFromCache = useCallback(async () => {
     try {
@@ -75,17 +76,17 @@ export function useOfflineData() {
   }, []);
 
   useEffect(() => {
-    setState((prev) => ({ ...prev, isOnline: navigator.onLine }));
-    const onOnline = () => setState((prev) => ({ ...prev, isOnline: true }));
-    const onOffline = () => setState((prev) => ({ ...prev, isOnline: false }));
+    startTransition(() => { setState((prev) => ({ ...prev, isOnline: navigator.onLine })); });
+    const onOnline = () => startTransition(() => { setState((prev) => ({ ...prev, isOnline: true })); });
+    const onOffline = () => startTransition(() => { setState((prev) => ({ ...prev, isOnline: false })); });
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
-    void loadFromCache();
+    startTransition(() => { void loadFromCache(); });
     return () => {
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
-  }, [loadFromCache]);
+  }, [loadFromCache, startTransition]);
 
   const syncData = useCallback(async () => {
     if (!navigator.onLine) return;

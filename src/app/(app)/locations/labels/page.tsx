@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { apiFetch } from "@/lib/client";
 import { Printer, LoaderCircle, Search } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -12,25 +12,32 @@ export default function LocationLabelsPage() {
   const [labels, setLabels] = useState<LocationData[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchCode, setSearchCode] = useState("");
-  const [filteredLabels, setFilteredLabels] = useState<LocationData[]>([]);
 
-  const load = useCallback(async () => {
+  const filteredLabels = useMemo(() => {
+    if (!searchCode.trim()) return labels;
+    const q = searchCode.toLowerCase();
+    return labels.filter((l) => l.code.toLowerCase().includes(q));
+  }, [searchCode, labels]);
+
+  async function load() {
     setLoading(true);
     try {
       const data = await apiFetch<{ labels: LocationData[] }>("/api/positions/labels");
       setLabels(data.labels);
-      setFilteredLabels(data.labels);
     } catch { /* silent */ }
     finally { setLoading(false); }
-  }, []);
-
-  useEffect(() => { void load(); }, [load]);
+  }
 
   useEffect(() => {
-    if (!searchCode.trim()) { setFilteredLabels(labels); return; }
-    const q = searchCode.toLowerCase();
-    setFilteredLabels(labels.filter((l) => l.code.toLowerCase().includes(q)));
-  }, [searchCode, labels]);
+    void (async () => {
+      setLoading(true);
+      try {
+        const data = await apiFetch<{ labels: LocationData[] }>("/api/positions/labels");
+        setLabels(data.labels);
+      } catch { /* silent */ }
+      finally { setLoading(false); }
+    })();
+  }, []);
 
   function handlePrint() {
     window.print();

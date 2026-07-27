@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
 import { Building2, Layers, MapPin, Plus, LoaderCircle, Printer, Trash2, Warehouse } from "lucide-react";
@@ -35,12 +35,22 @@ export default function LocationsPage() {
 
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  async function load() {
     try {
       const data = await apiFetch<{ warehouses: WarehouseNode[] }>("/api/warehouses");
       setTree(data.warehouses);
     } catch { /* silent */ }
     finally { setLoading(false); }
+  }
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const data = await apiFetch<{ warehouses: WarehouseNode[] }>("/api/warehouses");
+        setTree(data.warehouses);
+      } catch { /* silent */ }
+      finally { setLoading(false); }
+    })();
   }, []);
 
   async function handleDeleteWarehouse(id: string, name: string) {
@@ -52,8 +62,6 @@ export default function LocationsPage() {
     } catch { /* silent */ }
     finally { setDeleting(null); }
   }
-
-  useEffect(() => { void load(); }, [load]);
 
   async function handleCreate() {
     if (!newCode.trim() || !newName.trim()) return;

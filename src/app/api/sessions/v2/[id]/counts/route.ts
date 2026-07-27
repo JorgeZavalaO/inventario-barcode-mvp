@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { apiError } from "@/lib/http";
 import { requireAuth } from "@/server/guards";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 
 const boxItemSchema = z.object({
   productId: z.string().uuid(),
@@ -35,7 +36,7 @@ const legacyCountSchema = z.object({
   notes: z.string().max(500).optional(),
 }).strict();
 
-async function ensureRound(tx: any, sessionId: string, positionId: string, userId: string) {
+async function ensureRound(tx: Prisma.TransactionClient, sessionId: string, positionId: string, userId: string) {
   const sessionPosition = await tx.sessionPosition.findUnique({
     where: { sessionId_positionId: { sessionId, positionId } },
   });
@@ -69,11 +70,11 @@ async function ensureRound(tx: any, sessionId: string, positionId: string, userI
   return round;
 }
 
-async function resolveBoxWithOptionalPallet(tx: any, importCode: string, palletNumber: string | undefined, boxNumber: string) {
+async function resolveBoxWithOptionalPallet(tx: Prisma.TransactionClient, importCode: string, palletNumber: string | undefined, boxNumber: string) {
   const imp = await tx.import.findUnique({ where: { code: importCode } });
   if (!imp) throw new Error(`Importación ${importCode} no encontrada`);
 
-  let pallet: any = null;
+  let pallet: { id: string; importId: string; number: string; active: boolean } | null = null;
   if (palletNumber) {
     pallet = await tx.pallet.findUnique({ where: { importId_number: { importId: imp.id, number: palletNumber } } });
     if (!pallet) throw new Error(`Pallet ${palletNumber} no encontrado`);

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "palletId o importId requerido" }, { status: 400 });
     }
 
-    let where: any = { active: true };
+    const where: Record<string, unknown> = { active: true };
     if (palletId) {
       where.palletId = palletId;
     } else if (importId) {

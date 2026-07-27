@@ -3,6 +3,7 @@ import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { apiError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 
 const boxItemSchema = z.object({
   productId: z.string().uuid(),
@@ -24,11 +25,11 @@ const boxCountSchema = z.object({
   items: z.array(boxItemSchema).min(1),
 }).strict();
 
-async function resolveBoxWithOptionalPallet(tx: any, importCode: string, palletNumber: string | undefined, boxNumber: string) {
+async function resolveBoxWithOptionalPallet(tx: Prisma.TransactionClient, importCode: string, palletNumber: string | undefined, boxNumber: string) {
   const imp = await tx.import.findUnique({ where: { code: importCode } });
   if (!imp) throw new Error(`Importación ${importCode} no encontrada`);
 
-  let pallet: any = null;
+  let pallet: { id: string; importId: string; number: string; active: boolean } | null = null;
   if (palletNumber) {
     pallet = await tx.pallet.findUnique({ where: { importId_number: { importId: imp.id, number: palletNumber } } });
     if (!pallet) throw new Error(`Pallet ${palletNumber} no encontrado`);
@@ -53,7 +54,7 @@ function virtualColumnIndex(boxId: string) {
   return 100000 + (hash % 900000);
 }
 
-async function ensureVirtualLocation(tx: any) {
+async function ensureVirtualLocation(tx: Prisma.TransactionClient) {
   const warehouse = await tx.warehouse.upsert({
     where: { code: "VIRTUAL-V3" },
     update: { active: false },
@@ -93,7 +94,7 @@ async function ensureVirtualLocation(tx: any) {
   return { rack, compartment, depthSlot };
 }
 
-async function ensureSessionPositionForBox(tx: any, sessionId: string, box: any, userId: string) {
+async function ensureSessionPositionForBox(tx: Prisma.TransactionClient, sessionId: string, box: { id: string }, userId: string) {
   const code = `VIRTUAL-V3-${box.id}`;
   let position = await tx.storagePosition.findFirst({ where: { code } });
 

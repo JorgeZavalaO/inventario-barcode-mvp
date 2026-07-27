@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/client";
@@ -9,11 +9,20 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+type Rack = { id: string; code: string; name: string; orderIndex: number };
+type Zone = { id: string; code: string; name: string; orderIndex: number; racks: Rack[] };
+type FloorData = {
+  floor: {
+    id: string; code: string; name: string; warehouseId: string;
+    zones: Zone[];
+  };
+};
+
 export default function FloorDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [floor, setFloor] = useState<any>(null);
+  const [floor, setFloor] = useState<FloorData["floor"] | null>(null);
   const [loading, setLoading] = useState(true);
   const [showZoneForm, setShowZoneForm] = useState(false);
   const [zoneCode, setZoneCode] = useState("");
@@ -29,15 +38,22 @@ export default function FloorDetailPage() {
   const [deletingZone, setDeletingZone] = useState<string | null>(null);
   const [deletingRack, setDeletingRack] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      const data = await apiFetch<any>(`/api/floors/${id}`);
-      setFloor(data.floor);
-    } catch { /* silent */ }
-    finally { setLoading(false); }
+  useEffect(() => {
+    void (async () => {
+      try {
+        const data = await apiFetch<FloorData>(`/api/floors/${id}`);
+        setFloor(data.floor);
+      } catch { /* silent */ }
+      finally { setLoading(false); }
+    })();
   }, [id]);
 
-  useEffect(() => { void load(); }, [load]);
+  async function load() {
+    try {
+      const data = await apiFetch<FloorData>(`/api/floors/${id}`);
+      setFloor(data.floor);
+    } catch { /* silent */ }
+  }
 
   function generateZoneItems() {
     const count = Math.max(1, zoneCantidad);
@@ -70,7 +86,7 @@ export default function FloorDetailPage() {
   function generateRackItems(zoneId: string) {
     const count = Math.max(1, rackCantidad);
     const digits = Math.max(2, String(count).length);
-    const zoneIndex = (floor?.zones ?? []).findIndex((z: any) => z.id === zoneId);
+    const zoneIndex = (floor?.zones ?? []).findIndex((z: Zone) => z.id === zoneId);
     const existingRacks = (floor?.zones ?? [])[zoneIndex]?.racks?.length ?? 0;
     return Array.from({ length: count }, (_, i) => {
       const num = String(i + 1).padStart(digits, "0");
@@ -148,7 +164,7 @@ export default function FloorDetailPage() {
       )}
 
       <div className="space-y-3">
-        {(floor.zones ?? []).map((zone: any) => (
+        {(floor.zones ?? []).map((zone: Zone) => (
           <Card key={zone.id}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -174,7 +190,7 @@ export default function FloorDetailPage() {
               )}
               {zone.racks?.length > 0 ? (
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  {zone.racks.map((rack: any) => (
+                  {zone.racks.map((rack: Rack) => (
                     <div key={rack.id} className="group relative">
                       <Link href={`/locations/racks/${rack.id}`}>
                         <div className="flex items-center gap-2 rounded-lg border border-slate-200 p-3 text-sm transition hover:border-teal-300 hover:bg-teal-50">
@@ -190,7 +206,7 @@ export default function FloorDetailPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-400">Sin racks. Haz clic en "Añadir rack" para crear uno nuevo.</p>
+                <p className="text-xs text-slate-400">Sin racks. Haz clic en &ldquo;Añadir rack&rdquo; para crear uno nuevo.</p>
               )}
             </CardContent>
           </Card>

@@ -43,8 +43,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       include: { product: { select: { code: true, description: true, unit: true } } },
     });
 
-    const rows: any[] = [];
-    const summaryRows: any[] = [];
+    const rows: Record<string, unknown>[] = [];
+    const summaryRows: Record<string, unknown>[] = [];
     const productSummary = new Map<string, { code: string; description: string; unit: string; expected: number; counted: number }>();
 
     for (const sp of positions) {

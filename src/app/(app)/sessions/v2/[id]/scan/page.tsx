@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useTransition } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import * as XLSX from "xlsx";
@@ -24,6 +24,15 @@ type BoxProduct = { productId: string; productCode: string; productDescription: 
 type ConfirmedProduct = { product: BoxProduct; correct: boolean; quantity: number; notes: string; locations: LocationAssignment[] };
 type LocationAssignment = { positionId: string; positionCode: string; quantity: number };
 type Step = "IDENTIFY" | "CONFIRM" | "ASSIGN" | "SUMMARY";
+
+type ResolvedBox = {
+  id: string;
+  number: string;
+  import: string;
+  pallet: string | null;
+  expectedPosition?: { code: string } | null;
+  products: BoxProduct[];
+};
 
 export default function V2ScanPage() {
   const params = useParams();
@@ -49,7 +58,7 @@ export default function V2ScanPage() {
   const [loadingPallets, setLoadingPallets] = useState(false);
   const [loadingBoxes, setLoadingBoxes] = useState(false);
 
-  const [resolvedBox, setResolvedBox] = useState<any>(null);
+  const [resolvedBox, setResolvedBox] = useState<ResolvedBox | null>(null);
   const [boxProducts, setBoxProducts] = useState<BoxProduct[]>([]);
   const [currentProductIdx, setCurrentProductIdx] = useState(0);
   const [productCorrect, setProductCorrect] = useState(true);
@@ -65,13 +74,14 @@ export default function V2ScanPage() {
   const [operator, setOperator] = useState<{ id: string; name: string } | null>(null);
   const [operatorName, setOperatorName] = useState("");
   const [joining, setJoining] = useState(false);
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     const stored = localStorage.getItem("stockscan_operator_v2");
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setOperator(parsed);
+        startTransition(() => { setOperator(parsed); });
       } catch { localStorage.removeItem("stockscan_operator_v2"); }
     }
   }, []);
@@ -111,19 +121,19 @@ export default function V2ScanPage() {
       const buffer = await file.arrayBuffer();
       const wb = XLSX.read(buffer, { type: "buffer" });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(ws);
-      const rows = jsonData.map((row: any) => ({
-        importCode: row.importacion || row.importCode || row.import || "",
-        palletNumber: row.pallet || row.palletNumber || row.numero_pallet || "",
-        boxNumber: row.caja || row.boxNumber || row.numero_caja || "",
-        productCode: row.codigo_producto || row.productCode || row.codigo || "",
-        productDescription: row.descripcion || row.description || "",
-        productUnit: row.unidad || row.unit || "UND",
-        expectedQty: row.cantidad_esperada || row.expectedQty || row.cantidad || 0,
-        expectedPosition: row.posicion_esperada || row.expectedPosition || row.posicion || "",
-      })).filter((r: any) => r.importCode && r.boxNumber && r.productCode);
+      const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws);
+      const rows = jsonData.map((row) => ({
+        importCode: String(row.importacion || row.importCode || row.import || ""),
+        palletNumber: String(row.pallet || row.palletNumber || row.numero_pallet || ""),
+        boxNumber: String(row.caja || row.boxNumber || row.numero_caja || ""),
+        productCode: String(row.codigo_producto || row.productCode || row.codigo || ""),
+        productDescription: String(row.descripcion || row.description || ""),
+        productUnit: String(row.unidad || row.unit || "UND"),
+        expectedQty: Number(row.cantidad_esperada || row.expectedQty || row.cantidad || 0),
+        expectedPosition: String(row.posicion_esperada || row.expectedPosition || row.posicion || ""),
+      })).filter((r) => r.importCode && r.boxNumber && r.productCode);
       if (rows.length === 0) { setImportResult("No se encontraron filas válidas"); return; }
-      const result = await apiFetch<any>("/api/boxes/import", {
+      const result = await apiFetch<{ created: { imports: number; pallets: number; boxes: number; links: number } }>("/api/boxes/import", {
         method: "POST",
         body: JSON.stringify({ rows }),
       });
@@ -148,11 +158,11 @@ export default function V2ScanPage() {
 
   const load = useCallback(async () => {
     try {
-      const data = await apiFetch<any>(`/api/sessions/v2/${id}`);
-      setSession(data.session);
+      const data = await apiFetch<{ session: SessionData }>(`/api/sessions/v2/${id}`);
+      startTransition(() => { setSession(data.session); });
     } catch { /* silent */ }
     finally { setLoading(false); }
-  }, [id]);
+  }, [id, startTransition]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -200,9 +210,9 @@ export default function V2ScanPage() {
     if (boxPallet.trim()) p.set("pallet", boxPallet.trim());
     setBusy(true);
     try {
-      const data = await apiFetch<any>(`/api/boxes/resolve?${p.toString()}`);
+      const data = await apiFetch<{ box: ResolvedBox }>(`/api/boxes/resolve?${p.toString()}`);
       setResolvedBox(data.box);
-      setBoxProducts(data.box.products.map((pr: any) => ({
+      setBoxProducts(data.box.products.map((pr) => ({
         productId: pr.productId, productCode: pr.productCode, productDescription: pr.productDescription,
         productUnit: pr.productUnit, supplierCode: pr.supplierCode || undefined, expectedQty: pr.expectedQty,
       })));
@@ -287,10 +297,10 @@ export default function V2ScanPage() {
     try {
       for (const cp of correctProducts()) {
         for (const loc of cp.locations) {
-          const roundRes = await apiFetch<any>(`/api/sessions/v2/${id}/positions/${loc.positionId}`, {
+          const roundRes = await apiFetch<{ round: { id: string } }>(`/api/sessions/v2/${id}/positions/${loc.positionId}`, {
             method: "POST", body: JSON.stringify({ operationId: crypto.randomUUID() }),
           });
-          await apiFetch<any>(`/api/sessions/v2/${id}/counts`, {
+          await apiFetch<Record<string, unknown>>(`/api/sessions/v2/${id}/counts`, {
             method: "POST", body: JSON.stringify({
               operationId: crypto.randomUUID(), positionId: loc.positionId, countRoundId: roundRes.round.id,
               productCode: cp.product.productCode, quantity: loc.quantity, inputMethod: "MANUAL", notes: cp.notes || undefined,
