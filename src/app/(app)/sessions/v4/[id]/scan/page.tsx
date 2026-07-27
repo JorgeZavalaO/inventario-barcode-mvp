@@ -55,6 +55,8 @@ type RegisterEntry = {
   supplierCode: string;
   cajas: number;
   unidadesPorCaja: number;
+  quantitiesDiffer: boolean;
+  boxQuantities: { boxNumber: string; quantity: number }[];
   total: number;
   notes: string;
   createdAt: Date;
@@ -129,6 +131,8 @@ export default function V4ScanPage() {
   const [selectedBoxes, setSelectedBoxes] = useState<number[]>([]);
   const [boxRangeInput, setBoxRangeInput] = useState("");
   const [countedBoxes, setCountedBoxes] = useState<string[]>([]);
+  const [boxQuantities, setBoxQuantities] = useState<Record<string, number>>({});
+  const [quantitiesDiffer, setQuantitiesDiffer] = useState(false);
 
   const [existingImports, setExistingImports] = useState<{ id: string; code: string; description: string | null }[]>([]);
   const [existingPallets, setExistingPallets] = useState<{ id: string; number: string }[]>([]);
@@ -148,7 +152,6 @@ export default function V4ScanPage() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  const [cajas, setCajas] = useState(1);
   const [unidadesPorCaja, setUnidadesPorCaja] = useState(1);
   const [notes, setNotes] = useState("");
 
@@ -156,7 +159,7 @@ export default function V4ScanPage() {
   const [showEntries, setShowEntries] = useState(false);
 
   const productInputRef = useRef<HTMLInputElement>(null);
-  const cajasInputRef = useRef<HTMLInputElement>(null);
+  const quantityInputRef = useRef<HTMLInputElement>(null);
   const boxRangeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -231,7 +234,14 @@ export default function V4ScanPage() {
 
   function updateSelectedBoxes(boxes: number[]) {
     setSelectedBoxes(boxes);
-    if (boxes.length > 0) setCajas(boxes.length);
+    setBoxQuantities((current) => {
+      const next: Record<string, number> = {};
+      for (const box of boxes) {
+        const key = String(box);
+        next[key] = current[key] ?? unidadesPorCaja;
+      }
+      return next;
+    });
   }
 
   async function handleJoin() {
@@ -290,6 +300,8 @@ export default function V4ScanPage() {
     setSelectedBoxes([]);
     setBoxRangeInput("");
     setCountedBoxes([]);
+    setBoxQuantities({});
+    setQuantitiesDiffer(false);
     setExistingPallets([]);
     if (!value.trim()) return;
     try {
@@ -305,6 +317,8 @@ export default function V4ScanPage() {
     setSelectedBoxes([]);
     setBoxRangeInput("");
     setCountedBoxes([]);
+    setBoxQuantities({});
+    setQuantitiesDiffer(false);
     if (!value.trim() || !importCode.trim()) return;
     try {
       const data = await apiFetch<StructureData>(
@@ -344,7 +358,7 @@ export default function V4ScanPage() {
     try {
       const data = await apiFetch<{ product: ProductData }>(`/api/products/by-code?code=${encodeURIComponent(code)}`);
       setProduct(data.product);
-      setTimeout(() => cajasInputRef.current?.focus(), 100);
+      setTimeout(() => quantityInputRef.current?.focus(), 100);
     } catch {
       setProductError("Producto no encontrado");
     } finally {
@@ -386,7 +400,7 @@ export default function V4ScanPage() {
     setProductSuggestions([]);
     setProductError("");
     setShowCreateProduct(false);
-    setTimeout(() => cajasInputRef.current?.focus(), 100);
+    setTimeout(() => quantityInputRef.current?.focus(), 100);
   }
 
   function handleProductKeyDown(e: React.KeyboardEvent) {
@@ -446,7 +460,7 @@ export default function V4ScanPage() {
       setNewProductDescription("");
       setNewProductUnit("UND");
       setNewProductSupplierCode("");
-      setTimeout(() => cajasInputRef.current?.focus(), 100);
+      setTimeout(() => quantityInputRef.current?.focus(), 100);
       showToast("Producto creado y seleccionado", "success");
     } catch (error) {
       setProductError(error instanceof Error ? error.message : "No se pudo crear el producto");
@@ -455,7 +469,23 @@ export default function V4ScanPage() {
     }
   }
 
-  const total = cajas * unidadesPorCaja;
+  function getBoxQuantity(boxNumber: number) {
+    return quantitiesDiffer ? boxQuantities[String(boxNumber)] ?? 0 : unidadesPorCaja;
+  }
+
+  function getSelectedBoxQuantities() {
+    return selectedBoxes.map((boxNumber) => ({
+      boxNumber: String(boxNumber),
+      quantity: getBoxQuantity(boxNumber),
+    }));
+  }
+
+  const cajas = selectedBoxes.length;
+  const selectedBoxQuantities = getSelectedBoxQuantities();
+  const total = selectedBoxQuantities.reduce((sum, item) => sum + item.quantity, 0);
+  const hasInvalidBoxQuantity = selectedBoxQuantities.some(
+    (item) => !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 9999,
+  );
 
   async function handleRegister() {
     if (!product) {
@@ -474,13 +504,17 @@ export default function V4ScanPage() {
       showToast("Selecciona al menos una caja", "error");
       return;
     }
-    if (cajas <= 0 || unidadesPorCaja <= 0) {
-      showToast("Cajas y unidades por caja deben ser mayores a 0", "error");
+    if (unidadesPorCaja < 1 || unidadesPorCaja > 9999 || !Number.isInteger(unidadesPorCaja)) {
+      showToast("La cantidad por caja debe ser un entero entre 1 y 9999", "error");
+      return;
+    }
+    if (hasInvalidBoxQuantity) {
+      showToast("Cada caja debe tener una cantidad entera entre 1 y 9999", "error");
       return;
     }
     setBusy(true);
     try {
-      for (const boxNum of selectedBoxes) {
+      for (const box of selectedBoxQuantities) {
         const operationId = crypto.randomUUID();
         await apiFetch(`/api/sessions/v4/${id}/counts`, {
           method: "POST",
@@ -490,10 +524,10 @@ export default function V4ScanPage() {
             countedByOperatorId: countedByOperatorId || undefined,
             importCode: importCode.trim(),
             palletNumber: palletNumber.trim() || undefined,
-            boxNumber: String(boxNum),
+            boxNumber: box.boxNumber,
             productId: product.id,
-            cajas,
-            unidadesPorCaja,
+            cajas: 1,
+            unidadesPorCaja: box.quantity,
             notes: notes.trim() || undefined,
           }),
         });
@@ -506,6 +540,8 @@ export default function V4ScanPage() {
         supplierCode: product.supplierCode ?? "",
         cajas,
         unidadesPorCaja,
+        quantitiesDiffer,
+        boxQuantities: selectedBoxQuantities,
         total,
         notes: notes.trim(),
         createdAt: new Date(),
@@ -525,8 +561,9 @@ export default function V4ScanPage() {
       setProduct(null);
       setProductSuggestions([]);
       setShowSuggestions(false);
-      setCajas(1);
       setUnidadesPorCaja(1);
+      setBoxQuantities({});
+      setQuantitiesDiffer(false);
       setNotes("");
       setSelectedBoxes([]);
       setBoxRangeInput("");
@@ -968,36 +1005,82 @@ export default function V4ScanPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-slate-500">Cajas</label>
-                  <Input
-                    ref={cajasInputRef}
-                    type="number"
-                    inputMode="numeric"
-                    value={cajas || ""}
-                    onChange={(e) => setCajas(parseInt(e.target.value || "0", 10))}
-                    min={1}
-                    className="h-12 rounded-xl text-lg font-bold text-center"
-                  />
+                  <label className="mb-1.5 block text-xs font-medium text-slate-500">Cajas seleccionadas</label>
+                  <div className="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-lg font-bold text-slate-700">
+                    {cajas}
+                  </div>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-slate-500">Unidades/caja</label>
+                  <label className="mb-1.5 block text-xs font-medium text-slate-500">Cantidad por caja predeterminada</label>
                   <Input
+                    ref={quantityInputRef}
                     type="number"
                     inputMode="numeric"
                     value={unidadesPorCaja || ""}
                     onChange={(e) => setUnidadesPorCaja(parseInt(e.target.value || "0", 10))}
                     min={1}
+                    max={9999}
                     className="h-12 rounded-xl text-lg font-bold text-center"
                   />
                 </div>
               </div>
+
+              <label className="flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={quantitiesDiffer}
+                  onChange={(e) => setQuantitiesDiffer(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-teal-600"
+                />
+                <span>
+                  <span className="block font-medium">Las cantidades varían entre cajas</span>
+                  <span className="mt-0.5 block text-xs text-slate-400">
+                    Permite editar la cantidad individual de cada caja seleccionada.
+                  </span>
+                </span>
+              </label>
+
+              {quantitiesDiffer && cajas > 0 && (
+                <div className="rounded-xl border border-teal-200 bg-teal-50 p-3.5">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-teal-800">Cantidad por caja</p>
+                    <p className="text-[11px] text-teal-600">{cajas} caja{cajas !== 1 ? "s" : ""}</p>
+                  </div>
+                  <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+                    {selectedBoxes.map((boxNumber) => {
+                      const key = String(boxNumber);
+                      return (
+                        <div key={key} className="flex items-center gap-3 rounded-lg border border-teal-100 bg-white px-3 py-2">
+                          <span className="flex-1 text-sm font-medium text-slate-700">Caja {boxNumber}</span>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            max={9999}
+                            value={boxQuantities[key] || ""}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value || "0", 10);
+                              setBoxQuantities((current) => ({ ...current, [key]: value }));
+                            }}
+                            className="h-10 w-28 rounded-lg text-center font-semibold"
+                            aria-label={`Cantidad para caja ${boxNumber}`}
+                          />
+                          <span className="w-10 text-xs text-slate-400">unds.</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Total display */}
               <div className="rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 px-4 py-4 text-center shadow-sm">
                 <p className="text-[11px] font-medium text-teal-100 uppercase tracking-wider">Total</p>
                 <p className="text-4xl font-black text-white leading-none mt-0.5">{total}</p>
                 <p className="text-xs text-teal-100 mt-1">
-                  {cajas} cajas × {unidadesPorCaja} unds/caja
+                  {quantitiesDiffer
+                    ? `${cajas} cajas · cantidades variables`
+                    : `${cajas} cajas × ${unidadesPorCaja} unds/caja`}
                 </p>
               </div>
 
@@ -1045,7 +1128,7 @@ export default function V4ScanPage() {
             <Button
               className="h-12 rounded-xl px-6 text-base font-semibold shadow-sm"
               onClick={() => void handleRegister()}
-              disabled={busy || cajas <= 0 || unidadesPorCaja <= 0}
+              disabled={busy || cajas <= 0 || unidadesPorCaja <= 0 || hasInvalidBoxQuantity}
             >
               {busy ? (
                 <LoaderCircle className="mr-2 animate-spin" size={18} />
@@ -1106,12 +1189,20 @@ export default function V4ScanPage() {
                       {entry.productCode}
                       {entry.supplierCode ? ` · Prov: ${entry.supplierCode}` : ""}
                     </p>
-                  </div>
-                  <div className="text-right shrink-0 ml-3">
-                    <p className="text-sm font-bold text-teal-700">
-                      {entry.cajas} × {entry.unidadesPorCaja} = <Hash size={12} className="inline" />{entry.total}
-                    </p>
-                    {entry.notes && (
+                   </div>
+                   <div className="text-right shrink-0 ml-3">
+                     <p className="text-sm font-bold text-teal-700">
+                       {entry.quantitiesDiffer
+                         ? `${entry.cajas} cajas · `
+                         : `${entry.cajas} × ${entry.unidadesPorCaja} = `}
+                       <Hash size={12} className="inline" />{entry.total}
+                     </p>
+                     {entry.quantitiesDiffer && (
+                       <p className="mt-0.5 max-w-[220px] text-[11px] text-slate-400">
+                         {entry.boxQuantities.map((item) => `Caja ${item.boxNumber}: ${item.quantity}`).join(" · ")}
+                       </p>
+                     )}
+                     {entry.notes && (
                       <p className="text-[11px] text-slate-400 italic truncate max-w-[120px] mt-0.5">{entry.notes}</p>
                     )}
                   </div>

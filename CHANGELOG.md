@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.87.0 (2026-07-27)
+
+### Added
+
+- **Cantidades variables por caja en V4:** El formulario de conteo permite marcar que las cantidades varían entre cajas y editar la cantidad individual de cada caja seleccionada.
+
+### Fixed
+
+- **Registro por rango V4:** Cada caja del rango se registra con su propia cantidad y se evita multiplicar la cantidad por el número total de cajas seleccionadas.
+
 ## 0.86.1 (2026-07-27)
 
 ### Fixed

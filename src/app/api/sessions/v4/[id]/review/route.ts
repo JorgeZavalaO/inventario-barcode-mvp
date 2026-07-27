@@ -27,7 +27,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         operator: { select: { name: true } },
         countedByOperator: { select: { name: true } },
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
     });
 
     const boxMap = new Map<string, typeof boxEntries>();
@@ -133,6 +133,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         countedByName: latestEntry.countedByOperator?.name ?? latestEntry.operator.name,
       };
     });
+
+    differences.sort((a, b) => b.countedAt.getTime() - a.countedAt.getTime());
 
     const summary = {
       totalBoxes: differences.length,

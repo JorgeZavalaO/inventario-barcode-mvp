@@ -12,6 +12,7 @@ import {
   Download,
   BarChart3,
   Table2,
+  Search,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,8 @@ export default function V4ReviewPage() {
   const [sessionName, setSessionName] = useState("");
   const [sessionStatus, setSessionStatus] = useState("");
   const [activeTab, setActiveTab] = useState<"summary" | "detail">("summary");
+  const [boxFilter, setBoxFilter] = useState("");
+  const [digitizerFilter, setDigitizerFilter] = useState("");
 
   useEffect(() => {
     void (async () => {
@@ -248,6 +251,11 @@ export default function V4ReviewPage() {
     );
 
   const hasData = differences.length > 0;
+  const filteredDifferences = differences.filter((diff) => {
+    const boxMatches = diff.boxNumber.toLowerCase().includes(boxFilter.trim().toLowerCase());
+    const digitizerMatches = diff.digitizerName.toLowerCase().includes(digitizerFilter.trim().toLowerCase());
+    return boxMatches && digitizerMatches;
+  });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4">
@@ -345,6 +353,36 @@ export default function V4ReviewPage() {
         </div>
       )}
 
+      {hasData && activeTab === "detail" && (
+        <div className="grid gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:grid-cols-2">
+          <label className="relative block">
+            <span className="mb-1.5 block text-xs font-medium text-slate-500">Buscar caja</span>
+            <Search size={15} className="absolute left-3 top-[calc(50%+10px)] -translate-y-1/2 text-slate-400" />
+            <input
+              value={boxFilter}
+              onChange={(event) => setBoxFilter(event.target.value)}
+              placeholder="Número de caja..."
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none"
+            />
+          </label>
+          <label className="relative block">
+            <span className="mb-1.5 block text-xs font-medium text-slate-500">Buscar digitador</span>
+            <Search size={15} className="absolute left-3 top-[calc(50%+10px)] -translate-y-1/2 text-slate-400" />
+            <input
+              value={digitizerFilter}
+              onChange={(event) => setDigitizerFilter(event.target.value)}
+              placeholder="Nombre del digitador..."
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none"
+            />
+          </label>
+          {(boxFilter || digitizerFilter) && (
+            <p className="text-xs text-slate-500 sm:col-span-2">
+              Mostrando {filteredDifferences.length} de {differences.length} cajas
+            </p>
+          )}
+        </div>
+      )}
+
       {!hasData ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-slate-400">
@@ -407,6 +445,7 @@ export default function V4ReviewPage() {
                   <TableHead>Pallet</TableHead>
                   <TableHead>Caja</TableHead>
                   <TableHead>Producto</TableHead>
+                  <TableHead className="hidden md:table-cell">Digitador</TableHead>
                   <TableHead className="text-center hidden md:table-cell">Cajas</TableHead>
                   <TableHead className="text-center hidden md:table-cell">Unds/caja</TableHead>
                   <TableHead className="text-right">Total</TableHead>
@@ -417,54 +456,61 @@ export default function V4ReviewPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {differences.flatMap((diff) =>
-                  diff.products.map((product) => (
-                    <TableRow
-                      key={`${diff.boxId}-${product.productId}`}
-                      className={diff.diffType === "coincide" ? "bg-green-50/50" : ""}
-                    >
-                      <TableCell className="text-xs">{diff.importCode}</TableCell>
-                      <TableCell className="text-xs">{diff.palletNumber}</TableCell>
-                      <TableCell className="text-xs font-medium">{diff.boxNumber}</TableCell>
-                      <TableCell>
-                        <p className="text-sm font-medium">{product.productDescription}</p>
-                        <p className="text-xs text-slate-400">{product.productCode}</p>
-                      </TableCell>
-                      <TableCell className="text-center text-xs hidden md:table-cell">{product.cajas}</TableCell>
-                      <TableCell className="text-center text-xs hidden md:table-cell">{product.unidadesPorCaja}</TableCell>
-                      <TableCell className="text-right text-sm font-medium">{product.countedQty}</TableCell>
-                      <TableCell className="text-right text-sm hidden md:table-cell">{product.expectedQty}</TableCell>
-                      <TableCell className="text-right">
-                        {diffBadge(product.diffType, product.difference)}
-                      </TableCell>
-                      <TableCell>{statusBadge(diff.status)}</TableCell>
-                      <TableCell className="text-right hidden md:table-cell">
-                        {diff.status === "SUBMITTED" && (
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2 text-green-600"
-                              onClick={() => void handleApprove(diff)}
-                              disabled={busy}
-                            >
-                              <CheckCircle2 size={14} />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 px-2 text-red-600"
-                              onClick={() => void handleReject(diff)}
-                              disabled={busy}
-                            >
-                              <XCircle size={14} />
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                {filteredDifferences.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={12} className="py-10 text-center text-sm text-slate-400">
+                      No hay cajas que coincidan con los filtros.
+                    </TableCell>
+                  </TableRow>
+                ) : filteredDifferences.flatMap((diff) =>
+                    diff.products.map((product) => (
+                      <TableRow
+                        key={`${diff.boxId}-${product.productId}`}
+                        className={diff.diffType === "coincide" ? "bg-green-50/50" : ""}
+                      >
+                        <TableCell className="text-xs">{diff.importCode}</TableCell>
+                        <TableCell className="text-xs">{diff.palletNumber}</TableCell>
+                        <TableCell className="text-xs font-medium">{diff.boxNumber}</TableCell>
+                        <TableCell>
+                          <p className="text-sm font-medium">{product.productDescription}</p>
+                          <p className="text-xs text-slate-400">{product.productCode}</p>
+                        </TableCell>
+                        <TableCell className="text-xs hidden md:table-cell">{diff.digitizerName}</TableCell>
+                        <TableCell className="text-center text-xs hidden md:table-cell">{product.cajas}</TableCell>
+                        <TableCell className="text-center text-xs hidden md:table-cell">{product.unidadesPorCaja}</TableCell>
+                        <TableCell className="text-right text-sm font-medium">{product.countedQty}</TableCell>
+                        <TableCell className="text-right text-sm hidden md:table-cell">{product.expectedQty}</TableCell>
+                        <TableCell className="text-right">
+                          {diffBadge(product.diffType, product.difference)}
+                        </TableCell>
+                        <TableCell>{statusBadge(diff.status)}</TableCell>
+                        <TableCell className="text-right hidden md:table-cell">
+                          {diff.status === "SUBMITTED" && (
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2 text-green-600"
+                                onClick={() => void handleApprove(diff)}
+                                disabled={busy}
+                              >
+                                <CheckCircle2 size={14} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2 text-red-600"
+                                onClick={() => void handleReject(diff)}
+                                disabled={busy}
+                              >
+                                <XCircle size={14} />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )),
+                  )}
               </TableBody>
             </Table>
           </CardContent>
