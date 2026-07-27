@@ -9,6 +9,7 @@ import {
   Settings,
   Building2,
   GitBranch,
+  Container,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,6 +38,7 @@ export function AppSidebar({
   const allItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
     { title: "Productos", url: "/products", icon: Package },
+    { title: "Importaciones", url: "/products/imports", icon: Container },
     { title: "Ubicaciones", url: "/locations", icon: Building2 },
     { title: "Sesiones V4", url: "/sessions/v4", icon: GitBranch },
     { title: "Sesiones V3", url: "/sessions/v3", icon: GitBranch },

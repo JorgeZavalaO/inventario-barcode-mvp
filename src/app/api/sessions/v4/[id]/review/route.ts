@@ -246,6 +246,13 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
           approvedById: action === "approve" ? userId : undefined,
         },
       });
+
+      if (action === "reject") {
+        await tx.inventorySession.update({
+          where: { id: sessionId },
+          data: { status: "OPEN" },
+        });
+      }
     });
 
     return NextResponse.json({ ok: true });

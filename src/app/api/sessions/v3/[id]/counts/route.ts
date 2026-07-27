@@ -188,7 +188,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
       const session = await tx.inventorySession.findUnique({ where: { id: sessionId } });
       if (!session) throw new Error("Sesión no existe");
-      if (session.status !== "OPEN" && session.status !== "REVIEW") {
+      if (session.status !== "OPEN") {
         throw new Error("Sesión no está disponible para conteos");
       }
 

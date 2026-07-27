@@ -1,6 +1,18 @@
 # Changelog
 
-## 0.81.0 (2026-07-27)
+## 0.83.0 (2026-07-27)
+
+### Fixed
+
+- **Duplicados de cajas en V3/V4 durante REVIEW:** Corregido bug que permitía contar la misma caja múltiples veces mientras la sesión estaba en estado `REVIEW`. La API de conteos ahora solo acepta registros cuando la sesión está en `OPEN`. Al rechazar un conteo en revisión, la sesión vuelve a `OPEN` automáticamente para permitir reconteo.
+
+## 0.82.0 (2026-07-27)
+
+### Added
+
+- **Vista de importaciones** (`/products/imports`): Nueva página en el módulo de productos que muestra todas las importaciones con su estructura completa: Importación → Pallet → Cajas → Productos. Árbol colapsable/expandible por importación y pallet. Búsqueda por código de importación o pallet. Resumen con conteo total de importaciones, pallets y cajas.
+- **API de importaciones** (`GET /api/imports`): Endpoint que retorna todas las importaciones activas con pallets, cajas y productos asociados (vía BoxProduct).
+- **Enlace "Importaciones" en sidebar:** Nuevo enlace de navegación en el sidebar, debajo de Productos.
 
 ### Added
 
