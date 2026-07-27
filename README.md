@@ -56,7 +56,7 @@ Aplicación web en Next.js para cargar productos, generar etiquetas (Code 128 o 
 - Escáner inteligente: acceso directo con selector de sesión activa.
 - Progressive Web App (PWA) instalable en dispositivos móviles y escritorio.
 - **Sesiones V3 — Inventario por cajas sin posiciones físicas:** Flujo simplificado de 3 pasos (Identificar caja → Confirmar cantidades → Registrar) sin necesidad de asignar posiciones físicas. Soporta división de líneas de cantidad por producto.
-- **Sesiones V4 — Inventario por cajas con ingreso rápido:** Flujo en una sola pantalla para conteo rápido. Seleccionar importación → seleccionar cajas con input de rangos (ej: `1-50, 55, 60-70`) → digitar código o nombre de producto (búsqueda case-insensitive) → ver nombre y código proveedor → ingresar cajas × unidades por caja → total automático. Soporta hasta 900+ cajas con presets rápidos (1-10, 1-50, 1-100, 1-200). Muestra cajas ya contadas en verde. Revisión con dos pestañas: resumen por producto y detalle por caja. Reutiliza tablas Import/Pallet/Box existentes.
+- **Sesiones V4 — Inventario por cajas con ingreso rápido:** Flujo en una sola pantalla para conteo rápido. Seleccionar importación → seleccionar cajas con input de rangos (ej: `1-50, 55, 60-70`) → digitar código o nombre de producto (búsqueda case-insensitive) → ver nombre y código proveedor → ingresar cajas × unidades por caja → total automático. Soporta hasta 900+ cajas con presets rápidos (1-10, 1-50, 1-100, 1-200). Muestra cajas ya contadas en verde y permite agregar manualmente otros productos a una caja ya contada. Revisión con dos pestañas: resumen por producto y detalle por caja. Reutiliza tablas Import/Pallet/Box existentes.
 
 ## Stack
 

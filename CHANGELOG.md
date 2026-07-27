@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.86.0 (2026-07-27)
+
+### Changed
+
+- **Múltiples productos por caja en V4:** Una caja puede recibir varios registros de productos distintos dentro de la misma ronda. Se reutiliza la entrada de caja existente y cada producto se registra como un evento independiente. El mismo producto continúa bloqueado para evitar duplicados.
+- **Selector de cajas V4:** Las cajas contadas siguen excluidas de las selecciones automáticas, pero ahora pueden escribirse manualmente para agregar otro producto.
+
 ## 0.85.1 (2026-07-27)
 
 ### Fixed

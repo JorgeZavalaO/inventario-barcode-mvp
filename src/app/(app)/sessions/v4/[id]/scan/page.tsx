@@ -137,6 +137,11 @@ export default function V4ScanPage() {
   const [product, setProduct] = useState<ProductData | null>(null);
   const [productLoading, setProductLoading] = useState(false);
   const [productError, setProductError] = useState("");
+  const [showCreateProduct, setShowCreateProduct] = useState(false);
+  const [newProductDescription, setNewProductDescription] = useState("");
+  const [newProductUnit, setNewProductUnit] = useState("UND");
+  const [newProductSupplierCode, setNewProductSupplierCode] = useState("");
+  const [creatingProduct, setCreatingProduct] = useState(false);
   const [productSuggestions, setProductSuggestions] = useState<ProductData[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
@@ -320,8 +325,7 @@ export default function V4ScanPage() {
 
   function handleBoxRangeInputChange(value: string) {
     setBoxRangeInput(value);
-    const parsed = parseBoxRange(value);
-    setSelectedBoxes(parsed.filter((n) => !countedBoxes.includes(String(n))));
+    setSelectedBoxes(parseBoxRange(value));
   }
 
   function applyPreset(range: string) {
@@ -353,6 +357,7 @@ export default function V4ScanPage() {
     setProductCode(value);
     setProduct(null);
     setProductError("");
+    setShowCreateProduct(false);
     setHighlightIdx(-1);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -381,6 +386,7 @@ export default function V4ScanPage() {
     setShowSuggestions(false);
     setProductSuggestions([]);
     setProductError("");
+    setShowCreateProduct(false);
     setTimeout(() => cajasInputRef.current?.focus(), 100);
   }
 
@@ -404,6 +410,49 @@ export default function V4ScanPage() {
       }
     } else if (e.key === "Escape") {
       setShowSuggestions(false);
+    }
+  }
+
+  async function handleCreateProduct() {
+    const code = productCode.trim();
+    const description = newProductDescription.trim();
+    if (!code) {
+      setProductError("Ingresa el código del producto");
+      return;
+    }
+    if (!description) {
+      setProductError("Ingresa el nombre del producto");
+      return;
+    }
+
+    setCreatingProduct(true);
+    setProductError("");
+    try {
+      const data = await apiFetch<{ product: ProductData & { theoretical_stock?: number } }>("/api/products", {
+        method: "POST",
+        body: JSON.stringify({
+          code,
+          description,
+          unit: newProductUnit.trim() || "UND",
+          supplierCode: newProductSupplierCode.trim() || undefined,
+        }),
+      });
+
+      setProduct({
+        ...data.product,
+        theoreticalStock: Number(data.product.theoreticalStock ?? data.product.theoretical_stock ?? 0),
+      });
+      setProductCode(data.product.code);
+      setShowCreateProduct(false);
+      setNewProductDescription("");
+      setNewProductUnit("UND");
+      setNewProductSupplierCode("");
+      setTimeout(() => cajasInputRef.current?.focus(), 100);
+      showToast("Producto creado y seleccionado", "success");
+    } catch (error) {
+      setProductError(error instanceof Error ? error.message : "No se pudo crear el producto");
+    } finally {
+      setCreatingProduct(false);
     }
   }
 
@@ -465,7 +514,7 @@ export default function V4ScanPage() {
       setEntries((prev) => [entry, ...prev]);
 
       const newCounted = selectedBoxes.map((n) => String(n));
-      setCountedBoxes((prev) => [...prev, ...newCounted].sort((a, b) => {
+      setCountedBoxes((prev) => Array.from(new Set([...prev, ...newCounted])).sort((a, b) => {
         const na = parseInt(a, 10);
         const nb = parseInt(b, 10);
         if (!isNaN(na) && !isNaN(nb)) return na - nb;
@@ -700,6 +749,11 @@ export default function V4ScanPage() {
               <p className="mt-1.5 text-[11px] text-slate-400">
                 Rangos: 1-50 · Individuales: 55 · Mixto: 1-10, 15, 20-30
               </p>
+              {countedCount > 0 && (
+                <p className="mt-1 text-[11px] text-amber-600">
+                  Las cajas verdes ya tienen productos. Escríbelas manualmente para agregar otro producto.
+                </p>
+              )}
             </div>
 
             {/* Selected boxes preview */}
@@ -790,9 +844,104 @@ export default function V4ScanPage() {
               </Button>
             </div>
 
-            {productError && (
+            {productError && !showCreateProduct && (
               <div className="rounded-xl bg-red-50 border border-red-200 px-3.5 py-2.5 text-xs text-red-600">
-                {productError}
+                <p>{productError}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateProduct(true);
+                    setNewProductDescription("");
+                    setProductError("");
+                  }}
+                  className="mt-2 font-semibold text-teal-700 hover:text-teal-800"
+                >
+                  Crear producto &quot;{productCode.trim()}&quot;
+                </button>
+              </div>
+            )}
+
+            {showCreateProduct && (
+              <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-3.5">
+                <div>
+                  <p className="text-sm font-semibold text-teal-800">Crear producto nuevo</p>
+                  <p className="mt-0.5 text-[11px] text-teal-600">
+                    Se guardará en el catálogo y quedará seleccionado para este conteo.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-slate-600">Código</label>
+                  <Input value={productCode} disabled className="h-11 rounded-xl bg-white/70" />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-slate-600">
+                    Nombre completo <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={newProductDescription}
+                    onChange={(e) => {
+                      setNewProductDescription(e.target.value);
+                      setProductError("");
+                    }}
+                    placeholder="Ej: Acople hidráulico 1/2 pulgada"
+                    className="h-11 rounded-xl bg-white"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") void handleCreateProduct();
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-slate-600">Unidad</label>
+                    <Input
+                      value={newProductUnit}
+                      onChange={(e) => setNewProductUnit(e.target.value)}
+                      placeholder="UND"
+                      className="h-11 rounded-xl bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-slate-600">Código proveedor</label>
+                    <Input
+                      value={newProductSupplierCode}
+                      onChange={(e) => setNewProductSupplierCode(e.target.value)}
+                      placeholder="Opcional"
+                      className="h-11 rounded-xl bg-white"
+                    />
+                  </div>
+                </div>
+
+                {productError && (
+                  <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{productError}</p>
+                )}
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 flex-1 rounded-xl bg-white"
+                    onClick={() => {
+                      setShowCreateProduct(false);
+                      setProductError("");
+                    }}
+                    disabled={creatingProduct}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    className="h-11 flex-1 rounded-xl"
+                    onClick={() => void handleCreateProduct()}
+                    disabled={creatingProduct || !newProductDescription.trim()}
+                  >
+                    {creatingProduct && <LoaderCircle className="mr-2 animate-spin" size={16} />}
+                    Crear y seleccionar
+                  </Button>
+                </div>
               </div>
             )}
 

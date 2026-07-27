@@ -261,20 +261,34 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       const existingEntry = await tx.boxCountEntry.findUnique({
         where: { countRoundId_boxId: { countRoundId: round.id, boxId: box.id } },
       });
-      if (existingEntry) throw new Error("Esta caja ya fue contada en esta ronda");
+      let entryId: string;
 
-      const entryId = randomUUID();
-      await tx.boxCountEntry.create({
-        data: {
-          id: entryId,
-          sessionId,
-          countRoundId: round.id,
-          boxId: box.id,
-          positionId: sessionPosition.positionId,
-          operatorId,
-          countedByOperatorId,
-        },
-      });
+      if (existingEntry) {
+        const existingProductEvent = await tx.countEvent.findFirst({
+          where: {
+            boxCountEntryId: existingEntry.id,
+            productId: body.productId,
+            reversedAt: null,
+          },
+        });
+        if (existingProductEvent) {
+          throw new Error("Producto ya contado en esta caja en esta ronda");
+        }
+        entryId = existingEntry.id;
+      } else {
+        entryId = randomUUID();
+        await tx.boxCountEntry.create({
+          data: {
+            id: entryId,
+            sessionId,
+            countRoundId: round.id,
+            boxId: box.id,
+            positionId: sessionPosition.positionId,
+            operatorId,
+            countedByOperatorId,
+          },
+        });
+      }
 
       const totalQty = body.cajas * body.unidadesPorCaja;
       const eventId = randomUUID();
