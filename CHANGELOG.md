@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.83.0 (2026-07-27)
+## 0.83.1 (2026-07-27)
 
 ### Fixed
 
-- **Duplicados de cajas en V3/V4 durante REVIEW:** Corregido bug que permitía contar la misma caja múltiples veces mientras la sesión estaba en estado `REVIEW`. La API de conteos ahora solo acepta registros cuando la sesión está en `OPEN`. Al rechazar un conteo en revisión, la sesión vuelve a `OPEN` automáticamente para permitir reconteo.
+- **Duplicados de cajas en V3/V4 durante REVIEW:** Corregido bug que permitía contar la misma caja múltiples veces mientras la sesión estaba en `REVIEW`. Ahora, si una caja tiene un round `SUBMITTED` (en revisión), se bloquea el conteo de esa caja específica con el mensaje "Esta caja está en revisión". Otros usuarios pueden seguir contando cajas que aún no han sido enviadas a revisión. Al rechazar un conteo, la sesión vuelve a `OPEN` para permitir reconteo.
 
 ## 0.82.0 (2026-07-27)
 

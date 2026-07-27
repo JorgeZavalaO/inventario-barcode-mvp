@@ -147,7 +147,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
       const session = await tx.inventorySession.findUnique({ where: { id: sessionId } });
       if (!session) throw new Error("Sesión no existe");
-      if (session.status !== "OPEN") {
+      if (session.status !== "OPEN" && session.status !== "REVIEW") {
         throw new Error("Sesión no está disponible para conteos");
       }
 
@@ -239,6 +239,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
           orderBy: { roundNumber: "desc" },
         });
         if (latestRound?.status === "APPROVED") throw new Error("Esta caja ya fue aprobada");
+        if (latestRound?.status === "SUBMITTED") throw new Error("Esta caja está en revisión, espera a que sea aprobada o rechazada");
         round = await tx.countRound.create({
           data: {
             id: randomUUID(),
