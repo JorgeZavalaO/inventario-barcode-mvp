@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.89.0 (2026-07-28)
+
+### Added
+
+- **Sesiones V5 — Captura rápida general:** Nuevo módulo independiente de importaciones y ubicaciones para registrar productos por código, descripción del catálogo, cajas, unidades por caja, total calculado, operador y comentario opcional. Incluye historial persistente por sesión.
+
+## 0.88.0 (2026-07-27)
+
+### Fixed
+
+- **Segundo producto en caja V4 durante revisión:** Corregido el bloqueo que impedía agregar un producto distinto a una caja cuyo round ya estaba `SUBMITTED`. Ahora se reutiliza la entrada de caja existente y se registra un evento adicional. El mismo producto repetido continúa bloqueado y las cajas `APPROVED` permanecen protegidas.
+
 ## 0.87.0 (2026-07-27)
 
 ### Added

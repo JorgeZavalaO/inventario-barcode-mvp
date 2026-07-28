@@ -239,19 +239,22 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
           orderBy: { roundNumber: "desc" },
         });
         if (latestRound?.status === "APPROVED") throw new Error("Esta caja ya fue aprobada");
-        if (latestRound?.status === "SUBMITTED") throw new Error("Esta caja está en revisión, espera a que sea aprobada o rechazada");
-        round = await tx.countRound.create({
-          data: {
-            id: randomUUID(),
-            sessionPositionId: sessionPosition.id,
-            roundNumber: (latestRound?.roundNumber ?? 0) + 1,
-            operatorId,
-            status: "OPEN",
-          },
-        });
+        if (latestRound?.status === "SUBMITTED") {
+          round = latestRound;
+        } else {
+          round = await tx.countRound.create({
+            data: {
+              id: randomUUID(),
+              sessionPositionId: sessionPosition.id,
+              roundNumber: (latestRound?.roundNumber ?? 0) + 1,
+              operatorId,
+              status: "OPEN",
+            },
+          });
+        }
       }
 
-      if (sessionPosition.status !== "IN_PROGRESS") {
+      if (round.status === "OPEN" && sessionPosition.status !== "IN_PROGRESS") {
         await tx.sessionPosition.update({
           where: { id: sessionPosition.id },
           data: { status: "IN_PROGRESS", assignedToId: operatorId, startedAt: new Date() },

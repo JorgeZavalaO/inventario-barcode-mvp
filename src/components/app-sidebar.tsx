@@ -40,6 +40,7 @@ export function AppSidebar({
     { title: "Productos", url: "/products", icon: Package },
     { title: "Importaciones", url: "/products/imports", icon: Container },
     { title: "Ubicaciones", url: "/locations", icon: Building2 },
+    { title: "Sesiones V5", url: "/sessions/v5", icon: ScanBarcode },
     { title: "Sesiones V4", url: "/sessions/v4", icon: GitBranch },
     { title: "Sesiones V3", url: "/sessions/v3", icon: GitBranch },
     { title: "Configuración", url: "/settings", icon: Settings },
