@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Boxes,
   CheckCircle2,
+  Download,
   History,
   LoaderCircle,
   Package,
@@ -55,6 +56,7 @@ export default function V5HistoryPage() {
   const [data, setData] = useState<HistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
   const [, startTransition] = useTransition();
 
@@ -86,6 +88,33 @@ export default function V5HistoryPage() {
       setError(cause instanceof Error ? cause.message : "No se pudo actualizar la sesión");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleExport() {
+    if (!data) return;
+    setExporting(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/sessions/v5/${id}/export`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as { error?: string };
+        throw new Error(payload.error || "No se pudo exportar el historial");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `captura-v5-${data.session.code}.xlsx`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudo exportar el historial");
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -139,6 +168,10 @@ export default function V5HistoryPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" onClick={() => void handleExport()} disabled={exporting}>
+          {exporting ? <LoaderCircle className="mr-1.5 animate-spin" size={14} /> : <Download size={14} className="mr-1.5" />}
+          Exportar Excel
+        </Button>
         {statusIsOpen && events.length > 0 && (
           <Button size="sm" variant="outline" onClick={() => void changeStatus("REVIEW")} disabled={busy}>
             <Send size={14} className="mr-1.5" /> Enviar a revisión
