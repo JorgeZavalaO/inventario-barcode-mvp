@@ -67,6 +67,8 @@ export default function V5ScanPage() {
   const id = params.id as string;
   const productInputRef = useRef<HTMLInputElement>(null);
   const boxesInputRef = useRef<HTMLInputElement>(null);
+  const productSearchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const productSearchRequestRef = useRef(0);
   const [session, setSession] = useState<Session | null>(null);
   const [events, setEvents] = useState<V5Event[]>([]);
   const [summary, setSummary] = useState<SessionResponse["summary"] | null>(null);
@@ -80,6 +82,10 @@ export default function V5ScanPage() {
   const [operatorName, setOperatorName] = useState("");
   const [productCode, setProductCode] = useState("");
   const [product, setProduct] = useState<Product | null>(null);
+  const [productSuggestions, setProductSuggestions] = useState<Product[]>([]);
+  const [showProductSuggestions, setShowProductSuggestions] = useState(false);
+  const [productSuggestionsLoading, setProductSuggestionsLoading] = useState(false);
+  const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
   const [cajas, setCajas] = useState(1);
   const [unidadesPorCaja, setUnidadesPorCaja] = useState(1);
   const [notes, setNotes] = useState("");
@@ -125,6 +131,12 @@ export default function V5ScanPage() {
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
+  useEffect(() => {
+    return () => {
+      if (productSearchDebounceRef.current) clearTimeout(productSearchDebounceRef.current);
+    };
+  }, []);
+
   const total = cajas * unidadesPorCaja;
 
   async function handleJoin() {
@@ -151,11 +163,86 @@ export default function V5ScanPage() {
     setProductCode(value);
     setProduct(null);
     setError("");
+    setHighlightedProductIndex(-1);
+
+    if (productSearchDebounceRef.current) clearTimeout(productSearchDebounceRef.current);
+
+    const requestId = ++productSearchRequestRef.current;
+    const search = value.trim();
+    if (search.length < 2) {
+      setProductSuggestions([]);
+      setShowProductSuggestions(false);
+      setProductSuggestionsLoading(false);
+      return;
+    }
+
+    setProductSuggestionsLoading(true);
+    productSearchDebounceRef.current = setTimeout(async () => {
+      try {
+        const data = await apiFetch<{ products: Product[] }>(
+          `/api/products?search=${encodeURIComponent(search)}`,
+        );
+        if (requestId !== productSearchRequestRef.current) return;
+        const suggestions = data.products.slice(0, 8);
+        setProductSuggestions(suggestions);
+        setShowProductSuggestions(suggestions.length > 0);
+      } catch {
+        if (requestId !== productSearchRequestRef.current) return;
+        setProductSuggestions([]);
+        setShowProductSuggestions(false);
+      } finally {
+        if (requestId === productSearchRequestRef.current) setProductSuggestionsLoading(false);
+      }
+    }, 250);
+  }
+
+  function selectProduct(selectedProduct: Product) {
+    setProduct(selectedProduct);
+    setProductCode(selectedProduct.code);
+    setProductSuggestions([]);
+    setShowProductSuggestions(false);
+    setHighlightedProductIndex(-1);
+    setError("");
+    window.setTimeout(() => boxesInputRef.current?.focus(), 100);
+  }
+
+  function handleProductKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      setShowProductSuggestions(false);
+      setHighlightedProductIndex(-1);
+      return;
+    }
+
+    if (!showProductSuggestions || productSuggestions.length === 0) {
+      if (event.key === "Enter") void handleProductSearch();
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setHighlightedProductIndex((current) =>
+        current < productSuggestions.length - 1 ? current + 1 : 0,
+      );
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setHighlightedProductIndex((current) =>
+        current > 0 ? current - 1 : productSuggestions.length - 1,
+      );
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      if (highlightedProductIndex >= 0) {
+        selectProduct(productSuggestions[highlightedProductIndex]);
+      } else {
+        void handleProductSearch();
+      }
+    }
   }
 
   async function handleProductSearch() {
     const code = productCode.trim();
     if (!code) return;
+    setShowProductSuggestions(false);
+    setHighlightedProductIndex(-1);
     setProductLoading(true);
     setError("");
     try {
@@ -321,7 +408,7 @@ export default function V5ScanPage() {
         {error && <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">{error}</div>}
 
         {canCapture ? (
-          <Card className="border-teal-200 shadow-sm">
+          <Card className="border-teal-200 shadow-sm overflow-visible">
             <CardContent className="space-y-4 p-4 sm:p-5">
               <div className="flex items-center gap-2">
                 <span className="grid size-8 place-items-center rounded-lg bg-teal-100 text-teal-700">
@@ -334,17 +421,57 @@ export default function V5ScanPage() {
               </div>
 
               <div className="flex gap-2">
-                <Input
-                  ref={productInputRef}
-                  value={productCode}
-                  onChange={(event) => handleProductChange(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") void handleProductSearch();
-                  }}
-                  placeholder="Código o código de barras"
-                  className="h-12 text-base"
-                  autoFocus
-                />
+                <div className="relative min-w-0 flex-1">
+                  <Input
+                    ref={productInputRef}
+                    value={productCode}
+                    onChange={(event) => handleProductChange(event.target.value)}
+                    onKeyDown={handleProductKeyDown}
+                    onFocus={() => {
+                      if (productSuggestions.length > 0 && productCode.trim().length >= 2) {
+                        setShowProductSuggestions(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      window.setTimeout(() => setShowProductSuggestions(false), 150);
+                    }}
+                    placeholder="Código, barcode o descripción"
+                    className="h-12 pr-10 text-base"
+                    autoFocus
+                  />
+                  {productSuggestionsLoading && (
+                    <LoaderCircle size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 animate-spin text-teal-500" />
+                  )}
+                  {showProductSuggestions && productSuggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                      {productSuggestions.map((suggestion, index) => (
+                        <button
+                          key={suggestion.id}
+                          type="button"
+                          role="option"
+                          aria-selected={index === highlightedProductIndex}
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            selectProduct(suggestion);
+                          }}
+                          className={`flex w-full items-start gap-3 px-3.5 py-2.5 text-left transition-colors ${
+                            index === highlightedProductIndex
+                              ? "bg-teal-50 text-teal-800"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          <Search size={14} className="mt-0.5 shrink-0 text-slate-400" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium">{suggestion.description}</span>
+                            <span className="mt-0.5 block truncate text-[11px] text-slate-400">
+                              {suggestion.code} · {suggestion.unit}
+                            </span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <Button
                   type="button"
                   variant="outline"
